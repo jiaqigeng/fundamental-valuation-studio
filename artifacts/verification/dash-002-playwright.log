@@ -1,0 +1,5 @@
+Running 1 test using 1 worker
+
+  ok 1 [chromium] ? e2e\dash-002.spec.ts:3:5 ? dash-002 displays company identity and key stats (630ms)
+
+  1 passed (3.1s)
