@@ -33,3 +33,15 @@
 - Files or artifacts updated: `feature_list.json`, `progress.md`, `session-handoff.md`, `artifacts/verification/dash-001-playwright.log`, `frontend/playwright.config.ts`, `frontend/src/app/layout.tsx`, `frontend/src/app/page.tsx`, `frontend/src/app/globals.css`, `frontend/src/app/_components/ticker-search-form.tsx`, `frontend/src/app/_lib/company-directory.ts`, `frontend/src/app/dashboard/[ticker]/page.tsx`
 - Known risk or unresolved issue: The initial workspace is intentionally seeded with demo company data for `AAPL`, `MSFT`, and `KO`; later dashboard features still need real market and company data sources.
 - Next best step: Start `dash-002` and use the new `/dashboard/[ticker]` route to render company identity and key stats for the selected company.
+
+### Session 003
+
+- Date: 2026-04-18
+- Goal: Clarify the new topic and architecture docs so each has a distinct role without overlapping guidance.
+- Completed: Tightened `docs/frontend.md` and `docs/backend.md` into workflow-oriented topic docs, and tightened `frontend/ARCHITECTURE.md` and `backend/ARCHITECTURE.md` into structure-oriented architecture docs. Added explicit scope boundaries in each file so commands and verification stay in `docs/`, while code ownership and layering stay in the architecture files.
+- Verification run: `./init.sh`
+- Evidence captured: `./init.sh` completed successfully after the doc changes; no feature status changed and `dash-002` remains the highest-priority unfinished feature.
+- Commits: none yet
+- Files or artifacts updated: `docs/frontend.md`, `docs/backend.md`, `frontend/ARCHITECTURE.md`, `backend/ARCHITECTURE.md`, `progress.md`, `session-handoff.md`
+- Known risk or unresolved issue: `AGENTS.md` and `.claude/` contain user changes that were intentionally left untouched; the docs now reference those files but do not supersede them.
+- Next best step: Resume feature work with `dash-002`; use the clarified docs to keep workflow guidance in `docs/` and placement guidance in `*/ARCHITECTURE.md`.
