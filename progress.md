@@ -5,7 +5,7 @@
 - Repository root: `c:\Users\gengj\source\repos\FundamentalValuationStudio`
 - Standard startup path: `./init.sh`
 - Standard verification path: `./init.sh` for baseline health plus `feature_list.json -> features[*].verification.command` for feature passing
-- Current highest-priority unfinished feature: `dash-002`
+- Current highest-priority unfinished feature: `dash-003`
 - Current blocker: none
 
 ## Session Log
@@ -45,3 +45,15 @@
 - Files or artifacts updated: `docs/frontend.md`, `docs/backend.md`, `frontend/ARCHITECTURE.md`, `backend/ARCHITECTURE.md`, `progress.md`, `session-handoff.md`
 - Known risk or unresolved issue: `AGENTS.md` and `.claude/` contain user changes that were intentionally left untouched; the docs now reference those files but do not supersede them.
 - Next best step: Resume feature work with `dash-002`; use the clarified docs to keep workflow guidance in `docs/` and placement guidance in `*/ARCHITECTURE.md`.
+
+### Session 004
+
+- Date: 2026-04-18
+- Goal: Implement `dash-002` under the repository harness and record passing evidence.
+- Completed: Expanded the seeded company directory with sector, price, market cap, and summary fields; replaced the placeholder dashboard panel with a company overview card plus key-stats cards on `/dashboard/[ticker]`; added `frontend/e2e/dash-002.spec.ts`; and captured the passing Playwright log.
+- Verification run: `./init.sh`; `cd frontend && npm run lint`; `cd frontend && npm run typecheck`; `cd frontend && npx playwright test e2e/dash-002.spec.ts`
+- Evidence captured: `./init.sh` completed successfully before the feature work; frontend `npm run lint` passed; frontend `npm run typecheck` passed; `cd frontend && npx playwright test e2e/dash-002.spec.ts` passed after rerunning outside the sandbox to avoid a local `spawn EPERM`; log saved at `artifacts/verification/dash-002-playwright.log`; implementation commit is `fc67226`.
+- Commits: `fc67226 Implement dash-002 company overview card`
+- Files or artifacts updated: `frontend/src/app/_lib/company-directory.ts`, `frontend/src/app/dashboard/[ticker]/page.tsx`, `frontend/src/app/globals.css`, `frontend/e2e/dash-002.spec.ts`, `artifacts/verification/dash-002-playwright.log`, `feature_list.json`, `progress.md`, `session-handoff.md`
+- Known risk or unresolved issue: The overview card still uses seeded demo values rather than live market data, so later dashboard slices should treat the overview fields as temporary scaffolding.
+- Next best step: Start `dash-003` and add seeded market plus industry context indices that respond to the selected company's sector without disturbing the `dash-001` and `dash-002` contracts.

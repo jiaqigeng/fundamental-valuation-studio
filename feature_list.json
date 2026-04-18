@@ -81,14 +81,14 @@
         ]
       },
       "evidence": {
-        "commit": null,
-        "verification_run": null,
-        "output_log": null,
-        "timestamp": null
+        "commit": "fc67226",
+        "verification_run": "cd frontend && npx playwright test e2e/dash-002.spec.ts",
+        "output_log": "artifacts/verification/dash-002-playwright.log",
+        "timestamp": "2026-04-18T18:28:43.6102504-04:00"
       },
       "depends_on": ["dash-001"],
-      "status": "not_started",
-      "notes": ""
+      "status": "passing",
+      "notes": "Implemented with seeded company overview data plus a dashboard card that shows identity, sector, summary, share price, and market cap for supported tickers."
     },
     {
       "id": "dash-003",
