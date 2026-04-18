@@ -6,6 +6,14 @@ class QuoteDetail(BaseModel):
     value: str
 
 
+class MarketContextCard(BaseModel):
+    label: str
+    symbol: str
+    value: str
+    daily_change: str
+    description: str
+
+
 class CompanyWorkspaceSnapshot(BaseModel):
     ticker: str
     name: str
@@ -15,3 +23,4 @@ class CompanyWorkspaceSnapshot(BaseModel):
     current_price_display: str
     market_cap_display: str
     quote_details: list[QuoteDetail]
+    market_contexts: list[MarketContextCard]

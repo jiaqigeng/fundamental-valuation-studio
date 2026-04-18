@@ -190,7 +190,8 @@ a {
   gap: 1.25rem;
 }
 
-.quote-snapshot-panel h2 {
+.quote-snapshot-panel h2,
+.market-context-panel h2 {
   margin: 0;
   font-size: clamp(1.8rem, 4vw, 2.3rem);
   letter-spacing: -0.04em;
@@ -261,8 +262,17 @@ a {
   gap: 1rem;
 }
 
+.market-context-header {
+  display: grid;
+  gap: 1rem;
+}
+
 .quote-snapshot-copy {
   max-width: 30rem;
+}
+
+.market-context-copy {
+  max-width: 36rem;
 }
 
 .quote-detail-grid {
@@ -299,6 +309,69 @@ a {
   border-radius: 1.4rem;
   background: rgba(255, 255, 255, 0.56);
   padding: 1.2rem;
+}
+
+.market-context-grid {
+  display: grid;
+  gap: 1rem;
+  margin: 1.5rem 0 0;
+}
+
+.market-context-card {
+  border: 1px solid rgba(20, 33, 61, 0.08);
+  border-radius: 1.4rem;
+  background: rgba(255, 255, 255, 0.56);
+  padding: 1.2rem;
+}
+
+.market-context-card-company {
+  background:
+    linear-gradient(135deg, rgba(194, 91, 42, 0.14), rgba(255, 255, 255, 0.84)),
+    rgba(255, 255, 255, 0.72);
+}
+
+.market-context-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.market-context-symbol,
+.market-context-label,
+.market-context-change {
+  margin: 0;
+}
+
+.market-context-symbol,
+.market-context-change {
+  color: var(--accent-strong);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.market-context-label {
+  margin-top: 0.95rem;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.market-context-value {
+  margin: 0.5rem 0 0;
+  font-size: clamp(1.7rem, 4vw, 2.35rem);
+  font-weight: 700;
+  letter-spacing: -0.05em;
+}
+
+.market-context-description {
+  margin: 1rem 0 0;
+  color: var(--muted);
+  line-height: 1.6;
 }
 
 .ticker-chip-row {
@@ -353,7 +426,16 @@ a {
     align-items: start;
   }
 
+  .market-context-header {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 24rem);
+    align-items: start;
+  }
+
   .quote-detail-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .market-context-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }

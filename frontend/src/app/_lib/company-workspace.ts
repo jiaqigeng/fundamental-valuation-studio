@@ -5,6 +5,14 @@ export type QuoteDetail = {
   readonly value: string;
 };
 
+export type MarketContextCard = {
+  readonly label: string;
+  readonly symbol: string;
+  readonly value: string;
+  readonly dailyChange: string;
+  readonly description: string;
+};
+
 export type CompanyWorkspaceData = {
   readonly ticker: string;
   readonly name: string;
@@ -14,6 +22,7 @@ export type CompanyWorkspaceData = {
   readonly currentPriceDisplay: string;
   readonly marketCapDisplay: string;
   readonly quoteDetails: readonly QuoteDetail[];
+  readonly marketContexts: readonly MarketContextCard[];
 };
 
 const BACKEND_BASE_URL =
@@ -61,6 +70,13 @@ export async function getCompanyWorkspaceData(
       current_price_display: string;
       market_cap_display: string;
       quote_details: QuoteDetail[];
+      market_contexts: {
+        label: string;
+        symbol: string;
+        value: string;
+        daily_change: string;
+        description: string;
+      }[];
     };
 
     return {
@@ -72,6 +88,13 @@ export async function getCompanyWorkspaceData(
       currentPriceDisplay: payload.current_price_display,
       marketCapDisplay: payload.market_cap_display,
       quoteDetails: payload.quote_details,
+      marketContexts: payload.market_contexts.map((context) => ({
+        label: context.label,
+        symbol: context.symbol,
+        value: context.value,
+        dailyChange: context.daily_change,
+        description: context.description,
+      })),
     };
   } catch {
     return buildFallbackWorkspace(normalizedTicker);
@@ -94,5 +117,6 @@ function buildFallbackWorkspace(ticker: string): CompanyWorkspaceData | null {
     currentPriceDisplay: priceFormatter.format(company.currentPrice),
     marketCapDisplay: marketCapFormatter.format(company.marketCap),
     quoteDetails: [],
+    marketContexts: [],
   };
 }

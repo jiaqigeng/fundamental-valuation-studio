@@ -106,6 +106,47 @@ export default async function DashboardPage({
         </section>
       ) : null}
 
+      {company.marketContexts.length > 0 ? (
+        <section
+          className="workspace-panel market-context-panel"
+          aria-label="Market context"
+        >
+          <div className="market-context-header">
+            <div>
+              <p className="panel-label">Market Context</p>
+              <h2>Company price against its market backdrop</h2>
+            </div>
+            <p className="panel-copy market-context-copy">
+              Compare the selected company against the broad market and a
+              sector-relevant benchmark chosen from its reported sector.
+            </p>
+          </div>
+
+          <div className="market-context-grid">
+            <article className="market-context-card market-context-card-company">
+              <p className="market-context-symbol">{company.ticker}</p>
+              <p className="market-context-label">Company price</p>
+              <p className="market-context-value">{company.currentPriceDisplay}</p>
+              <p className="market-context-description">
+                Current quote for the selected company workspace.
+              </p>
+            </article>
+
+            {company.marketContexts.map((context) => (
+              <article className="market-context-card" key={context.symbol}>
+                <div className="market-context-card-header">
+                  <p className="market-context-symbol">{context.symbol}</p>
+                  <p className="market-context-change">{context.dailyChange}</p>
+                </div>
+                <p className="market-context-label">{context.label}</p>
+                <p className="market-context-value">{context.value}</p>
+                <p className="market-context-description">{context.description}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
       <Link className="back-link" href="/">
         Search another ticker
       </Link>

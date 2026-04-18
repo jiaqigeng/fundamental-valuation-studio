@@ -3,22 +3,39 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from decimal import Decimal, ROUND_HALF_UP
+from pathlib import Path
+from threading import Lock
 
-import httpx
+import yfinance as yf
 
-from app.schemas.company_workspace import CompanyWorkspaceSnapshot, QuoteDetail
+from app.schemas.company_workspace import (
+    CompanyWorkspaceSnapshot,
+    MarketContextCard,
+    QuoteDetail,
+)
 
 
-QUOTE_URL = "https://query1.finance.yahoo.com/v7/finance/quote"
-SUMMARY_URL = "https://query2.finance.yahoo.com/v10/finance/quoteSummary/{ticker}"
-YAHOO_HEADERS = {
-    "Accept": "application/json",
-    "User-Agent": (
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-        "(KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36"
-    ),
+YFINANCE_CACHE_DIR = Path(__file__).resolve().parents[2] / "tmp" / "yfinance-cache"
+_CACHE_CONFIGURED = False
+_CACHE_LOCK = Lock()
+
+SECTOR_INDEXES: dict[str, tuple[str, str]] = {
+    "Basic Materials": ("XLB", "Materials sector benchmark"),
+    "Communication Services": ("XLC", "Communication Services sector benchmark"),
+    "Consumer Cyclical": ("XLY", "Consumer Discretionary sector benchmark"),
+    "Consumer Defensive": ("XLP", "Consumer Staples sector benchmark"),
+    "Consumer Discretionary": ("XLY", "Consumer Discretionary sector benchmark"),
+    "Consumer Staples": ("XLP", "Consumer Staples sector benchmark"),
+    "Energy": ("XLE", "Energy sector benchmark"),
+    "Financial Services": ("XLF", "Financials sector benchmark"),
+    "Financials": ("XLF", "Financials sector benchmark"),
+    "Healthcare": ("XLV", "Health Care sector benchmark"),
+    "Health Care": ("XLV", "Health Care sector benchmark"),
+    "Industrials": ("XLI", "Industrials sector benchmark"),
+    "Real Estate": ("XLRE", "Real Estate sector benchmark"),
+    "Technology": ("XLK", "Technology sector benchmark"),
+    "Utilities": ("XLU", "Utilities sector benchmark"),
 }
-SUMMARY_MODULES = "assetProfile,price,summaryDetail,defaultKeyStatistics,calendarEvents"
 
 
 class YahooFinanceLookupError(RuntimeError):
@@ -27,45 +44,34 @@ class YahooFinanceLookupError(RuntimeError):
 
 @dataclass(frozen=True)
 class YahooWorkspacePayload:
-    quote: dict
-    summary: dict
+    company_info: dict
+    market_contexts: list[MarketContextCard]
 
 
 class YahooFinanceClient:
     def __init__(self, timeout: float = 10.0) -> None:
         self._timeout = timeout
+        _configure_yfinance_cache()
 
     def fetch_company_workspace_snapshot(self, ticker: str) -> CompanyWorkspaceSnapshot:
         payload = self._fetch_payload(ticker)
-        quote = payload.quote
-        summary = payload.summary
-
-        asset_profile = summary.get("assetProfile", {})
-        summary_detail = summary.get("summaryDetail", {})
-        default_stats = summary.get("defaultKeyStatistics", {})
-        calendar_events = summary.get("calendarEvents", {})
-        price = summary.get("price", {})
+        info = payload.company_info
 
         name = (
-            quote.get("longName")
-            or quote.get("shortName")
-            or _formatted_field(price.get("longName"))
-            or _formatted_field(price.get("shortName"))
+            _string_field(info, "longName")
+            or _string_field(info, "shortName")
             or ticker
         )
-        sector = asset_profile.get("sector") or "Unknown sector"
-        summary_text = asset_profile.get("longBusinessSummary") or (
+        sector = _string_field(info, "sector") or "Unknown sector"
+        summary_text = _string_field(info, "longBusinessSummary") or (
             "Yahoo Finance returned market data for this company, but not a long "
             "business summary."
         )
         current_price = _first_number(
-            quote.get("regularMarketPrice"),
-            _raw_field(price.get("regularMarketPrice")),
+            info.get("currentPrice"),
+            info.get("regularMarketPrice"),
         )
-        market_cap = _first_number(
-            quote.get("marketCap"),
-            _raw_field(price.get("marketCap")),
-        )
+        market_cap = _first_number(info.get("marketCap"))
 
         return CompanyWorkspaceSnapshot(
             ticker=ticker,
@@ -73,65 +79,46 @@ class YahooFinanceClient:
             sector=sector,
             summary=summary_text,
             workspace_tagline=(
-                "Yahoo Finance-backed market snapshot ready for deeper context, "
-                "valuation work, and AI analysis."
+                "yfinance-backed market snapshot ready for deeper context, "
+                "sector context, valuation work, and AI analysis."
             ),
             current_price_display=_format_currency(current_price),
             market_cap_display=_format_compact_currency(market_cap),
             quote_details=[
                 QuoteDetail(
                     label="Previous Close",
-                    value=_format_number(
-                        _first_number(
-                            quote.get("regularMarketPreviousClose"),
-                            _raw_field(summary_detail.get("previousClose")),
-                        ),
-                    ),
+                    value=_format_number(_first_number(info.get("previousClose"))),
                 ),
                 QuoteDetail(
                     label="Open",
-                    value=_format_number(
-                        _first_number(
-                            quote.get("regularMarketOpen"),
-                            _raw_field(summary_detail.get("open")),
-                        ),
-                    ),
+                    value=_format_number(_first_number(info.get("open"))),
                 ),
                 QuoteDetail(
                     label="Bid",
-                    value=_format_bid_ask(quote.get("bid"), quote.get("bidSize")),
+                    value=_format_bid_ask(info.get("bid"), info.get("bidSize")),
                 ),
                 QuoteDetail(
                     label="Ask",
-                    value=_format_bid_ask(quote.get("ask"), quote.get("askSize")),
+                    value=_format_bid_ask(info.get("ask"), info.get("askSize")),
                 ),
                 QuoteDetail(
                     label="Day's Range",
-                    value=_format_range(
-                        quote.get("regularMarketDayLow"),
-                        quote.get("regularMarketDayHigh"),
-                    ),
+                    value=_format_range(info.get("dayLow"), info.get("dayHigh")),
                 ),
                 QuoteDetail(
                     label="52 Week Range",
                     value=_format_range(
-                        quote.get("fiftyTwoWeekLow"),
-                        quote.get("fiftyTwoWeekHigh"),
+                        info.get("fiftyTwoWeekLow"),
+                        info.get("fiftyTwoWeekHigh"),
                     ),
                 ),
                 QuoteDetail(
                     label="Volume",
-                    value=_format_integer(quote.get("regularMarketVolume")),
+                    value=_format_integer(info.get("volume")),
                 ),
                 QuoteDetail(
                     label="Avg. Volume",
-                    value=_format_integer(
-                        _first_number(
-                            quote.get("averageDailyVolume3Month"),
-                            quote.get("averageVolume"),
-                            _raw_field(summary_detail.get("averageVolume")),
-                        ),
-                    ),
+                    value=_format_integer(_first_number(info.get("averageVolume"))),
                 ),
                 QuoteDetail(
                     label="Market Cap (intraday)",
@@ -139,119 +126,133 @@ class YahooFinanceClient:
                 ),
                 QuoteDetail(
                     label="Beta (5Y Monthly)",
-                    value=_formatted_field(default_stats.get("beta"))
-                    or _format_number(_raw_field(default_stats.get("beta"))),
+                    value=_format_number(_first_number(info.get("beta"))),
                 ),
                 QuoteDetail(
                     label="PE Ratio (TTM)",
-                    value=_format_number(
-                        _first_number(
-                            quote.get("trailingPE"),
-                            _raw_field(summary_detail.get("trailingPE")),
-                        ),
-                    ),
+                    value=_format_number(_first_number(info.get("trailingPE"))),
                 ),
                 QuoteDetail(
                     label="EPS (TTM)",
-                    value=_format_number(
-                        _first_number(
-                            quote.get("epsTrailingTwelveMonths"),
-                            _raw_field(default_stats.get("trailingEps")),
-                        ),
-                    ),
+                    value=_format_number(_first_number(info.get("trailingEps"))),
                 ),
                 QuoteDetail(
                     label="Earnings Date",
-                    value=_format_earnings_date(calendar_events.get("earnings")),
+                    value=_format_date(
+                        _first_number(
+                            info.get("earningsTimestamp"),
+                            info.get("earningsTimestampStart"),
+                            info.get("earningsTimestampEnd"),
+                        ),
+                    ),
                 ),
                 QuoteDetail(
                     label="Forward Dividend & Yield",
                     value=_format_forward_dividend(
-                        _first_number(
-                            quote.get("dividendRate"),
-                            _raw_field(summary_detail.get("dividendRate")),
-                        ),
-                        _first_number(
-                            quote.get("dividendYield"),
-                            _raw_field(summary_detail.get("dividendYield")),
-                        ),
+                        _first_number(info.get("dividendRate")),
+                        _first_number(info.get("dividendYield")),
                     ),
                 ),
                 QuoteDetail(
                     label="Ex-Dividend Date",
-                    value=_format_date(
-                        _first_number(
-                            quote.get("exDividendDate"),
-                            _raw_field(summary_detail.get("exDividendDate")),
-                        ),
-                    ),
+                    value=_format_date(_first_number(info.get("exDividendDate"))),
                 ),
             ],
+            market_contexts=payload.market_contexts,
         )
 
     def _fetch_payload(self, ticker: str) -> YahooWorkspacePayload:
         try:
-            with httpx.Client(
-                headers=YAHOO_HEADERS,
-                timeout=self._timeout,
-                follow_redirects=True,
-            ) as client:
-                quote_response = client.get(
-                    QUOTE_URL,
-                    params={"symbols": ticker, "lang": "en-US", "region": "US"},
-                )
-                summary_response = client.get(
-                    SUMMARY_URL.format(ticker=ticker),
-                    params={
-                        "modules": SUMMARY_MODULES,
-                        "formatted": "true",
-                        "lang": "en-US",
-                        "region": "US",
-                        "corsDomain": "finance.yahoo.com",
-                    },
-                )
-        except httpx.HTTPError as exc:
+            company_info = dict(yf.Ticker(ticker).info)
+        except Exception as exc:  # pragma: no cover - upstream library errors vary.
             raise YahooFinanceLookupError(
-                f"Yahoo Finance request failed for ticker {ticker}."
+                f"yfinance request failed for ticker {ticker}."
             ) from exc
 
-        if quote_response.status_code != 200 or summary_response.status_code != 200:
-            raise YahooFinanceLookupError(
-                f"Yahoo Finance returned {quote_response.status_code} / "
-                f"{summary_response.status_code} for ticker {ticker}."
-            )
-
-        quote_payload = quote_response.json()
-        summary_payload = summary_response.json()
-
-        quote_results = quote_payload.get("quoteResponse", {}).get("result", [])
-        summary_results = summary_payload.get("quoteSummary", {}).get("result", [])
-
-        if not quote_results or not summary_results:
+        if _looks_like_missing_ticker(company_info):
             raise YahooFinanceLookupError(
                 f"Yahoo Finance returned no result for ticker {ticker}."
             )
 
+        sector = _string_field(company_info, "sector") or "Unknown sector"
+
         return YahooWorkspacePayload(
-            quote=quote_results[0],
-            summary=summary_results[0],
+            company_info=company_info,
+            market_contexts=_build_market_contexts(sector),
         )
 
 
-def _raw_field(value: object) -> float | int | None:
-    if isinstance(value, dict):
-        raw_value = value.get("raw")
-        if isinstance(raw_value, (int, float)):
-            return raw_value
-    return None
+def _configure_yfinance_cache() -> None:
+    global _CACHE_CONFIGURED
+    if _CACHE_CONFIGURED:
+        return
+
+    with _CACHE_LOCK:
+        if _CACHE_CONFIGURED:
+            return
+        YFINANCE_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+        yf.set_tz_cache_location(str(YFINANCE_CACHE_DIR))
+        _CACHE_CONFIGURED = True
 
 
-def _formatted_field(value: object) -> str | None:
-    if isinstance(value, dict):
-        for key in ("fmt", "longFmt"):
-            formatted = value.get(key)
-            if isinstance(formatted, str) and formatted:
-                return formatted
+def _build_market_contexts(sector: str) -> list[MarketContextCard]:
+    benchmark_symbol, benchmark_label = SECTOR_INDEXES.get(
+        sector,
+        ("XLK", "Sector benchmark"),
+    )
+    return [
+        _build_market_context_card(
+            label="S&P 500",
+            symbol="^GSPC",
+            description="Broad-market baseline for the current U.S. session.",
+        ),
+        _build_market_context_card(
+            label=benchmark_label,
+            symbol=benchmark_symbol,
+            description="Sector proxy chosen from the company's reported sector.",
+        ),
+    ]
+
+
+def _build_market_context_card(
+    *,
+    label: str,
+    symbol: str,
+    description: str,
+) -> MarketContextCard:
+    try:
+        info = dict(yf.Ticker(symbol).info)
+    except Exception as exc:  # pragma: no cover - upstream library errors vary.
+        raise YahooFinanceLookupError(
+            f"yfinance request failed for symbol {symbol}."
+        ) from exc
+
+    if _looks_like_missing_ticker(info):
+        raise YahooFinanceLookupError(
+            f"Yahoo Finance returned no result for symbol {symbol}."
+        )
+
+    return MarketContextCard(
+        label=label,
+        symbol=symbol,
+        value=_format_metric_value(
+            _first_number(
+                info.get("regularMarketPrice"),
+                info.get("currentPrice"),
+            ),
+        ),
+        daily_change=_format_daily_change(
+            _first_number(info.get("regularMarketChange")),
+            _first_number(info.get("regularMarketChangePercent")),
+        ),
+        description=description,
+    )
+
+
+def _string_field(payload: dict, key: str) -> str | None:
+    value = payload.get(key)
+    if isinstance(value, str) and value.strip():
+        return value.strip()
     return None
 
 
@@ -271,6 +272,12 @@ def _format_currency(value: float | int | None) -> str:
     if value is None:
         return "N/A"
     return f"${_decimal_text(value, '0.01')}"
+
+
+def _format_metric_value(value: float | int | None) -> str:
+    if value is None:
+        return "N/A"
+    return f"{float(value):,.2f}"
 
 
 def _format_number(value: float | int | None) -> str:
@@ -344,18 +351,48 @@ def _format_date(value: float | int | None) -> str:
     return f"{dt.strftime('%b')} {dt.day}, {dt.year}"
 
 
-def _format_earnings_date(value: object) -> str:
-    if not isinstance(value, dict):
+def _looks_like_missing_ticker(info: dict) -> bool:
+    if not info:
+        return True
+    if _string_field(info, "symbol") or _string_field(info, "shortName"):
+        return False
+    if _first_number(info.get("regularMarketPrice"), info.get("currentPrice")) is not None:
+        return False
+    quote_type = _string_field(info, "quoteType")
+    if quote_type and quote_type.lower() == "none":
+        return True
+    return True
+
+
+def _format_daily_change(
+    change: float | int | None,
+    change_percent: float | int | None,
+) -> str:
+    if change is None and change_percent is None:
         return "N/A"
+    change_text = _format_signed_number(change)
+    percent_text = _format_signed_percent(change_percent)
+    if change_text == "N/A":
+        return percent_text
+    if percent_text == "N/A":
+        return change_text
+    return f"{change_text} ({percent_text})"
 
-    earnings_dates = value.get("earningsDate")
-    if isinstance(earnings_dates, list):
-        for entry in earnings_dates:
-            raw_value = _raw_field(entry)
-            if raw_value is not None:
-                return _format_date(raw_value)
 
-    return "N/A"
+def _format_signed_number(value: float | int | None) -> str:
+    if value is None:
+        return "N/A"
+    decimal_text = _decimal_text(abs(float(value)), "0.01")
+    sign = "+" if float(value) >= 0 else "-"
+    return f"{sign}{decimal_text}"
+
+
+def _format_signed_percent(value: float | int | None) -> str:
+    if value is None:
+        return "N/A"
+    decimal_text = _decimal_text(abs(float(value)), "0.01")
+    sign = "+" if float(value) >= 0 else "-"
+    return f"{sign}{decimal_text}%"
 
 
 def _format_forward_dividend(
@@ -369,7 +406,12 @@ def _format_forward_dividend(
     if dividend_yield is None:
         return rate_text
 
-    yield_percent = Decimal(str(dividend_yield * 100)).quantize(
+    normalized_yield = (
+        float(dividend_yield) * 100
+        if abs(float(dividend_yield)) <= 1
+        else float(dividend_yield)
+    )
+    yield_percent = Decimal(str(normalized_yield)).quantize(
         Decimal("0.01"), rounding=ROUND_HALF_UP
     )
     return f"{rate_text} ({yield_percent}%)"

@@ -25,6 +25,22 @@ def test_company_workspace_fixture_response(monkeypatch) -> None:
         "label": "Ex-Dividend Date",
         "value": "Mar 9, 2026",
     }
+    assert body["market_contexts"] == [
+        {
+            "label": "S&P 500",
+            "symbol": "^GSPC",
+            "value": "7,126.06",
+            "daily_change": "+84.78 (+1.20%)",
+            "description": "Broad-market baseline for the current U.S. session.",
+        },
+        {
+            "label": "Technology sector benchmark",
+            "symbol": "XLK",
+            "value": "154.35",
+            "daily_change": "+2.33 (+1.53%)",
+            "description": "Sector proxy chosen from the company's reported sector.",
+        },
+    ]
 
 
 def test_company_workspace_fixture_404(monkeypatch) -> None:

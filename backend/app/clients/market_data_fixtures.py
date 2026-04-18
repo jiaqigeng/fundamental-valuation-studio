@@ -1,4 +1,8 @@
-from app.schemas.company_workspace import CompanyWorkspaceSnapshot, QuoteDetail
+from app.schemas.company_workspace import (
+    CompanyWorkspaceSnapshot,
+    MarketContextCard,
+    QuoteDetail,
+)
 
 
 FIXTURE_WORKSPACES: dict[str, CompanyWorkspaceSnapshot] = {
@@ -33,6 +37,22 @@ FIXTURE_WORKSPACES: dict[str, CompanyWorkspaceSnapshot] = {
             QuoteDetail(label="Forward Dividend & Yield", value="1.04 (0.49%)"),
             QuoteDetail(label="Ex-Dividend Date", value="Feb 9, 2026"),
         ],
+        market_contexts=[
+            MarketContextCard(
+                label="S&P 500",
+                symbol="^GSPC",
+                value="7,126.06",
+                daily_change="+84.78 (+1.20%)",
+                description="Broad-market baseline for the current U.S. session.",
+            ),
+            MarketContextCard(
+                label="Technology sector benchmark",
+                symbol="XLK",
+                value="154.35",
+                daily_change="+2.33 (+1.53%)",
+                description="Sector proxy chosen from the company's reported sector.",
+            ),
+        ],
     ),
     "KO": CompanyWorkspaceSnapshot(
         ticker="KO",
@@ -65,6 +85,22 @@ FIXTURE_WORKSPACES: dict[str, CompanyWorkspaceSnapshot] = {
             QuoteDetail(label="Forward Dividend & Yield", value="2.04 (3.28%)"),
             QuoteDetail(label="Ex-Dividend Date", value="Mar 13, 2026"),
         ],
+        market_contexts=[
+            MarketContextCard(
+                label="S&P 500",
+                symbol="^GSPC",
+                value="7,126.06",
+                daily_change="+84.78 (+1.20%)",
+                description="Broad-market baseline for the current U.S. session.",
+            ),
+            MarketContextCard(
+                label="Consumer Staples sector benchmark",
+                symbol="XLP",
+                value="82.46",
+                daily_change="+1.03 (+1.26%)",
+                description="Sector proxy chosen from the company's reported sector.",
+            ),
+        ],
     ),
     "MSFT": CompanyWorkspaceSnapshot(
         ticker="MSFT",
@@ -96,6 +132,22 @@ FIXTURE_WORKSPACES: dict[str, CompanyWorkspaceSnapshot] = {
             QuoteDetail(label="Earnings Date", value="Apr 29, 2026"),
             QuoteDetail(label="Forward Dividend & Yield", value="0.84 (0.25%)"),
             QuoteDetail(label="Ex-Dividend Date", value="Mar 9, 2026"),
+        ],
+        market_contexts=[
+            MarketContextCard(
+                label="S&P 500",
+                symbol="^GSPC",
+                value="7,126.06",
+                daily_change="+84.78 (+1.20%)",
+                description="Broad-market baseline for the current U.S. session.",
+            ),
+            MarketContextCard(
+                label="Technology sector benchmark",
+                symbol="XLK",
+                value="154.35",
+                daily_change="+2.33 (+1.53%)",
+                description="Sector proxy chosen from the company's reported sector.",
+            ),
         ],
     ),
 }
