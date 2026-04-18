@@ -54,14 +54,14 @@
         ]
       },
       "evidence": {
-        "commit": null,
-        "verification_run": null,
-        "output_log": null,
-        "timestamp": null
+        "commit": "1fba98d",
+        "verification_run": "cd frontend && npx playwright test e2e/dash-001.spec.ts",
+        "output_log": "artifacts/verification/dash-001-playwright.log",
+        "timestamp": "2026-04-18T17:39:32.5260168-04:00"
       },
       "depends_on": [],
-      "status": "in_progress",
-      "notes": "Foundation feature. All other dashboard, valuation, and AI features depend on the workspace route existing."
+      "status": "passing",
+      "notes": "Implemented with a ticker-search landing page, a dashboard route at /dashboard/[ticker], and a small seeded company directory for the first workspace flow."
     },
     {
       "id": "dash-002",

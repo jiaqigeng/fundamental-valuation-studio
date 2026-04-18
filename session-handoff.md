@@ -2,29 +2,29 @@
 
 ## Verified Now
 
-- What is currently working: The repo boots with `./init.sh`, the frontend and backend are scaffolded, backend health-check testing passes, frontend lint and typecheck pass, and the first feature-level e2e target file for `dash-001` exists.
-- What verification actually ran: `./init.sh`; `cd frontend && npm run lint`; `cd frontend && npm run typecheck`; `cd backend && ./.venv/Scripts/python.exe -m pytest -q`
+- What is currently working: The repo boots with `./init.sh`, the landing page accepts a ticker, `/dashboard/[ticker]` loads a company workspace for seeded tickers, backend health-check testing passes, frontend lint and typecheck pass, and `dash-001` is recorded as passing.
+- What verification actually ran: `./init.sh`; `cd frontend && npm run lint`; `cd frontend && npm run typecheck`; `cd frontend && npx playwright test e2e/dash-001.spec.ts`
 
 ## Changed This Session
 
-- Code or behavior added: Added FastAPI app baseline, Next.js app scaffold, backend health endpoint test, and the first Playwright spec file at `frontend/e2e/dash-001.spec.ts`.
-- Infrastructure or harness changes: Tightened `AGENTS.md` around feature-level verification, added frontend Playwright scaffolding, added frontend `typecheck` and `test:e2e` scripts, and aligned the startup contract with the richer feature-list schema.
+- Code or behavior added: Added a real ticker-search landing page, a client search form, a seeded company directory, and a dashboard workspace route at `/dashboard/[ticker]`.
+- Infrastructure or harness changes: Updated Playwright to auto-start the frontend dev server for e2e runs and captured verification output at `artifacts/verification/dash-001-playwright.log`.
 
 ## Broken Or Unverified
 
-- Known defect: `dash-001` is not implemented yet, so `frontend/e2e/dash-001.spec.ts` is expected to fail until the ticker-search workflow exists.
-- Unverified path: Most later per-feature verification files referenced in `feature_list.json` do not exist yet because those features have not been started.
-- Risk for the next session: The repo now enforces a stronger feature-verification contract, so the next session should avoid widening scope beyond `dash-001`.
+- Known defect: None for `dash-001`; the next dashboard slices are still not implemented.
+- Unverified path: Later per-feature verification files in `feature_list.json` remain unstarted until their features become active.
+- Risk for the next session: `dash-002` should preserve the new `/dashboard/[ticker]` foundation and avoid widening into charts, valuation, or AI work.
 
 ## Next Best Step
 
-- Highest-priority unfinished feature: `dash-001`
-- Why it is next: It is the top unfinished feature in `feature_list.json` and the root dependency for all later dashboard, valuation, AI, and UX work.
-- What counts as passing: The ticker-search workflow is implemented and `cd frontend && npx playwright test e2e/dash-001.spec.ts` passes with evidence recorded.
-- What must not change during that step: Do not mark later dashboard or valuation features as active, and do not rewrite the feature-level verification contract unless the repo artifacts are updated together.
+- Highest-priority unfinished feature: `dash-002`
+- Why it is next: `dash-001` is now passing, so the next dependency-ordered dashboard slice is the company identity and key-stats card on top of the new workspace route.
+- What counts as passing: The selected company workspace shows company identity, price, market cap, sector, and summary, and `cd frontend && npx playwright test e2e/dash-002.spec.ts` passes with evidence recorded.
+- What must not change during that step: Keep focus on `dash-002`, preserve the `/dashboard/[ticker]` route and `dash-001` verification contract, and avoid jumping ahead into context indices, financial metrics, or chart work.
 
 ## Commands
 
 - Startup: `./init.sh`
 - Verification: `./init.sh` for baseline; `feature_list.json -> features[*].verification.command` for feature passing
-- Focused debug command: `cd frontend && npx playwright test e2e/dash-001.spec.ts`
+- Focused debug command: `cd frontend && npx playwright test e2e/dash-002.spec.ts`
