@@ -108,14 +108,14 @@
         ]
       },
       "evidence": {
-        "commit": null,
-        "verification_run": null,
-        "output_log": null,
-        "timestamp": null
+        "commit": "7f8854d",
+        "verification_run": "cd frontend && npx playwright test e2e/dash-002b.spec.ts",
+        "output_log": "artifacts/verification/dash-002b-playwright.log",
+        "timestamp": "2026-04-18T19:08:35.5662695-04:00"
       },
       "depends_on": ["dash-001", "dash-002"],
-      "status": "in_progress",
-      "notes": "Uses FastAPI as a backend-for-frontend layer over Yahoo Finance at runtime, with fixture mode for deterministic test coverage."
+      "status": "passing",
+      "notes": "Implemented with a FastAPI backend-for-frontend route that fetches Yahoo Finance data at runtime and uses fixture mode for deterministic Playwright and pytest coverage."
     },
     {
       "id": "dash-003",
