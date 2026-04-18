@@ -115,7 +115,7 @@
       },
       "depends_on": ["dash-001", "dash-002"],
       "status": "passing",
-      "notes": "Implemented with a FastAPI backend-for-frontend route that fetches Yahoo Finance data at runtime and uses fixture mode for deterministic Playwright and pytest coverage."
+      "notes": "Implemented with a FastAPI backend-for-frontend route that fetches Yahoo Finance data at runtime and uses fixture mode for deterministic Playwright and pytest coverage. Live non-seeded ticker requests are currently blocked by Yahoo `401 / 401` responses (for example `NVDA`) until cookie/crumb/session handling or a different provider is implemented."
     },
     {
       "id": "dash-003",

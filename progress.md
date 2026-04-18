@@ -6,7 +6,7 @@
 - Standard startup path: `./init.sh`
 - Standard verification path: `./init.sh` for baseline health plus `feature_list.json -> features[*].verification.command` for feature passing
 - Current highest-priority unfinished feature: `dash-003`
-- Current blocker: none
+- Current blocker: Live Yahoo Finance runtime requests for non-seeded tickers are currently failing with `401 / 401` from the upstream endpoints (confirmed with `NVDA`).
 
 ## Session Log
 
@@ -69,3 +69,15 @@
 - Files or artifacts updated: `backend/app/main.py`, `backend/app/clients/`, `backend/app/routers/`, `backend/app/schemas/`, `backend/app/services/`, `backend/tests/test_company_workspace.py`, `frontend/src/app/_lib/company-workspace.ts`, `frontend/src/app/dashboard/[ticker]/page.tsx`, `frontend/src/app/globals.css`, `frontend/playwright.config.ts`, `frontend/e2e/dash-002b.spec.ts`, `artifacts/verification/dash-002b-playwright.log`, `feature_list.json`, `docs/frontend.md`, `docs/backend.md`, `frontend/ARCHITECTURE.md`, `backend/ARCHITECTURE.md`
 - Known risk or unresolved issue: The live runtime path depends on observed Yahoo Finance endpoints rather than an official supported public API, so upstream response-shape or access-policy changes remain a real risk; automated coverage mitigates this by running the backend in fixture mode.
 - Next best step: Resume `dash-003` and build the market plus industry context layer on top of the new backend workspace data path rather than adding more seeded-only dashboard data.
+
+### Session 006
+
+- Date: 2026-04-18
+- Goal: Record the live Yahoo Finance runtime problem in the repository artifacts for the next session.
+- Completed: Confirmed that the current live backend path still fails for non-seeded tickers because Yahoo Finance is returning `401 / 401` from the quote and quoteSummary endpoints, then recorded that issue in `feature_list.json`, `progress.md`, and `session-handoff.md` without changing feature code.
+- Verification run: none; this was a tracking-only handoff update driven by the observed runtime error response `{"detail":"Yahoo Finance returned 401 / 401 for ticker NVDA."}`.
+- Evidence captured: Live request for `NVDA` returned `401 / 401` from the Yahoo-backed backend route; seeded fallback behavior still masks that failure for `AAPL`, `MSFT`, and `KO`.
+- Commits: none yet
+- Files or artifacts updated: `feature_list.json`, `progress.md`, `session-handoff.md`
+- Known risk or unresolved issue: `dash-002b` remains recorded as passing because fixture-mode verification succeeded, but the live Yahoo path is currently blocked for non-seeded tickers until cookie/crumb/session handling or a different provider is implemented.
+- Next best step: In the next session, investigate the Yahoo auth/session failure before relying further on the live backend data path for non-seeded tickers or building additional dashboard slices on top of it.
