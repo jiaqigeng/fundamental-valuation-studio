@@ -1,0 +1,194 @@
+{
+  "project": "fundamental-valuation-studio",
+  "last_updated": "2026-04-18",
+  "rules": {
+    "single_active_feature": true,
+    "passing_requires_evidence": true,
+    "do_not_skip_verification": true
+  },
+  "status_legend": {
+    "not_started": "Work has not begun.",
+    "in_progress": "The feature is the current active task.",
+    "blocked": "Work cannot continue until a documented blocker is resolved.",
+    "passing": "Required verification has passed and evidence is recorded."
+  },
+  "features": [
+    {
+      "id": "company-001",
+      "priority": 1,
+      "area": "search",
+      "title": "Search and select a company by ticker",
+      "user_visible_behavior": "A user can enter a ticker, choose a company, and load its analysis workspace.",
+      "status": "not_started",
+      "verification": [
+        "Open the app.",
+        "Enter a valid ticker such as AAPL in the search input.",
+        "Submit or select the result.",
+        "Verify the app loads the selected company's workspace."
+      ],
+      "evidence": [],
+      "notes": ""
+    },
+    {
+      "id": "company-002",
+      "priority": 2,
+      "area": "overview",
+      "title": "Display a company overview dashboard",
+      "user_visible_behavior": "A user sees the selected company's name, ticker, sector, price, market cap, and a concise business summary.",
+      "status": "not_started",
+      "verification": [
+        "Load a company workspace.",
+        "Verify the dashboard shows company identity fields.",
+        "Verify price and market cap are visible.",
+        "Verify a business summary is shown in the overview panel."
+      ],
+      "evidence": [],
+      "notes": ""
+    },
+    {
+      "id": "company-003",
+      "priority": 3,
+      "area": "financials",
+      "title": "Show key financial metrics for the selected company",
+      "user_visible_behavior": "A user sees important financial details such as revenue, EPS, free cash flow, margins, and return metrics.",
+      "status": "not_started",
+      "verification": [
+        "Load a company workspace.",
+        "Open the financial details section.",
+        "Verify key metrics such as revenue, EPS, and free cash flow are displayed.",
+        "Verify at least one profitability or return metric is shown."
+      ],
+      "evidence": [],
+      "notes": ""
+    },
+    {
+      "id": "company-004",
+      "priority": 4,
+      "area": "charts",
+      "title": "Render historical financial charts",
+      "user_visible_behavior": "A user can view clean historical charts for revenue, earnings, and cash flow trends.",
+      "status": "not_started",
+      "verification": [
+        "Load a company workspace.",
+        "Navigate to the chart section.",
+        "Verify at least three historical charts render.",
+        "Verify the charts update when a different company is selected."
+      ],
+      "evidence": [],
+      "notes": ""
+    },
+    {
+      "id": "valuation-001",
+      "priority": 5,
+      "area": "valuation",
+      "title": "Calculate intrinsic value with a DCF model",
+      "user_visible_behavior": "A user can enter DCF assumptions and see an intrinsic value estimate update from those inputs.",
+      "status": "not_started",
+      "verification": [
+        "Load a company workspace.",
+        "Open the DCF calculator.",
+        "Enter or modify growth, discount rate, and terminal assumptions.",
+        "Verify the intrinsic value output updates after the changes."
+      ],
+      "evidence": [],
+      "notes": ""
+    },
+    {
+      "id": "valuation-002",
+      "priority": 6,
+      "area": "valuation",
+      "title": "Show valuation sensitivity for DCF assumptions",
+      "user_visible_behavior": "A user can see how the DCF result changes across assumption ranges in a sensitivity table or grid.",
+      "status": "not_started",
+      "verification": [
+        "Open the DCF calculator for a company.",
+        "Locate the sensitivity section.",
+        "Verify the table or grid shows different outcomes across multiple assumptions.",
+        "Verify changing a core assumption updates the sensitivity output."
+      ],
+      "evidence": [],
+      "notes": ""
+    },
+    {
+      "id": "valuation-003",
+      "priority": 7,
+      "area": "valuation",
+      "title": "Calculate intrinsic value with a dividend discount model",
+      "user_visible_behavior": "A user can use a DDM calculator for dividend-paying companies and compare the resulting valuation.",
+      "status": "not_started",
+      "verification": [
+        "Load a dividend-paying company workspace.",
+        "Open the DDM calculator.",
+        "Enter or modify dividend growth and discount assumptions.",
+        "Verify the DDM intrinsic value output is shown."
+      ],
+      "evidence": [],
+      "notes": ""
+    },
+    {
+      "id": "ai-001",
+      "priority": 8,
+      "area": "ai",
+      "title": "Generate an AI investment analysis for the selected company",
+      "user_visible_behavior": "A user can request an AI analysis and see a structured summary covering business quality, risks, and valuation context.",
+      "status": "not_started",
+      "verification": [
+        "Load a company workspace.",
+        "Open the AI analysis panel.",
+        "Trigger analysis generation.",
+        "Verify the response includes sections for thesis, risks, and valuation context."
+      ],
+      "evidence": [],
+      "notes": ""
+    },
+    {
+      "id": "ai-002",
+      "priority": 9,
+      "area": "ai",
+      "title": "Ground AI analysis with visible evidence",
+      "user_visible_behavior": "A user can inspect the evidence or source data behind the AI analysis instead of seeing an unsupported summary.",
+      "status": "not_started",
+      "verification": [
+        "Generate an AI analysis for a company.",
+        "Open the evidence or support section.",
+        "Verify the UI shows the inputs, data points, or citations used by the analysis.",
+        "Verify the evidence shown matches the selected company."
+      ],
+      "evidence": [],
+      "notes": ""
+    },
+    {
+      "id": "workspace-001",
+      "priority": 10,
+      "area": "persistence",
+      "title": "Save and reload valuation scenarios",
+      "user_visible_behavior": "A user can save a valuation scenario and load it again later without re-entering assumptions.",
+      "status": "not_started",
+      "verification": [
+        "Open a valuation calculator for a company.",
+        "Change several assumptions.",
+        "Save the scenario.",
+        "Reload the page or restart the app.",
+        "Verify the saved scenario can be loaded and the assumptions are restored."
+      ],
+      "evidence": [],
+      "notes": ""
+    },
+    {
+      "id": "ux-001",
+      "priority": 11,
+      "area": "ux",
+      "title": "Handle loading, invalid tickers, and API failures gracefully",
+      "user_visible_behavior": "A user sees clear loading states and understandable error messages instead of blank screens or broken components.",
+      "status": "not_started",
+      "verification": [
+        "Search for a valid ticker and verify loading indicators appear while data is fetched.",
+        "Search for an invalid ticker and verify a clear error message is shown.",
+        "Simulate or trigger a backend failure.",
+        "Verify the app shows a recoverable error state instead of crashing."
+      ],
+      "evidence": [],
+      "notes": ""
+    }
+  ]
+}
