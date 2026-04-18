@@ -14,10 +14,11 @@ Fundamental Valuation Studio is a full-stack equity research platform for fundam
 - Backend test runner: pytest 9.0.3
 - Shell: Git Bash on Windows
 - Frontend dev command: `cd frontend && npm run dev`
-- Frontend verification command: `cd frontend && npm run lint`
+- Frontend baseline verification commands: `cd frontend && npm run lint` and `cd frontend && npm run typecheck`
 - Backend dev command: `cd backend && .venv/Scripts/python.exe -m uvicorn app.main:app --reload`
-- Backend verification command: `cd backend && .venv/Scripts/python.exe -m pytest -q`
-- Standard startup contract: `./init.sh`
+- Backend baseline verification command: `cd backend && .venv/Scripts/python.exe -m pytest -q`
+- Baseline startup and verification contract: `./init.sh`
+- Feature-level passing command: `feature_list.json -> features[*].verification.command`
 
 ## Startup Workflow
 
@@ -26,10 +27,11 @@ Before writing code:
 1. Confirm the working directory with `pwd`.
 2. Read `progress.md` for the latest verified state and next step.
 3. Read `feature_list.json` and choose the highest-priority unfinished feature.
-4. Review recent commits with `git log --oneline -5`.
-5. Run `./init.sh`.
-6. Use the standard commands above when working directly in the frontend or backend.
-7. Run the required verification for the active feature before starting new work if the repository is already scaffolded.
+4. Read the active feature's `depends_on`, `verification.command`, and `verification.kind` in `feature_list.json`.
+5. Review recent commits with `git log --oneline -5`.
+6. Run `./init.sh`.
+7. Use the standard commands above when working directly in the frontend or backend.
+8. Treat `./init.sh` as baseline verification only and use the active feature's `verification.command` as the passing gate for that feature.
 
 If baseline verification is already failing, fix that first. Do not stack new feature work on top of a broken starting state.
 
@@ -38,7 +40,10 @@ If baseline verification is already failing, fix that first. Do not stack new fe
 - The agent MUST work on only one feature at a time.
 - The agent MUST read `progress.md` and `feature_list.json` before starting work.
 - The agent MUST pick the highest-priority unfinished feature unless `progress.md` records a justified exception.
+- The agent MUST treat `./init.sh` as baseline verification, not as a substitute for feature-level passing verification.
+- The agent MUST use the active feature's `verification.command` as the passing gate for that feature.
 - The agent MUST NOT mark a feature as `passing` without recorded evidence.
+- The agent MUST NOT mark a feature as `passing` if its declared `verification.command` has not run successfully.
 - The agent MUST NOT skip required verification for the active feature.
 - The agent MUST NOT widen scope beyond the active feature unless a narrow supporting fix is required to unblock it.
 - The agent MUST update repository artifacts instead of relying on chat memory for cross-session continuity.
@@ -55,7 +60,7 @@ If baseline verification is already failing, fix that first. Do not stack new fe
 
 ## Required Artifacts
 
-- `feature_list.json`: source of truth for feature state, priority, verification, and evidence
+- `feature_list.json`: source of truth for feature state, priority, dependencies, verification commands, and evidence
 - `progress.md`: current verified state, session log, blockers, and next step
 - `init.sh`: standard startup and baseline verification entry point for frontend and backend
 - `session-handoff.md`: optional compact handoff for larger sessions or incomplete work

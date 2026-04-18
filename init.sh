@@ -26,6 +26,10 @@ BACKEND_DEV_COMMAND="TBD"
 FRONTEND_VERIFY_COMMAND="TBD"
 BACKEND_VERIFY_COMMAND="TBD"
 FULL_VERIFY_COMMAND="./init.sh"
+NEXT_FEATURE_VERIFY_COMMAND="TBD"
+NEXT_FEATURE_VERIFY_KIND="unknown"
+NEXT_FEATURE_VERIFY_ARTIFACT="unknown"
+NEXT_FEATURE_VERIFY_ARTIFACT_EXISTS="unknown"
 
 warn() {
   printf 'WARN: %s\n' "$1"
@@ -129,10 +133,31 @@ validate_feature_list() {
 
   run_python_script "$python_cmd" - <<'PY'
 import json
+import re
 from pathlib import Path
 
 path = Path("feature_list.json")
 data = json.loads(path.read_text(encoding="utf-8"))
+
+schema_version = data.get("schema_version")
+if not isinstance(schema_version, int):
+    raise SystemExit("feature_list.json: schema_version must be an integer")
+
+sections = data.get("sections")
+if not isinstance(sections, dict) or not sections:
+    raise SystemExit("feature_list.json: sections must be a non-empty object")
+
+rules = data.get("rules")
+if not isinstance(rules, dict):
+    raise SystemExit("feature_list.json: rules must be an object")
+
+verification_conventions = data.get("verification_conventions")
+if not isinstance(verification_conventions, dict):
+    raise SystemExit("feature_list.json: verification_conventions must be an object")
+
+kinds = verification_conventions.get("kinds")
+if not isinstance(kinds, dict) or not kinds:
+    raise SystemExit("feature_list.json: verification_conventions.kinds must be a non-empty object")
 
 features = data.get("features", [])
 if not isinstance(features, list):
@@ -140,15 +165,41 @@ if not isinstance(features, list):
 
 allowed = {"not_started", "in_progress", "blocked", "passing"}
 seen_ids = set()
+dependencies = {}
 in_progress = 0
 
 for feature in features:
+    required_keys = {
+        "id",
+        "priority",
+        "section",
+        "area",
+        "title",
+        "behavior",
+        "verification",
+        "evidence",
+        "depends_on",
+        "status",
+        "notes",
+    }
+    missing_keys = required_keys - feature.keys()
+    if missing_keys:
+        raise SystemExit(
+            f"feature_list.json: feature is missing keys: {sorted(missing_keys)}"
+        )
+
     feature_id = feature.get("id")
     if not feature_id:
         raise SystemExit("feature_list.json: every feature must have an id")
     if feature_id in seen_ids:
         raise SystemExit(f"feature_list.json: duplicate feature id: {feature_id}")
     seen_ids.add(feature_id)
+    dependencies[feature_id] = feature.get("depends_on", [])
+
+    if feature.get("section") not in sections:
+        raise SystemExit(
+            f"feature_list.json: unknown section for {feature_id}: {feature.get('section')}"
+        )
 
     status = feature.get("status")
     if status not in allowed:
@@ -156,16 +207,78 @@ for feature in features:
     if status == "in_progress":
         in_progress += 1
 
+    verification = feature.get("verification")
+    if not isinstance(verification, dict):
+        raise SystemExit(f"feature_list.json: verification must be an object for {feature_id}")
+
+    command = verification.get("command")
+    if not isinstance(command, str) or not command.strip():
+        raise SystemExit(f"feature_list.json: verification.command must be a non-empty string for {feature_id}")
+
+    kind = verification.get("kind")
+    if kind not in kinds:
+        raise SystemExit(f"feature_list.json: verification.kind must be one of {sorted(kinds)} for {feature_id}")
+
+    manual_steps = verification.get("manual_steps")
+    if not isinstance(manual_steps, list) or not manual_steps:
+        raise SystemExit(f"feature_list.json: verification.manual_steps must be a non-empty list for {feature_id}")
+
+    evidence = feature.get("evidence")
+    if not isinstance(evidence, dict):
+        raise SystemExit(f"feature_list.json: evidence must be an object for {feature_id}")
+
+    for evidence_key in ("commit", "verification_run", "output_log", "timestamp"):
+        if evidence_key not in evidence:
+            raise SystemExit(
+                f"feature_list.json: evidence.{evidence_key} is required for {feature_id}"
+            )
+
+    depends_on = feature.get("depends_on")
+    if not isinstance(depends_on, list):
+        raise SystemExit(f"feature_list.json: depends_on must be a list for {feature_id}")
+
 if in_progress > 1:
     raise SystemExit("feature_list.json: more than one feature is marked in_progress")
+
+for feature_id, feature_dependencies in dependencies.items():
+    for dependency in feature_dependencies:
+        if dependency not in seen_ids:
+            raise SystemExit(
+                f"feature_list.json: {feature_id} depends on unknown feature {dependency}"
+            )
 
 unfinished = [feature for feature in features if feature.get("status") != "passing"]
 unfinished.sort(key=lambda item: item.get("priority", 10**9))
 next_feature = unfinished[0]["id"] if unfinished else "none"
+next_feature_command = unfinished[0]["verification"]["command"] if unfinished else "none"
+next_feature_kind = unfinished[0]["verification"]["kind"] if unfinished else "none"
+
+next_feature_artifact = "none"
+next_feature_artifact_exists = False
+if unfinished:
+    command = next_feature_command
+    artifact_match = re.search(r"playwright test\s+([^\s]+)", command)
+    if artifact_match is None:
+        artifact_match = re.search(r"pytest\s+([^\s]+)", command)
+
+    if artifact_match is not None:
+        artifact_path = artifact_match.group(1)
+        command_prefix = ""
+        prefix_match = re.match(r"\s*cd\s+([^\s]+)\s+&&", command)
+        if prefix_match is not None:
+            command_prefix = prefix_match.group(1)
+
+        resolved = Path(command_prefix) / artifact_path if command_prefix else Path(artifact_path)
+        next_feature_artifact = resolved.as_posix()
+        next_feature_artifact_exists = resolved.exists()
 
 print(f"FEATURE_COUNT={len(features)}")
 print(f"ACTIVE_IN_PROGRESS={in_progress}")
 print(f"NEXT_FEATURE={next_feature}")
+print(f"NEXT_FEATURE_VERIFY_COMMAND={next_feature_command}")
+print(f"NEXT_FEATURE_VERIFY_KIND={next_feature_kind}")
+print(f"NEXT_FEATURE_VERIFY_ARTIFACT={next_feature_artifact}")
+print(f"NEXT_FEATURE_VERIFY_ARTIFACT_EXISTS={int(next_feature_artifact_exists)}")
 PY
 }
 
@@ -208,19 +321,35 @@ summarize_git_state() {
 
 read_feature_summary() {
   local python_cmd="$1"
-  local line key value
+  local key value
 
   while IFS='=' read -r key value; do
+    key="${key//$'\r'/}"
+    value="${value//$'\r'/}"
     case "$key" in
       FEATURE_COUNT) FEATURE_COUNT="$value" ;;
       ACTIVE_IN_PROGRESS) ACTIVE_IN_PROGRESS="$value" ;;
       NEXT_FEATURE) NEXT_FEATURE="$value" ;;
+      NEXT_FEATURE_VERIFY_COMMAND) NEXT_FEATURE_VERIFY_COMMAND="$value" ;;
+      NEXT_FEATURE_VERIFY_KIND) NEXT_FEATURE_VERIFY_KIND="$value" ;;
+      NEXT_FEATURE_VERIFY_ARTIFACT) NEXT_FEATURE_VERIFY_ARTIFACT="$value" ;;
+      NEXT_FEATURE_VERIFY_ARTIFACT_EXISTS) NEXT_FEATURE_VERIFY_ARTIFACT_EXISTS="$value" ;;
     esac
   done < <(validate_feature_list "$python_cmd")
 
   info "Feature count: ${FEATURE_COUNT}"
   info "Active in-progress features: ${ACTIVE_IN_PROGRESS}"
   info "Next unfinished feature: ${NEXT_FEATURE}"
+  info "Next feature verification kind: ${NEXT_FEATURE_VERIFY_KIND}"
+  info "Next feature verification command: ${NEXT_FEATURE_VERIFY_COMMAND}"
+
+  if [ "$NEXT_FEATURE_VERIFY_ARTIFACT" != "none" ] && [ "$NEXT_FEATURE_VERIFY_ARTIFACT" != "unknown" ]; then
+    if [ "$NEXT_FEATURE_VERIFY_ARTIFACT_EXISTS" = "1" ]; then
+      info "Next feature verification artifact present: ${NEXT_FEATURE_VERIFY_ARTIFACT}"
+    else
+      warn "Next feature verification artifact is missing: ${NEXT_FEATURE_VERIFY_ARTIFACT}"
+    fi
+  fi
 }
 
 detect_phase() {
@@ -362,6 +491,8 @@ print_summary() {
   printf '%s\n' "- frontend_dev_command: ${FRONTEND_DEV_COMMAND}"
   printf '%s\n' "- backend_verify_command: ${BACKEND_VERIFY_COMMAND}"
   printf '%s\n' "- frontend_verify_command: ${FRONTEND_VERIFY_COMMAND}"
+  printf '%s\n' "- next_feature_verify_kind: ${NEXT_FEATURE_VERIFY_KIND}"
+  printf '%s\n' "- next_feature_verify_command: ${NEXT_FEATURE_VERIFY_COMMAND}"
   printf '%s\n' "- full_verification: ${FULL_VERIFY_COMMAND}"
 }
 
