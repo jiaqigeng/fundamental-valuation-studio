@@ -115,7 +115,7 @@
       },
       "depends_on": ["dash-001", "dash-002"],
       "status": "passing",
-      "notes": "Implemented with a FastAPI backend-for-frontend route that fetches Yahoo Finance data at runtime and uses fixture mode for deterministic Playwright and pytest coverage. Live non-seeded ticker requests are currently blocked by Yahoo `401 / 401` responses (for example `NVDA`) until cookie/crumb/session handling or a different provider is implemented."
+      "notes": "Implemented with a FastAPI backend-for-frontend route that now uses `yfinance` for runtime market data and fixture mode for deterministic Playwright and pytest coverage."
     },
     {
       "id": "dash-003",
@@ -135,14 +135,14 @@
         ]
       },
       "evidence": {
-        "commit": null,
-        "verification_run": null,
-        "output_log": null,
-        "timestamp": null
+        "commit": "1e056b9",
+        "verification_run": "cd frontend && npx playwright test e2e/dash-003.spec.ts",
+        "output_log": "artifacts/verification/dash-003-playwright.log",
+        "timestamp": "2026-04-18T19:45:34.0325712-04:00"
       },
       "depends_on": ["dash-002b"],
-      "status": "not_started",
-      "notes": "Industry index follows the company's GICS sector or industry group."
+      "status": "passing",
+      "notes": "Implemented with backend-provided market context cards that show the S&P 500 plus a sector-relevant benchmark alongside the company price, with fixture-backed Playwright coverage and a `yfinance` live provider."
     },
     {
       "id": "dash-004",

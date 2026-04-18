@@ -5,8 +5,8 @@
 - Repository root: `c:\Users\gengj\source\repos\FundamentalValuationStudio`
 - Standard startup path: `./init.sh`
 - Standard verification path: `./init.sh` for baseline health plus `feature_list.json -> features[*].verification.command` for feature passing
-- Current highest-priority unfinished feature: `dash-003`
-- Current blocker: Live Yahoo Finance runtime requests for non-seeded tickers are currently failing with `401 / 401` from the upstream endpoints (confirmed with `NVDA`).
+- Current highest-priority unfinished feature: `dash-004`
+- Current blocker: none recorded
 
 ## Session Log
 
@@ -81,3 +81,15 @@
 - Files or artifacts updated: `feature_list.json`, `progress.md`, `session-handoff.md`
 - Known risk or unresolved issue: `dash-002b` remains recorded as passing because fixture-mode verification succeeded, but the live Yahoo path is currently blocked for non-seeded tickers until cookie/crumb/session handling or a different provider is implemented.
 - Next best step: In the next session, investigate the Yahoo auth/session failure before relying further on the live backend data path for non-seeded tickers or building additional dashboard slices on top of it.
+
+### Session 007
+
+- Date: 2026-04-18
+- Goal: Resolve the live market-data blocker with `yfinance`, then implement `dash-003` under the repository harness and record passing evidence.
+- Completed: Replaced the hand-rolled Yahoo HTTP path with a `yfinance`-backed backend client that stores its cache in a repo-local writable directory, extended the workspace schema and fixtures with market-context cards, added S&P 500 plus sector-benchmark rendering on `/dashboard/[ticker]`, created `frontend/e2e/dash-003.spec.ts`, and moved Playwright's test-only ports to `3100/8100` so feature verification does not accidentally reuse stale local servers on `3000/8000`.
+- Verification run: `./init.sh`; `cd backend && .venv/Scripts/python.exe -m pytest -q`; `cd frontend && npm run lint`; `cd frontend && npm run typecheck`; `cd frontend && npx playwright test e2e/dash-003.spec.ts`
+- Evidence captured: `./init.sh` completed successfully after the feature changes; backend `cd backend && .venv/Scripts/python.exe -m pytest -q` passed with `3 passed`; frontend `npm run lint` passed; frontend `npm run typecheck` passed; `cd frontend && npx playwright test e2e/dash-003.spec.ts` passed after rerunning outside the sandbox on fresh test ports; log saved at `artifacts/verification/dash-003-playwright.log`; implementation commit is `1e056b9`. A live validation using `yfinance` also resolved `NVDA` successfully after pointing the library cache into the workspace.
+- Commits: `1e056b9 Implement dash-003 market context workspace`
+- Files or artifacts updated: `backend/app/clients/yahoo_finance.py`, `backend/app/clients/market_data_fixtures.py`, `backend/app/schemas/company_workspace.py`, `backend/tests/test_company_workspace.py`, `backend/requirements.txt`, `frontend/src/app/_lib/company-workspace.ts`, `frontend/src/app/dashboard/[ticker]/page.tsx`, `frontend/src/app/globals.css`, `frontend/e2e/dash-003.spec.ts`, `frontend/playwright.config.ts`, `artifacts/verification/dash-003-playwright.log`, `feature_list.json`, `progress.md`, `session-handoff.md`
+- Known risk or unresolved issue: `yfinance` remains an unofficial Yahoo wrapper and its upstream data shape can still drift, but the repo-local cache configuration removes the prior local SQLite permission issue and the fixture-backed verification path remains deterministic.
+- Next best step: Start `dash-004` and add backend-sourced key financial metrics to the workspace without regressing the `dash-001` through `dash-003` contracts.
