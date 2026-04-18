@@ -41,9 +41,9 @@ It should not be the source of truth for folder ownership or long-lived code str
 
 ## Current implementation notes
 
-- Seed data for the current vertical slice lives in `frontend/src/app/_lib/company-directory.ts`.
-- Treat that module as a stand-in until real data sources land; do not expand it casually without a feature ticket driving the change.
-- `frontend/playwright.config.ts` declares a `webServer` so Playwright can auto-start the app on `127.0.0.1:3000`.
+- The dashboard now prefers backend-backed workspace data through `frontend/src/app/_lib/company-workspace.ts`.
+- `frontend/src/app/_lib/company-directory.ts` remains the seed fallback for `AAPL`, `MSFT`, and `KO`; do not expand it casually without a feature ticket driving the change.
+- `frontend/playwright.config.ts` declares multiple `webServer` entries so Playwright can auto-start both the frontend and backend during e2e runs.
 
 ## Commands
 
@@ -74,4 +74,4 @@ Run from the repo root unless noted.
 
 - Source: project scaffold from Session 001 and `dash-001` implementation in Session 002 (`progress.md`).
 - Applicability: any task that touches files under `frontend/`.
-- Expiry: revisit when Next.js, React, Tailwind, or Playwright majors change, when the app router structure grows beyond `_components` / `_lib`, or when real data sources replace `company-directory.ts`.
+- Expiry: revisit when Next.js, React, Tailwind, or Playwright majors change, when the app router structure grows beyond `_components` / `_lib`, or when the dashboard data path changes substantially again.

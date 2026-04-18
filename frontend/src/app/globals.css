@@ -190,6 +190,12 @@ a {
   gap: 1.25rem;
 }
 
+.quote-snapshot-panel h2 {
+  margin: 0;
+  font-size: clamp(1.8rem, 4vw, 2.3rem);
+  letter-spacing: -0.04em;
+}
+
 .overview-card h2 {
   margin: 0;
   font-size: clamp(1.8rem, 4vw, 2.5rem);
@@ -250,6 +256,44 @@ a {
   gap: 1rem;
 }
 
+.quote-snapshot-header {
+  display: grid;
+  gap: 1rem;
+}
+
+.quote-snapshot-copy {
+  max-width: 30rem;
+}
+
+.quote-detail-grid {
+  display: grid;
+  gap: 1rem;
+  margin: 1.5rem 0 0;
+}
+
+.quote-detail-card {
+  border: 1px solid rgba(20, 33, 61, 0.08);
+  border-radius: 1.4rem;
+  background: rgba(255, 255, 255, 0.56);
+  padding: 1.2rem;
+}
+
+.quote-detail-card dt {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.quote-detail-card dd {
+  margin: 0.5rem 0 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
 .stat-card {
   border: 1px solid rgba(20, 33, 61, 0.08);
   border-radius: 1.4rem;
@@ -302,5 +346,14 @@ a {
   .overview-grid,
   .stats-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .quote-snapshot-header {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 22rem);
+    align-items: start;
+  }
+
+  .quote-detail-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }

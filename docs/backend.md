@@ -37,8 +37,9 @@ It should not be the source of truth for where backend code belongs as the servi
 
 ## Current implementation notes
 
-- `backend/app/main.py` still owns the whole app because only `/health` exists today.
-- `backend/tests/test_health.py` is the only backend test so far and is the current reference style.
+- `backend/app/main.py` now constructs the FastAPI app and includes routers rather than owning every responsibility directly.
+- `backend/app/routers/companies.py`, `app/services/company_workspace.py`, `app/clients/yahoo_finance.py`, and `app/schemas/company_workspace.py` are the reference shape for the first external-data feature.
+- `backend/tests/test_health.py` and `backend/tests/test_company_workspace.py` are the current backend reference tests.
 - SQLAlchemy is installed but not yet used by the running app.
 
 ## Commands

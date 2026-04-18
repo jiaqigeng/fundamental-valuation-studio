@@ -91,6 +91,33 @@
       "notes": "Implemented with seeded company overview data plus a dashboard card that shows identity, sector, summary, share price, and market cap for supported tickers."
     },
     {
+      "id": "dash-002b",
+      "priority": 2.5,
+      "section": "dashboard",
+      "area": "market-data",
+      "title": "Fetch Yahoo Finance quote snapshot for the workspace",
+      "behavior": "The workspace fetches company market data through the backend and shows a Yahoo Finance-style quote snapshot with previous close, open, bid, ask, day's range, 52 week range, volume, average volume, market cap, beta, PE ratio, EPS, earnings date, forward dividend and yield, and ex-dividend date.",
+      "verification": {
+        "command": "cd frontend && npx playwright test e2e/dash-002b.spec.ts",
+        "kind": "e2e",
+        "manual_steps": [
+          "Run ./init.sh, then start the backend and frontend using the dev commands from the startup summary.",
+          "Open the MSFT dashboard workspace.",
+          "Verify the Yahoo Finance snapshot section appears.",
+          "Verify previous close, open, market cap, PE ratio, EPS, earnings date, forward dividend and yield, and ex-dividend date are shown."
+        ]
+      },
+      "evidence": {
+        "commit": null,
+        "verification_run": null,
+        "output_log": null,
+        "timestamp": null
+      },
+      "depends_on": ["dash-001", "dash-002"],
+      "status": "in_progress",
+      "notes": "Uses FastAPI as a backend-for-frontend layer over Yahoo Finance at runtime, with fixture mode for deterministic test coverage."
+    },
+    {
       "id": "dash-003",
       "priority": 3,
       "section": "dashboard",
@@ -113,7 +140,7 @@
         "output_log": null,
         "timestamp": null
       },
-      "depends_on": ["dash-001"],
+      "depends_on": ["dash-002b"],
       "status": "not_started",
       "notes": "Industry index follows the company's GICS sector or industry group."
     },
@@ -140,7 +167,7 @@
         "output_log": null,
         "timestamp": null
       },
-      "depends_on": ["dash-001"],
+      "depends_on": ["dash-002b"],
       "status": "not_started",
       "notes": "ROIC is preferred so DCF work can link growth to value creation."
     },

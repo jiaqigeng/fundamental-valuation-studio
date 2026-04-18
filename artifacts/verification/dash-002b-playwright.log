@@ -1,0 +1,5 @@
+Running 1 test using 1 worker
+
+  ok 1 [chromium] ? e2e\dash-002b.spec.ts:3:5 ? dash-002b shows a Yahoo Finance quote snapshot for the workspace (613ms)
+
+  1 passed (4.2s)

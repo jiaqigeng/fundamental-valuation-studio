@@ -1,9 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import {
-  getCompanyProfile,
-  SUPPORTED_TICKERS,
-} from "@/app/_lib/company-directory";
+import { SUPPORTED_TICKERS } from "@/app/_lib/company-directory";
+import { getCompanyWorkspaceData } from "@/app/_lib/company-workspace";
 
 type DashboardPageProps = {
   params: Promise<{
@@ -15,25 +13,11 @@ export function generateStaticParams() {
   return SUPPORTED_TICKERS.map((ticker) => ({ ticker }));
 }
 
-const priceFormatter = new Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
-  minimumFractionDigits: 2,
-  maximumFractionDigits: 2,
-});
-
-const marketCapFormatter = new Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
-  notation: "compact",
-  maximumFractionDigits: 1,
-});
-
 export default async function DashboardPage({
   params,
 }: DashboardPageProps) {
   const { ticker } = await params;
-  const company = getCompanyProfile(ticker);
+  const company = await getCompanyWorkspaceData(ticker);
 
   if (!company) {
     notFound();
@@ -80,22 +64,47 @@ export default async function DashboardPage({
           <div className="stats-grid">
             <article className="stat-card">
               <p className="stat-label">Share price</p>
-              <p className="stat-value">
-                {priceFormatter.format(company.currentPrice)}
+              <p className="stat-value">{company.currentPriceDisplay}</p>
+              <p className="stat-copy">
+                Current market pricing for the selected ticker.
               </p>
-              <p className="stat-copy">Seeded demo quote for the overview card.</p>
             </article>
 
             <article className="stat-card">
               <p className="stat-label">Market cap</p>
-              <p className="stat-value">
-                {marketCapFormatter.format(company.marketCap)}
-              </p>
+              <p className="stat-value">{company.marketCapDisplay}</p>
               <p className="stat-copy">Compact market value for quick context.</p>
             </article>
           </div>
         </section>
       </div>
+
+      {company.quoteDetails.length > 0 ? (
+        <section
+          className="workspace-panel quote-snapshot-panel"
+          aria-label="Yahoo Finance snapshot"
+        >
+          <div className="quote-snapshot-header">
+            <div>
+              <p className="panel-label">Yahoo Finance Snapshot</p>
+              <h2>Live market details</h2>
+            </div>
+            <p className="panel-copy quote-snapshot-copy">
+              Previous close, trading range, valuation, and event dates for the
+              selected ticker.
+            </p>
+          </div>
+
+          <dl className="quote-detail-grid">
+            {company.quoteDetails.map((detail) => (
+              <div className="quote-detail-card" key={detail.label}>
+                <dt>{detail.label}</dt>
+                <dd>{detail.value}</dd>
+              </div>
+            ))}
+          </dl>
+        </section>
+      ) : null}
 
       <Link className="back-link" href="/">
         Search another ticker
