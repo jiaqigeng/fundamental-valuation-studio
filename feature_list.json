@@ -60,7 +60,7 @@
         "timestamp": null
       },
       "depends_on": [],
-      "status": "not_started",
+      "status": "in_progress",
       "notes": "Foundation feature. All other dashboard, valuation, and AI features depend on the workspace route existing."
     },
     {
