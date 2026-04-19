@@ -162,14 +162,14 @@
         ]
       },
       "evidence": {
-        "commit": null,
-        "verification_run": null,
-        "output_log": null,
-        "timestamp": null
+        "commit": "25a1b9c",
+        "verification_run": "cd frontend && npx playwright test e2e/dash-004.spec.ts",
+        "output_log": "artifacts/verification/dash-004-playwright.log",
+        "timestamp": "2026-04-19T11:04:34.5299654-04:00"
       },
       "depends_on": ["dash-002b"],
-      "status": "not_started",
-      "notes": "ROIC is preferred so DCF work can link growth to value creation."
+      "status": "passing",
+      "notes": "Implemented as a dedicated key-financial-metrics accordion that flows through the backend workspace payload and shows revenue, EPS, free cash flow, gross margin, operating margin, and ROIC when Yahoo exposes it or ROE otherwise."
     },
     {
       "id": "dash-005",

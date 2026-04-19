@@ -5,8 +5,8 @@
 - Repository root: `c:\Users\gengj\source\repos\FundamentalValuationStudio`
 - Standard startup path: `./init.sh`
 - Standard verification path: `./init.sh` for baseline health plus `feature_list.json -> features[*].verification.command` for feature passing
-- Current highest-priority unfinished feature: `dash-004`
-- Current blocker: none recorded. The latest requested Yahoo snapshot field refinement is verified, including `Trailing P/E (TTM)`, `Forward Dividend & Yield`, a true `Trailing Dividend (TTM)`, `Avg. Volume (3M)`, debt-to-equity with a `%` suffix, and only `Ex-Dividend Date`, so the roadmap can return to `dash-004` unless the user asks for more narrow dashboard refinements first.
+- Current highest-priority unfinished feature: `dash-005`
+- Current blocker: none recorded. `dash-004` is now verified with a dedicated key-financial-metrics slice that shows revenue, EPS, free cash flow, gross margin, operating margin, and a return metric that prefers ROIC when Yahoo exposes it and otherwise falls back to ROE.
 
 ## Session Log
 
@@ -297,3 +297,15 @@
 - Files or artifacts updated: `backend/app/clients/yahoo_finance.py`, `backend/app/clients/market_data_fixtures.py`, `backend/tests/test_company_workspace.py`, `frontend/e2e/dash-002b.spec.ts`, `feature_list.json`, `progress.md`, `session-handoff.md`
 - Known risk or unresolved issue: The live snapshot still depends on `yfinance` field availability and naming; when Yahoo omits a field, the workspace now hides it instead of showing a placeholder, so the live card count can vary by ticker.
 - Next best step: Resume roadmap work at `dash-004` and add the dedicated key-financial-metrics slice without regressing the Yahoo snapshot contract.
+
+### Session 025
+
+- Date: 2026-04-19
+- Goal: Implement `dash-004` under the repository harness and record passing evidence.
+- Completed: Added a dedicated key-financial-metrics slice to the backend workspace schema and live `yfinance` client, seeded deterministic fixture values for `AAPL`, `MSFT`, and `KO`, exposed the new payload through the frontend workspace loader, rendered a new dashboard accordion for the metrics, and created `frontend/e2e/dash-004.spec.ts` as the feature gate. The live builder now shows revenue, EPS, free cash flow, gross margin, operating margin, and a return metric that prefers ROIC when Yahoo exposes it and otherwise falls back to ROE.
+- Verification run: `./init.sh`; `cd backend && .venv/Scripts/python.exe -m pytest tests/test_company_workspace.py -q`; `cd frontend && npm run lint`; `cd frontend && npm run typecheck`; `cd frontend && npx playwright test e2e/dash-004.spec.ts`
+- Evidence captured: `./init.sh` completed successfully both before and after the feature work; backend `cd backend && .venv/Scripts/python.exe -m pytest tests/test_company_workspace.py -q` passed with `9 passed` before the final baseline rerun and `10 passed` after the full post-change `./init.sh`; frontend `npm run lint` passed; frontend `npm run typecheck` passed; `cd frontend && npx playwright test e2e/dash-004.spec.ts` passed after rerunning Playwright outside the sandbox to avoid the local `spawn EPERM`; log saved at `artifacts/verification/dash-004-playwright.log`; implementation commit is `25a1b9c`.
+- Commits: `25a1b9c Implement dash-004 key financial metrics slice`
+- Files or artifacts updated: `backend/app/schemas/company_workspace.py`, `backend/app/clients/yahoo_finance.py`, `backend/app/clients/market_data_fixtures.py`, `backend/tests/test_company_workspace.py`, `frontend/src/app/_lib/company-workspace.ts`, `frontend/src/app/dashboard/[ticker]/page.tsx`, `frontend/src/app/globals.css`, `frontend/e2e/dash-004.spec.ts`, `artifacts/verification/dash-004-playwright.log`, `feature_list.json`, `progress.md`, `session-handoff.md`
+- Known risk or unresolved issue: The new section still depends on `yfinance` summary-field availability for live tickers; when Yahoo omits one of these metrics, the dashboard shows the metrics that are available rather than manufacturing placeholder values.
+- Next best step: Start `dash-005` and build the revenue-to-net-income waterfall chart on top of the now-verified key-metrics workspace data without regressing `dash-001` through `dash-004`.
