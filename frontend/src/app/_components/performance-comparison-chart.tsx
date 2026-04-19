@@ -137,13 +137,15 @@ export function PerformanceComparisonChart({
 
         {xAxisLabels?.map((point) => {
           const index = series[0].points.findIndex((entry) => entry.label === point.label);
+          const isFirst = index === 0;
+          const isLast = index === series[0].points.length - 1;
           return (
             <text
               key={point.label}
               x={xForIndex(index)}
-              y={CHART_HEIGHT - 10}
+              y={CHART_HEIGHT - 14}
               className="comparison-chart-axis-label"
-              textAnchor="middle"
+              textAnchor={isFirst ? "start" : isLast ? "end" : "middle"}
             >
               {point.label}
             </text>
