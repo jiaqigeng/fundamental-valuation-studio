@@ -35,8 +35,8 @@ def test_company_workspace_fixture_response(monkeypatch) -> None:
         {"label": "Return on Equity (ROE)", "value": "33.74%"},
         {"label": "Return on Assets (ROA)", "value": "14.95%"},
         {"label": "Forward Dividend & Yield", "value": "3.64 (0.86%)"},
+        {"label": "Trailing Dividend", "value": "3.32 (0.79%)"},
         {"label": "Avg. Volume", "value": "32,964,050"},
-        {"label": "Trailing Dividend", "value": "3.32"},
         {"label": "Earnings Date", "value": "Apr 29, 2026"},
         {"label": "Ex-Dividend Date", "value": "Mar 9, 2026"},
     ]
@@ -90,8 +90,9 @@ def test_build_quote_details_skips_missing_metrics() -> None:
             "returnOnEquity": 0.1876,
             "dividendRate": 1.04,
             "dividendYield": 0.38,
-            "averageVolume": 57_391_204,
             "trailingAnnualDividendRate": 0.96,
+            "trailingAnnualDividendYield": 0.45,
+            "averageVolume": 57_391_204,
             "earningsTimestampStart": 1_777_687_200,
         },
         current_price=150.0,
@@ -103,8 +104,8 @@ def test_build_quote_details_skips_missing_metrics() -> None:
         {"label": "Beta (5Y Monthly)", "value": "1.13"},
         {"label": "Return on Equity (ROE)", "value": "18.76%"},
         {"label": "Forward Dividend & Yield", "value": "1.04 (0.38%)"},
+        {"label": "Trailing Dividend", "value": "0.96 (0.45%)"},
         {"label": "Avg. Volume", "value": "57,391,204"},
-        {"label": "Trailing Dividend", "value": "0.96"},
         {"label": "Earnings Date", "value": "May 2, 2026"},
     ]
 

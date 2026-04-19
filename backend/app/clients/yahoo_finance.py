@@ -312,14 +312,15 @@ def _build_quote_details(
             ),
         ),
         _optional_quote_detail(
-            "Avg. Volume",
-            _format_optional_integer(_first_number(info.get("averageVolume"))),
+            "Trailing Dividend",
+            _format_optional_trailing_dividend(
+                _first_number(info.get("trailingAnnualDividendRate")),
+                _first_number(info.get("trailingAnnualDividendYield")),
+            ),
         ),
         _optional_quote_detail(
-            "Trailing Dividend",
-            _format_optional_number(
-                _first_number(info.get("trailingAnnualDividendRate"))
-            ),
+            "Avg. Volume",
+            _format_optional_integer(_first_number(info.get("averageVolume"))),
         ),
         _optional_quote_detail(
             "Earnings Date",
@@ -745,6 +746,19 @@ def _format_optional_forward_dividend(
     if formatted == "N/A":
         return None
     return formatted
+
+
+def _format_optional_trailing_dividend(
+    dividend_rate: float | int | None,
+    dividend_yield: float | int | None,
+) -> str | None:
+    if dividend_rate is None or dividend_yield is None:
+        return None
+
+    yield_percent = Decimal(str(float(dividend_yield))).quantize(
+        Decimal("0.01"), rounding=ROUND_HALF_UP
+    )
+    return f"{_format_number(dividend_rate)} ({yield_percent}%)"
 
 
 def _looks_like_missing_ticker(info: dict) -> bool:
