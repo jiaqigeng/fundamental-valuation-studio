@@ -424,12 +424,6 @@ a {
   stroke-width: 1;
 }
 
-.waterfall-chart-baseline {
-  stroke: rgba(122, 106, 88, 0.34);
-  stroke-width: 2.5;
-  stroke-dasharray: 7 4;
-}
-
 .waterfall-chart-connector {
   stroke: rgba(33, 64, 154, 0.28);
   stroke-width: 1.5;

@@ -55,12 +55,10 @@ export function IncomeStatementWaterfallChart({
   const yForValue = (value: number) =>
     CHART_PADDING.top + ((paddedMax - value) / paddedRange) * plotHeight;
 
-  const yAxisLabels = Array.from({ length: 5 }, (_, index) => {
-    const value = paddedMax - (paddedRange * index) / 4;
-    return {
-      value,
-      y: yForValue(value),
-    };
+  const yAxisLabels = buildYAxisLabels({
+    paddedMax,
+    paddedMin,
+    yForValue,
   });
 
   return (
@@ -88,13 +86,15 @@ export function IncomeStatementWaterfallChart({
 
         {yAxisLabels.map((label) => (
           <g key={`${label.value}`}>
-            <line
-              x1={CHART_PADDING.left}
-              x2={CHART_WIDTH - CHART_PADDING.right}
-              y1={label.y}
-              y2={label.y}
-              className="waterfall-chart-gridline"
-            />
+            {isApproximatelyZero(label.value) ? null : (
+              <line
+                x1={CHART_PADDING.left}
+                x2={CHART_WIDTH - CHART_PADDING.right}
+                y1={label.y}
+                y2={label.y}
+                className="waterfall-chart-gridline"
+              />
+            )}
             <text
               x={CHART_PADDING.left - 12}
               y={label.y + 4}
@@ -105,14 +105,6 @@ export function IncomeStatementWaterfallChart({
             </text>
           </g>
         ))}
-
-        <line
-          x1={CHART_PADDING.left}
-          x2={CHART_WIDTH - CHART_PADDING.right}
-          y1={yForValue(0)}
-          y2={yForValue(0)}
-          className="waterfall-chart-baseline"
-        />
 
         {bars.slice(0, -1).map((bar, index) => {
           const nextBar = bars[index + 1];
@@ -244,6 +236,25 @@ function getConnectorEntryValue(bar: WaterfallBar) {
 
 function getConnectorExitValue(bar: WaterfallBar) {
   return bar.end;
+}
+
+function buildYAxisLabels({
+  paddedMax,
+  paddedMin,
+  yForValue,
+}: {
+  readonly paddedMax: number;
+  readonly paddedMin: number;
+  readonly yForValue: (value: number) => number;
+}) {
+  return [paddedMax, paddedMax / 2, 0, paddedMin / 2, paddedMin].map((value) => ({
+    value,
+    y: yForValue(value),
+  }));
+}
+
+function isApproximatelyZero(value: number) {
+  return Math.abs(value) < 0.0001;
 }
 
 function getAxisLabelLines(label: string): readonly string[] {
