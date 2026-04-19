@@ -430,6 +430,12 @@ a {
   stroke-dasharray: 4 4;
 }
 
+.waterfall-chart-baseline {
+  stroke: rgba(33, 64, 154, 0.28);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 4;
+}
+
 .waterfall-chart-axis-label {
   fill: var(--muted);
   font-family: var(--font-fira-code), monospace;

@@ -84,17 +84,23 @@ export function IncomeStatementWaterfallChart({
           className="waterfall-chart-frame"
         />
 
+        <line
+          x1={CHART_PADDING.left}
+          x2={CHART_WIDTH - CHART_PADDING.right}
+          y1={yForValue(0)}
+          y2={yForValue(0)}
+          className="waterfall-chart-baseline"
+        />
+
         {yAxisLabels.map((label) => (
           <g key={`${label.value}`}>
-            {isApproximatelyZero(label.value) ? null : (
-              <line
-                x1={CHART_PADDING.left}
-                x2={CHART_WIDTH - CHART_PADDING.right}
-                y1={label.y}
-                y2={label.y}
-                className="waterfall-chart-gridline"
-              />
-            )}
+            <line
+              x1={CHART_PADDING.left}
+              x2={CHART_WIDTH - CHART_PADDING.right}
+              y1={label.y}
+              y2={label.y}
+              className="waterfall-chart-gridline"
+            />
             <text
               x={CHART_PADDING.left - 12}
               y={label.y + 4}
@@ -255,18 +261,14 @@ function buildYAxisLabels({
 
   const values = shouldCompressSmallerSide
     ? positiveSpan >= negativeSpan
-      ? [paddedMax, paddedMax / 2, 0, paddedMin]
-      : [paddedMax, 0, paddedMin / 2, paddedMin]
-    : [paddedMax, paddedMax / 2, 0, paddedMin / 2, paddedMin];
+      ? [paddedMax, paddedMax / 2, paddedMin]
+      : [paddedMax, paddedMin / 2, paddedMin]
+    : [paddedMax, paddedMax / 2, paddedMin / 2, paddedMin];
 
   return values.map((value) => ({
     value,
     y: yForValue(value),
   }));
-}
-
-function isApproximatelyZero(value: number) {
-  return Math.abs(value) < 0.0001;
 }
 
 function getAxisLabelLines(label: string): readonly string[] {
