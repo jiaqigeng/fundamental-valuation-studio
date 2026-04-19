@@ -14,9 +14,12 @@ from app.schemas.company_workspace import RevenueSegmentBreakdown
 
 FMP_API_KEY_ENV = "FVS_FMP_API_KEY"
 FMP_BASE_URL = "https://financialmodelingprep.com"
-FMP_SEGMENT_ENDPOINT = "/stable/revenue-product-segmentation"
+FMP_PRODUCT_SEGMENT_ENDPOINT = "/stable/revenue-product-segmentation"
+FMP_GEOGRAPHIC_SEGMENT_ENDPOINT = "/stable/revenue-geographic-segmentation"
 FMP_SEGMENT_PERIOD = "annual"
 FMP_MAX_REVENUE_DRIFT = 0.15
+TRIVIAL_BREAKDOWN_MAX_SEGMENTS = 1
+DOMINANT_SEGMENT_SHARE_THRESHOLD = 0.9
 AGGREGATE_SEGMENT_LABELS = {
     "product",
     "products",
@@ -46,18 +49,44 @@ class FinancialModelingPrepClient:
         if not self._api_key:
             return None
 
+        with httpx.Client(base_url=FMP_BASE_URL, timeout=self._timeout) as client:
+            product_breakdown = self._fetch_breakdown_for_endpoint(
+                client,
+                endpoint=FMP_PRODUCT_SEGMENT_ENDPOINT,
+                ticker=ticker,
+                target_revenue=target_revenue,
+            )
+            geographic_breakdown = self._fetch_breakdown_for_endpoint(
+                client,
+                endpoint=FMP_GEOGRAPHIC_SEGMENT_ENDPOINT,
+                ticker=ticker,
+                target_revenue=target_revenue,
+            )
+
+        return _choose_preferred_breakdown(
+            product_breakdown=product_breakdown,
+            geographic_breakdown=geographic_breakdown,
+        )
+
+    def _fetch_breakdown_for_endpoint(
+        self,
+        client: httpx.Client,
+        *,
+        endpoint: str,
+        ticker: str,
+        target_revenue: float | int | None,
+    ) -> RevenueSegmentBreakdown | None:
         try:
-            with httpx.Client(base_url=FMP_BASE_URL, timeout=self._timeout) as client:
-                response = client.get(
-                    FMP_SEGMENT_ENDPOINT,
-                    params={
-                        "symbol": ticker,
-                        "period": FMP_SEGMENT_PERIOD,
-                        "apikey": self._api_key,
-                    },
-                )
-                response.raise_for_status()
-                payload = response.json()
+            response = client.get(
+                endpoint,
+                params={
+                    "symbol": ticker,
+                    "period": FMP_SEGMENT_PERIOD,
+                    "apikey": self._api_key,
+                },
+            )
+            response.raise_for_status()
+            payload = response.json()
         except (httpx.HTTPError, ValueError):
             return None
 
@@ -133,6 +162,46 @@ def _build_revenue_segment_breakdown_from_fmp_payload(
             )
         ],
     )
+
+
+def _choose_preferred_breakdown(
+    *,
+    product_breakdown: RevenueSegmentBreakdown | None,
+    geographic_breakdown: RevenueSegmentBreakdown | None,
+) -> RevenueSegmentBreakdown | None:
+    if product_breakdown is None:
+        return geographic_breakdown
+    if geographic_breakdown is None:
+        return product_breakdown
+
+    if _is_trivial_breakdown(product_breakdown) and _is_richer_breakdown(
+        preferred=geographic_breakdown,
+        compared_to=product_breakdown,
+    ):
+        return geographic_breakdown
+
+    return product_breakdown
+
+
+def _is_trivial_breakdown(breakdown: RevenueSegmentBreakdown) -> bool:
+    if len(breakdown.segments) <= TRIVIAL_BREAKDOWN_MAX_SEGMENTS:
+        return True
+
+    dominant_share = max((segment.share_of_total for segment in breakdown.segments), default=0.0)
+    return dominant_share >= DOMINANT_SEGMENT_SHARE_THRESHOLD
+
+
+def _is_richer_breakdown(
+    *,
+    preferred: RevenueSegmentBreakdown,
+    compared_to: RevenueSegmentBreakdown,
+) -> bool:
+    if len(preferred.segments) > len(compared_to.segments):
+        return True
+
+    preferred_top_share = max((segment.share_of_total for segment in preferred.segments), default=1.0)
+    compared_top_share = max((segment.share_of_total for segment in compared_to.segments), default=1.0)
+    return preferred_top_share < compared_top_share
 
 
 def _select_best_entry(

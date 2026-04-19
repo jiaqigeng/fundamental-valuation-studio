@@ -3,6 +3,7 @@ from datetime import date
 from fastapi.testclient import TestClient
 
 from app.clients.financial_modeling_prep import _build_revenue_segment_breakdown_from_fmp_payload
+from app.clients.financial_modeling_prep import _choose_preferred_breakdown
 from app.clients.market_data_fixtures import FIXTURE_WORKSPACES
 from app.clients.yahoo_finance import _build_income_statement_waterfall_from_values
 from app.clients.yahoo_finance import _build_quote_details
@@ -276,6 +277,83 @@ def test_build_revenue_segment_breakdown_from_fmp_payload_parses_product_segment
         "iPad",
     ]
     assert sum(segment.value for segment in breakdown.segments) == breakdown.total_revenue
+
+
+def test_build_revenue_segment_breakdown_from_fmp_payload_parses_geographic_segments() -> None:
+    payload = [
+        {
+            "symbol": "NFLX",
+            "fiscalYear": 2025,
+            "period": "FY",
+            "reportedCurrency": "USD",
+            "date": "2025-12-31",
+            "data": {
+                "United States and Canada (UCAN)": 19_957_152_000,
+                "Europe, Middle East, and Africa (EMEA)": 14_514_646_000,
+                "Latin America (LATAM)": 5_357_521_000,
+                "Asia-Pacific (APAC)": 5_353_717_000,
+            },
+        }
+    ]
+
+    breakdown = _build_revenue_segment_breakdown_from_fmp_payload(
+        payload,
+        target_revenue=45_183_036_000,
+    )
+
+    assert breakdown is not None
+    assert breakdown.total_revenue == 45_183_036_000.0
+    assert [segment.label for segment in breakdown.segments] == [
+        "United States and Canada (UCAN)",
+        "Europe, Middle East, and Africa (EMEA)",
+        "Latin America (LATAM)",
+        "Asia-Pacific (APAC)",
+    ]
+
+
+def test_choose_preferred_breakdown_uses_geography_when_product_is_trivial() -> None:
+    product_breakdown = _build_revenue_segment_breakdown_from_fmp_payload(
+        [
+            {
+                "symbol": "NFLX",
+                "date": "2025-12-31",
+                "data": {
+                    "Streaming": 45_183_036_000,
+                },
+            }
+        ],
+        target_revenue=45_183_036_000,
+    )
+    geographic_breakdown = _build_revenue_segment_breakdown_from_fmp_payload(
+        [
+            {
+                "symbol": "NFLX",
+                "date": "2025-12-31",
+                "data": {
+                    "United States and Canada (UCAN)": 19_957_152_000,
+                    "Europe, Middle East, and Africa (EMEA)": 14_514_646_000,
+                    "Latin America (LATAM)": 5_357_521_000,
+                    "Asia-Pacific (APAC)": 5_353_717_000,
+                },
+            }
+        ],
+        target_revenue=45_183_036_000,
+    )
+
+    assert product_breakdown is not None
+    assert geographic_breakdown is not None
+    selected = _choose_preferred_breakdown(
+        product_breakdown=product_breakdown,
+        geographic_breakdown=geographic_breakdown,
+    )
+
+    assert selected is not None
+    assert [segment.label for segment in selected.segments] == [
+        "United States and Canada (UCAN)",
+        "Europe, Middle East, and Africa (EMEA)",
+        "Latin America (LATAM)",
+        "Asia-Pacific (APAC)",
+    ]
 
 
 def test_build_quote_details_skips_missing_metrics() -> None:
