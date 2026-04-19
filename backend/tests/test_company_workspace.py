@@ -6,6 +6,7 @@ from app.clients.yahoo_finance import _build_quote_details
 from app.clients.yahoo_finance import _build_normalized_points
 from app.clients.yahoo_finance import _select_anchor_value
 from app.clients.yahoo_finance import _subtract_years
+from app.clients.yahoo_finance import _sum_ttm_dividends
 from app.main import app
 
 
@@ -35,7 +36,7 @@ def test_company_workspace_fixture_response(monkeypatch) -> None:
         {"label": "Return on Equity (ROE)", "value": "33.74%"},
         {"label": "Return on Assets (ROA)", "value": "14.95%"},
         {"label": "Forward Dividend & Yield", "value": "3.64 (0.86%)"},
-        {"label": "Trailing Dividend", "value": "3.32 (0.79%)"},
+        {"label": "Trailing Dividend", "value": "3.32"},
         {"label": "Avg. Volume", "value": "32,964,050"},
         {"label": "Earnings Date", "value": "Apr 29, 2026"},
         {"label": "Ex-Dividend Date", "value": "Mar 9, 2026"},
@@ -90,12 +91,11 @@ def test_build_quote_details_skips_missing_metrics() -> None:
             "returnOnEquity": 0.1876,
             "dividendRate": 1.04,
             "dividendYield": 0.38,
-            "trailingAnnualDividendRate": 0.96,
-            "trailingAnnualDividendYield": 0.45,
             "averageVolume": 57_391_204,
             "earningsTimestampStart": 1_777_687_200,
         },
         current_price=150.0,
+        trailing_ttm_dividend=0.96,
     )
 
     assert [detail.model_dump() for detail in details] == [
@@ -104,10 +104,22 @@ def test_build_quote_details_skips_missing_metrics() -> None:
         {"label": "Beta (5Y Monthly)", "value": "1.13"},
         {"label": "Return on Equity (ROE)", "value": "18.76%"},
         {"label": "Forward Dividend & Yield", "value": "1.04 (0.38%)"},
-        {"label": "Trailing Dividend", "value": "0.96 (0.45%)"},
+        {"label": "Trailing Dividend", "value": "0.96"},
         {"label": "Avg. Volume", "value": "57,391,204"},
         {"label": "Earnings Date", "value": "May 2, 2026"},
     ]
+
+
+def test_sum_ttm_dividends_uses_only_last_365_days() -> None:
+    dividends = {
+        date(2024, 4, 18): 0.75,
+        date(2024, 7, 18): 0.80,
+        date(2024, 10, 17): 0.80,
+        date(2025, 1, 16): 0.80,
+        date(2025, 4, 17): 0.82,
+    }
+
+    assert _sum_ttm_dividends(dividends, as_of=date(2025, 4, 18)) == 3.22
 
 
 def test_build_normalized_points_ends_series_at_current_quote() -> None:

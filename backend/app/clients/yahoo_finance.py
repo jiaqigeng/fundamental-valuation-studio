@@ -84,6 +84,7 @@ class YahooFinanceClient:
     def fetch_company_workspace_snapshot(self, ticker: str) -> CompanyWorkspaceSnapshot:
         payload = self._fetch_payload(ticker)
         info = payload.company_info
+        trailing_ttm_dividend = _fetch_ttm_dividend(ticker)
 
         name = (
             _string_field(info, "longName")
@@ -116,7 +117,11 @@ class YahooFinanceClient:
             ),
             current_price_display=_format_currency(current_price),
             market_cap_display=_format_compact_currency(market_cap),
-            quote_details=_build_quote_details(info, current_price=current_price),
+            quote_details=_build_quote_details(
+                info,
+                current_price=current_price,
+                trailing_ttm_dividend=trailing_ttm_dividend,
+            ),
             market_contexts=payload.market_contexts,
             performance_chart_ranges=payload.performance_chart_ranges,
         )
@@ -251,6 +256,7 @@ def _build_quote_details(
     info: dict,
     *,
     current_price: float | int | None,
+    trailing_ttm_dividend: float | None = None,
 ) -> list[QuoteDetail]:
     trailing_pe = _resolve_ratio(
         direct_value=_first_number(info.get("trailingPE")),
@@ -313,10 +319,7 @@ def _build_quote_details(
         ),
         _optional_quote_detail(
             "Trailing Dividend",
-            _format_optional_trailing_dividend(
-                _first_number(info.get("trailingAnnualDividendRate")),
-                _first_number(info.get("trailingAnnualDividendYield")),
-            ),
+            _format_optional_number(trailing_ttm_dividend),
         ),
         _optional_quote_detail(
             "Avg. Volume",
@@ -501,6 +504,44 @@ def _fetch_history_points(
         )
 
     return history_points
+
+
+def _fetch_ttm_dividend(ticker: str) -> float | None:
+    try:
+        dividends = yf.Ticker(ticker).dividends
+    except Exception:
+        return None
+
+    if dividends is None:
+        return None
+
+    dividend_points: dict[date, float] = {}
+    for timestamp, dividend_value in dividends.items():
+        if _is_number(dividend_value):
+            dividend_points[timestamp.to_pydatetime().date()] = float(dividend_value)
+
+    return _sum_ttm_dividends(dividend_points, as_of=datetime.now(UTC).date())
+
+
+def _sum_ttm_dividends(
+    dividend_points: dict[date, float],
+    *,
+    as_of: date,
+) -> float | None:
+    if not dividend_points:
+        return None
+
+    window_start = as_of - timedelta(days=365)
+    total = sum(
+        dividend
+        for point_date, dividend in dividend_points.items()
+        if window_start < point_date <= as_of
+    )
+    if total <= 0:
+        return None
+    return float(
+        Decimal(str(total)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    )
 
 
 def _fetch_anchor_value(symbol: str, target_date: date) -> float:
@@ -746,19 +787,6 @@ def _format_optional_forward_dividend(
     if formatted == "N/A":
         return None
     return formatted
-
-
-def _format_optional_trailing_dividend(
-    dividend_rate: float | int | None,
-    dividend_yield: float | int | None,
-) -> str | None:
-    if dividend_rate is None or dividend_yield is None:
-        return None
-
-    yield_percent = Decimal(str(float(dividend_yield))).quantize(
-        Decimal("0.01"), rounding=ROUND_HALF_UP
-    )
-    return f"{_format_number(dividend_rate)} ({yield_percent}%)"
 
 
 def _looks_like_missing_ticker(info: dict) -> bool:
