@@ -163,14 +163,14 @@
         ]
       },
       "evidence": {
-        "commit": "cacbf3a",
+        "commit": "5a270e2",
         "verification_run": "cd frontend && npx playwright test e2e/dash-004.spec.ts",
         "output_log": "artifacts/verification/dash-004-playwright.log",
-        "timestamp": "2026-04-19T14:05:58.7918508-04:00"
+        "timestamp": "2026-04-19T13:09:57.3158002-04:00"
       },
       "depends_on": ["dash-002b"],
       "status": "passing",
-      "notes": "Implemented with a backend-for-frontend income-statement waterfall payload plus a server-rendered dashboard chart. The current statement walk now surfaces `Revenue`, `Cost of Revenue`, `Gross Profit`, `Operating Expenses`, `Operating Profit`, `Other Income / Cost`, `Taxes`, and `Net Profits` for supported fixture tickers. The chart wraps longer x-axis labels onto two lines so the statement labels remain readable without colliding, the dotted connector bridges every adjacent bar pair through each bar's true entry and exit edge, and negative total bars now render in a loss tone rather than the positive-total color. Fixture mode now includes a dedicated `LOSS` workspace so the negative-net-profit path is covered deterministically. The live `yfinance` path derives the same bridge from the latest available income-statement rows and uses signed other-income/cost plus taxes to land exactly on net profits."
+      "notes": "Implemented with a backend-for-frontend income-statement waterfall payload plus a server-rendered dashboard chart. The current statement walk now surfaces `Revenue`, `Cost of Revenue`, `Gross Profit`, `Operating Expenses`, `Operating Profit`, `Other Income / Cost`, `Taxes`, and `Net Profits` for supported fixture tickers. The chart wraps longer x-axis labels onto two lines so the statement labels remain readable without colliding, and the dotted connector now bridges every adjacent bar pair through each bar's true entry and exit edge. The live `yfinance` path derives the same bridge from the latest available income-statement rows and uses signed other-income/cost plus taxes to land exactly on net profits."
     },
     {
       "id": "dash-005",

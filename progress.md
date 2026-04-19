@@ -6,7 +6,7 @@
 - Standard startup path: `./init.sh`
 - Standard verification path: `./init.sh` for baseline health plus `feature_list.json -> features[*].verification.command` for feature passing
 - Current highest-priority unfinished feature: `dash-005`
-- Current blocker: none recorded. `dash-005` remains the next roadmap item, and the latest user-requested `dash-004` exception refinement now renders negative total bars correctly when operating profit or net profit falls below zero.
+- Current blocker: none recorded. `dash-005` remains the next roadmap item, and a user-requested `dash-004` exception refinement now keeps the dotted waterfall connector attached to each bar's true entry and exit edge.
 
 ## Session Log
 
@@ -367,17 +367,5 @@
 - Evidence captured: `./init.sh` completed successfully before the refinement; frontend `npm run lint` passed; frontend `npm run typecheck` passed; the initial Playwright attempt hit the local sandbox `spawn EPERM`, then `cd frontend && npx playwright test e2e/dash-004.spec.ts` passed when rerun outside the sandbox; log refreshed at `artifacts/verification/dash-004-playwright.log`; implementation commit is `5a270e2`.
 - Commits: `5a270e2 Connect dash-004 waterfall bars`
 - Files or artifacts updated: `frontend/src/app/_components/income-statement-waterfall-chart.tsx`, `frontend/e2e/dash-004.spec.ts`, `artifacts/verification/dash-004-playwright.log`, `feature_list.json`, `progress.md`, `session-handoff.md`
-- Known risk or unresolved issue: The live waterfall still depends on `yfinance` income-statement row availability and naming. When Yahoo omits gross-profit, operating-income, pretax, or tax rows, the builder fills the missing bridge points with derived values or zeros, so live subtotals may be less precise than the deterministic fixture path.
-- Next best step: Resume the roadmap at `dash-005` unless the user asks for another narrow `dash-004` refinement.
-
-### Session 031
-
-- Date: 2026-04-19
-- Goal: Fix the `dash-004` waterfall so negative net profit and other negative total bars render correctly.
-- Completed: Restored sign-aware styling for waterfall total bars and step values so negative totals now render in a loss color instead of the same tone as positive totals, added a dedicated fixture-only `LOSS` workspace with negative operating profit and negative net profits, and extended both backend and Playwright coverage to verify that loss-making waterfall path. Added data attributes on the SVG bars so the e2e contract can assert the negative total styling directly.
-- Verification run: `./init.sh`; `cd frontend && npx playwright test e2e/dash-004.spec.ts`
-- Evidence captured: `./init.sh` completed successfully after the refinement and ran backend pytest (`10 passed`), frontend lint, and frontend typecheck; the initial Playwright attempt hit the local sandbox `spawn EPERM`, then `cd frontend && npx playwright test e2e/dash-004.spec.ts` passed when rerun outside the sandbox; log refreshed at `artifacts/verification/dash-004-playwright.log`; implementation commit is `cacbf3a`.
-- Commits: `cacbf3a Handle dash-004 negative profit totals`
-- Files or artifacts updated: `frontend/src/app/_components/income-statement-waterfall-chart.tsx`, `frontend/src/app/globals.css`, `frontend/e2e/dash-004.spec.ts`, `backend/app/clients/market_data_fixtures.py`, `backend/tests/test_company_workspace.py`, `artifacts/verification/dash-004-playwright.log`, `feature_list.json`, `progress.md`, `session-handoff.md`
 - Known risk or unresolved issue: The live waterfall still depends on `yfinance` income-statement row availability and naming. When Yahoo omits gross-profit, operating-income, pretax, or tax rows, the builder fills the missing bridge points with derived values or zeros, so live subtotals may be less precise than the deterministic fixture path.
 - Next best step: Resume the roadmap at `dash-005` unless the user asks for another narrow `dash-004` refinement.
