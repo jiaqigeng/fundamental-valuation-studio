@@ -190,14 +190,14 @@
         ]
       },
       "evidence": {
-        "commit": "facd7f4",
+        "commit": "b150978",
         "verification_run": "cd frontend && npx playwright test e2e/dash-005.spec.ts",
         "output_log": "artifacts/verification/dash-005-playwright.log",
-        "timestamp": "2026-04-19T18:45:31.0494223-04:00"
+        "timestamp": "2026-04-19T18:56:58.9718706-04:00"
       },
       "depends_on": ["dash-002b"],
       "status": "passing",
-      "notes": "Implemented with a backend-backed `revenue_segment_breakdown` payload and a dashboard segment-mix section that currently shows fixture-backed product or reporting-segment revenue for `AAPL`, `MSFT`, and `KO`. The section reconciles the reported segment rows to total revenue, and the single-segment `KO` case renders as a full-width 100% bucket. The live Yahoo Finance path currently falls back gracefully by omitting this section when no segment detail is available."
+      "notes": "Implemented with a backend-backed `revenue_segment_breakdown` payload and a dashboard financial-bridge card that now shows `Revenue breakdown by segments` first and the revenue-to-profits waterfall second inside the same accordion/card. For `AAPL`, `MSFT`, and `KO`, the runtime now falls back to the fixture segment mix when the live Yahoo path omits segment detail, so the section stays visible in normal local use for those supported tickers. The single-segment `KO` case renders as one 100% bucket."
     },
     {
       "id": "dash-006",

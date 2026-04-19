@@ -6,7 +6,7 @@
 - Standard startup path: `./init.sh`
 - Standard verification path: `./init.sh` for baseline health plus `feature_list.json -> features[*].verification.command` for feature passing
 - Current highest-priority unfinished feature: `dash-006`
-- Current blocker: none recorded. `dash-006` is now the next roadmap item after `dash-005` added a passing revenue segment breakdown section that reconciles to total revenue for the fixture-backed dashboard tickers and handles the single-segment `KO` case gracefully.
+- Current blocker: none recorded. `dash-006` is now the next roadmap item after the latest `dash-005` refinement merged the segment mix and waterfall into one financial-bridge card and added a supported-ticker runtime fallback so `AAPL`, `MSFT`, and `KO` show the revenue breakdown in normal local use.
 
 ## Session Log
 
@@ -465,3 +465,15 @@
 - Files or artifacts updated: `backend/app/schemas/company_workspace.py`, `backend/app/clients/market_data_fixtures.py`, `backend/app/clients/yahoo_finance.py`, `backend/tests/test_company_workspace.py`, `frontend/src/app/_lib/company-workspace.ts`, `frontend/src/app/dashboard/[ticker]/page.tsx`, `frontend/src/app/_components/revenue-segment-breakdown.tsx`, `frontend/src/app/globals.css`, `frontend/e2e/dash-005.spec.ts`, `artifacts/verification/dash-005-playwright.log`, `feature_list.json`, `progress.md`, `session-handoff.md`
 - Known risk or unresolved issue: The live Yahoo Finance path still does not expose segment detail through the current provider, so this section is fixture-backed for the passing dashboard tickers and intentionally omitted for live tickers when no segment mix is available.
 - Next best step: Resume the roadmap at `dash-006` and add multi-year historical charts for revenue, earnings, and cash flow without regressing the passing dashboard slices.
+
+### Session 039
+
+- Date: 2026-04-19
+- Goal: Refine the passing `dash-005` layout so the revenue breakdown appears before the waterfall inside the same card, and make that section visible in normal local use for the supported tickers.
+- Completed: Merged the revenue segment breakdown and revenue-to-profits waterfall into a single `Income Statement Bridge` accordion/card with two subsections, reordered the segment breakdown ahead of the waterfall, added a backend fallback so the live runtime path reuses fixture segment data for `AAPL`, `MSFT`, and `KO` when Yahoo does not expose segment detail, added a backend regression test for that fallback, and tightened the `dash-005` Playwright coverage around the combined-card layout.
+- Verification run: `cd backend && .venv/Scripts/python.exe -m pytest tests/test_company_workspace.py -q`; `cd frontend && npm run lint`; `cd frontend && npm run typecheck`; `cd frontend && npx playwright test e2e/dash-004.spec.ts`; `cd frontend && npx playwright test e2e/dash-005.spec.ts`
+- Evidence captured: Backend `cd backend && .venv/Scripts/python.exe -m pytest tests/test_company_workspace.py -q` passed with `10 passed` plus one existing pytest cache warning; frontend `npm run lint` passed; frontend `npm run typecheck` passed; the first combined Playwright attempt hit the local sandbox `spawn EPERM`, then `cd frontend && npx playwright test e2e/dash-004.spec.ts` passed when rerun outside the sandbox and `cd frontend && npx playwright test e2e/dash-005.spec.ts` also passed outside the sandbox; the refreshed `dash-005` log is saved at `artifacts/verification/dash-005-playwright.log`; implementation commit is `b150978`.
+- Commits: `b150978 Combine dash-005 breakdown with waterfall card`
+- Files or artifacts updated: `backend/app/services/company_workspace.py`, `backend/tests/test_company_workspace.py`, `frontend/src/app/dashboard/[ticker]/page.tsx`, `frontend/src/app/_components/revenue-segment-breakdown.tsx`, `frontend/src/app/globals.css`, `frontend/e2e/dash-005.spec.ts`, `artifacts/verification/dash-005-playwright.log`, `feature_list.json`, `progress.md`, `session-handoff.md`
+- Known risk or unresolved issue: The supported-ticker runtime fallback is still curated fixture data, not true live segment disclosure parsing. Unsupported live tickers still omit the segment section when the provider does not expose that mix.
+- Next best step: Resume the roadmap at `dash-006` and add multi-year historical charts for revenue, earnings, and cash flow without regressing the combined financial-bridge card.
