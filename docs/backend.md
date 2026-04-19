@@ -32,6 +32,7 @@ It should not be the source of truth for where backend code belongs as the servi
 - Route handlers return plain dict or Pydantic models; FastAPI serializes both. `main.py:health_check` is the current reference.
 - Tests instantiate `TestClient(app)` at module scope (see `tests/test_health.py`) and assert both `status_code` and JSON body.
 - New modules under `backend/app/` should import from `app.*` (absolute), matching the test import style.
+- Local backend secrets can live in `backend/.env`; `backend/app/main.py` now loads that file at startup for local development variables such as `FVS_FMP_API_KEY`.
 - When a feature needs a new dependency, add it to `requirements.txt` and rerun `./init.sh` so the venv reflects the change.
 - Keep feature verification aligned with `feature_list.json`; the named pytest file is the passing gate for backend features.
 

@@ -6,7 +6,7 @@
 - Standard startup path: `./init.sh`
 - Standard verification path: `./init.sh` for baseline health plus `feature_list.json -> features[*].verification.command` for feature passing
 - Current highest-priority unfinished feature: `dash-006`
-- Current blocker: none recorded. `dash-006` is now the next roadmap item after the latest `dash-005` refinement switched the segment view to a pie chart while keeping it paired with the waterfall in one financial-bridge card.
+- Current blocker: none recorded. `dash-006` is still the next roadmap item. Separately, the backend now loads `backend/.env` at startup, and that file is the local place to put `FVS_FMP_API_KEY` before we wire the real FMP segment-data client.
 
 ## Session Log
 
@@ -489,3 +489,15 @@
 - Files or artifacts updated: `frontend/src/app/_components/revenue-segment-breakdown.tsx`, `frontend/src/app/globals.css`, `frontend/e2e/dash-005.spec.ts`, `artifacts/verification/dash-005-playwright.log`, `feature_list.json`, `progress.md`, `session-handoff.md`
 - Known risk or unresolved issue: The segment colors are currently a curated fixed palette sized for the current supported segment counts. If a later ticker exposes many more segments, the color system may need another pass.
 - Next best step: Resume the roadmap at `dash-006` unless the user asks for another narrow refinement to the financial-bridge card first.
+
+### Session 041
+
+- Date: 2026-04-19
+- Goal: Create a real local env-file path for the upcoming FMP API key instead of relying on a shell-only environment variable.
+- Completed: Added backend startup loading for `backend/.env`, added `python-dotenv` as an explicit backend dependency, created a local ignored `backend/.env` file with `FVS_FMP_API_KEY=` ready for the user to fill in, and documented that workflow in `docs/backend.md`.
+- Verification run: `cd backend && .venv/Scripts/python.exe -m pytest -q`
+- Evidence captured: Backend `cd backend && .venv/Scripts/python.exe -m pytest -q` passed with `11 passed` plus one existing pytest cache warning after the env-loading change.
+- Commits: pending
+- Files or artifacts updated: `backend/app/main.py`, `backend/requirements.txt`, `backend/.env` (local ignored file), `docs/backend.md`, `progress.md`, `session-handoff.md`
+- Known risk or unresolved issue: `backend/.env` is intentionally ignored by git, so the file exists locally in this workspace but is not part of repository history. The FMP client itself is still not wired in yet; only the config path now exists.
+- Next best step: The user can place the FMP key in `backend/.env` under `FVS_FMP_API_KEY=...`, then we can implement the real FMP revenue-segmentation client on top of that config.
