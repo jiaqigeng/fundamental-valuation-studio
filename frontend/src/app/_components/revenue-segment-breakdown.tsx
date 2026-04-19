@@ -16,7 +16,7 @@ export function RevenueSegmentBreakdownSection({
   const isSingleSegment = breakdown.segments.length === 1;
 
   return (
-    <section className="workspace-panel" aria-label="Revenue segment breakdown">
+    <div className="segment-breakdown-shell">
       <div className="segment-breakdown-copy-row">
         <p className="segment-breakdown-copy">
           {isSingleSegment
@@ -57,6 +57,6 @@ export function RevenueSegmentBreakdownSection({
       <p className="segment-breakdown-footnote">
         Reconciles to total revenue: {breakdown.totalRevenueDisplay}.
       </p>
-    </section>
+    </div>
   );
 }

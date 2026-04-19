@@ -2,6 +2,7 @@ from datetime import date
 
 from fastapi.testclient import TestClient
 
+from app.clients.market_data_fixtures import FIXTURE_WORKSPACES
 from app.clients.yahoo_finance import _build_income_statement_waterfall_from_values
 from app.clients.yahoo_finance import _build_quote_details
 from app.clients.yahoo_finance import _build_normalized_points
@@ -9,6 +10,7 @@ from app.clients.yahoo_finance import _select_anchor_value
 from app.clients.yahoo_finance import _subtract_years
 from app.clients.yahoo_finance import _sum_ttm_dividends
 from app.main import app
+from app.services.company_workspace import get_company_workspace_snapshot
 
 
 client = TestClient(app)
@@ -153,6 +155,36 @@ def test_company_workspace_fixture_404(monkeypatch) -> None:
     response = client.get("/companies/ZZZZ/workspace")
 
     assert response.status_code == 404
+
+
+def test_company_workspace_live_path_falls_back_to_fixture_segments(monkeypatch) -> None:
+    monkeypatch.delenv("FVS_MARKET_DATA_PROVIDER", raising=False)
+
+    fixture = FIXTURE_WORKSPACES["AAPL"]
+    yahoo_snapshot = fixture.model_copy(
+        update={
+            "summary": "Live snapshot",
+            "revenue_segment_breakdown": None,
+        }
+    )
+
+    class StubYahooFinanceClient:
+        def fetch_company_workspace_snapshot(self, ticker: str):
+            assert ticker == "AAPL"
+            return yahoo_snapshot
+
+    monkeypatch.setattr(
+        "app.services.company_workspace.YahooFinanceClient",
+        StubYahooFinanceClient,
+    )
+
+    snapshot = get_company_workspace_snapshot("AAPL")
+
+    assert snapshot.summary == "Live snapshot"
+    assert snapshot.revenue_segment_breakdown is not None
+    assert snapshot.revenue_segment_breakdown.model_dump() == (
+        fixture.revenue_segment_breakdown.model_dump()
+    )
 
 
 def test_build_quote_details_skips_missing_metrics() -> None:

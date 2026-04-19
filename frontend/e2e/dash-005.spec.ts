@@ -5,11 +5,21 @@ test("dash-005 shows a revenue segment breakdown that reconciles to total revenu
 }) => {
   await page.goto("/dashboard/AAPL");
 
+  const combinedCard = page
+    .locator(".workspace-accordion")
+    .filter({ has: page.getByRole("heading", { name: /revenue breakdown and profit bridge/i }) });
   const breakdown = page.getByRole("region", {
     name: /revenue segment breakdown/i,
   });
+  const waterfall = page.getByRole("region", {
+    name: /revenue to net income waterfall/i,
+  });
 
+  await expect(combinedCard).toBeVisible();
   await expect(breakdown).toBeVisible();
+  await expect(waterfall).toBeVisible();
+  await expect(combinedCard).toContainText("Revenue breakdown by segments");
+  await expect(combinedCard).toContainText("Revenue to profits waterfall bridge");
   await expect(breakdown).toContainText("Total revenue");
   await expect(breakdown).toContainText("$391.0B");
   await expect(breakdown.locator(".segment-breakdown-row")).toHaveCount(5);

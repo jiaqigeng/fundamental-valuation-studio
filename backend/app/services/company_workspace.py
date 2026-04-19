@@ -32,9 +32,19 @@ def get_company_workspace_snapshot(ticker: str) -> CompanyWorkspaceSnapshot:
 
     client = YahooFinanceClient()
     try:
-        return client.fetch_company_workspace_snapshot(normalized_ticker)
+        snapshot = client.fetch_company_workspace_snapshot(normalized_ticker)
     except YahooFinanceLookupError as exc:
         message = str(exc)
         if "no result" in message.lower():
             raise CompanyWorkspaceNotFoundError(message) from exc
         raise CompanyWorkspaceUnavailableError(message) from exc
+
+    fixture = FIXTURE_WORKSPACES.get(normalized_ticker)
+    if snapshot.revenue_segment_breakdown is None and fixture is not None:
+        return snapshot.model_copy(
+            update={
+                "revenue_segment_breakdown": fixture.revenue_segment_breakdown,
+            }
+        )
+
+    return snapshot

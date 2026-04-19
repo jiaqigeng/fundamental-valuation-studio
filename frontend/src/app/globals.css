@@ -501,6 +501,33 @@ a {
   color: #b34234;
 }
 
+.financial-bridge-card {
+  display: grid;
+  gap: 1.4rem;
+}
+
+.financial-bridge-subsection + .financial-bridge-subsection {
+  padding-top: 1.4rem;
+  border-top: 1px solid rgba(33, 64, 154, 0.1);
+}
+
+.financial-bridge-subsection-header {
+  display: grid;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+}
+
+.financial-bridge-subsection-header h3 {
+  margin: 0;
+  font-size: clamp(1.35rem, 2.6vw, 1.9rem);
+  font-weight: 600;
+  letter-spacing: -0.04em;
+}
+
+.segment-breakdown-shell {
+  display: grid;
+}
+
 .segment-breakdown-copy-row {
   display: flex;
   flex-direction: column;
