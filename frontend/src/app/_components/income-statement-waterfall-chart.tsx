@@ -147,7 +147,12 @@ export function IncomeStatementWaterfallChart({
           const barHeight = Math.max(rawHeight, 3);
           const barY = rawHeight < 3 ? yForValue(bar.upper) - 1.5 : yForValue(bar.upper);
           const x = leftXForIndex(index);
-          const toneClass = getBarToneClass(bar.step);
+          const toneClass =
+            bar.step.stepType === "total"
+              ? "waterfall-bar-total"
+              : bar.step.value >= 0
+                ? "waterfall-bar-positive"
+                : "waterfall-bar-negative";
 
           return (
             <g key={bar.step.label}>
@@ -157,8 +162,6 @@ export function IncomeStatementWaterfallChart({
                 width={barWidth}
                 height={barHeight}
                 rx="10"
-                data-step-label={bar.step.label}
-                data-step-type={bar.step.stepType}
                 className={toneClass}
               />
 
@@ -185,7 +188,12 @@ export function IncomeStatementWaterfallChart({
 
       <div className="waterfall-step-grid">
         {steps.map((step) => {
-          const toneClass = getStepValueToneClass(step);
+          const toneClass =
+            step.stepType === "total"
+              ? "waterfall-step-value-total"
+              : step.value >= 0
+                ? "waterfall-step-value-positive"
+                : "waterfall-step-value-negative";
 
           return (
             <article className="waterfall-step-card" key={step.label}>
@@ -236,30 +244,6 @@ function getConnectorEntryValue(bar: WaterfallBar) {
 
 function getConnectorExitValue(bar: WaterfallBar) {
   return bar.end;
-}
-
-function getBarToneClass(step: IncomeStatementWaterfallStep) {
-  if (step.stepType === "total") {
-    return step.value >= 0
-      ? "waterfall-bar-total-positive"
-      : "waterfall-bar-total-negative";
-  }
-
-  return step.value >= 0
-    ? "waterfall-bar-positive"
-    : "waterfall-bar-negative";
-}
-
-function getStepValueToneClass(step: IncomeStatementWaterfallStep) {
-  if (step.stepType === "total") {
-    return step.value >= 0
-      ? "waterfall-step-value-total-positive"
-      : "waterfall-step-value-total-negative";
-  }
-
-  return step.value >= 0
-    ? "waterfall-step-value-positive"
-    : "waterfall-step-value-negative";
 }
 
 function getAxisLabelLines(label: string): readonly string[] {
