@@ -22,12 +22,14 @@ test("dash-005 shows a revenue segment breakdown that reconciles to total revenu
   await expect(combinedCard).toContainText("Revenue to profits waterfall bridge");
   await expect(breakdown).toContainText("Total revenue");
   await expect(breakdown).toContainText("$391.0B");
+  await expect(breakdown.getByLabel("Revenue segment pie chart")).toBeVisible();
+  await expect(breakdown.locator("circle.segment-breakdown-slice")).toHaveCount(5);
   await expect(breakdown.locator(".segment-breakdown-row")).toHaveCount(5);
   await expect(breakdown).toContainText("iPhone");
   await expect(breakdown).toContainText("$201.2B");
   await expect(breakdown).toContainText("Services");
   await expect(breakdown).toContainText("$91.8B");
-  await expect(breakdown).toContainText("Reconciles to total revenue: $391.0B.");
+  await expect(breakdown).toContainText("Pie slices reconcile to total revenue: $391.0B.");
 
   await page.goto("/dashboard/KO");
 
@@ -36,6 +38,8 @@ test("dash-005 shows a revenue segment breakdown that reconciles to total revenu
   });
 
   await expect(singleSegmentBreakdown).toBeVisible();
+  await expect(singleSegmentBreakdown.getByLabel("Revenue segment pie chart")).toBeVisible();
+  await expect(singleSegmentBreakdown.locator("circle.segment-breakdown-slice")).toHaveCount(1);
   await expect(singleSegmentBreakdown.locator(".segment-breakdown-row")).toHaveCount(1);
   await expect(singleSegmentBreakdown).toContainText("Single reporting segment");
   await expect(singleSegmentBreakdown).toContainText("100.0%");

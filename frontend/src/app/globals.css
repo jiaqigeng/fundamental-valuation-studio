@@ -575,10 +575,73 @@ a {
   letter-spacing: -0.03em;
 }
 
+.segment-breakdown-visual {
+  display: grid;
+  gap: 1.15rem;
+  margin-top: 1.1rem;
+}
+
+.segment-breakdown-chart-shell {
+  position: relative;
+  display: grid;
+  place-items: center;
+  margin-inline: auto;
+  width: min(100%, 18rem);
+  aspect-ratio: 1;
+}
+
+.segment-breakdown-chart {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  transform: rotate(-90deg);
+}
+
+.segment-breakdown-chart-track,
+.segment-breakdown-slice {
+  fill: none;
+  stroke-width: 34;
+}
+
+.segment-breakdown-chart-track {
+  stroke: rgba(33, 64, 154, 0.08);
+}
+
+.segment-breakdown-slice {
+  stroke-linecap: butt;
+}
+
+.segment-breakdown-chart-center {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  gap: 0.25rem;
+  text-align: center;
+  pointer-events: none;
+}
+
+.segment-breakdown-chart-center span {
+  margin: 0;
+  color: var(--muted);
+  font-family: var(--font-fira-code), monospace;
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.segment-breakdown-chart-center strong {
+  margin: 0;
+  color: var(--dashboard-blue);
+  font-size: clamp(1.15rem, 2.2vw, 1.55rem);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+}
+
 .segment-breakdown-list {
   display: grid;
   gap: 0.9rem;
-  margin-top: 1.1rem;
 }
 
 .segment-breakdown-row {
@@ -596,25 +659,25 @@ a {
   gap: 1rem;
 }
 
+.segment-breakdown-row-title {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.8rem;
+}
+
+.segment-breakdown-swatch {
+  display: inline-flex;
+  flex: 0 0 auto;
+  width: 0.8rem;
+  height: 0.8rem;
+  margin-top: 0.15rem;
+  border-radius: 999px;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.9);
+}
+
 .segment-breakdown-share {
   margin-top: 0.35rem;
   color: rgba(33, 64, 154, 0.72);
-}
-
-.segment-breakdown-track {
-  overflow: hidden;
-  margin-top: 0.8rem;
-  width: 100%;
-  height: 0.9rem;
-  border-radius: 999px;
-  background: rgba(33, 64, 154, 0.08);
-}
-
-.segment-breakdown-fill {
-  height: 100%;
-  border-radius: inherit;
-  background:
-    linear-gradient(90deg, rgba(33, 64, 154, 0.92), rgba(12, 87, 158, 0.78));
 }
 
 .segment-breakdown-footnote {
@@ -872,6 +935,11 @@ a {
     flex-direction: row;
     align-items: flex-start;
     justify-content: space-between;
+  }
+
+  .segment-breakdown-visual {
+    grid-template-columns: minmax(15rem, 19rem) minmax(0, 1fr);
+    align-items: center;
   }
 
   .overview-meta-grid {
