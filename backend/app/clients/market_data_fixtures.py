@@ -1,5 +1,6 @@
 from app.schemas.company_workspace import (
     CompanyWorkspaceSnapshot,
+    KeyFinancialMetric,
     MarketContextCard,
     PerformanceChartRange,
     PerformancePoint,
@@ -23,6 +24,14 @@ FIXTURE_WORKSPACES: dict[str, CompanyWorkspaceSnapshot] = {
         ),
         current_price_display="$212.48",
         market_cap_display="$3.2T",
+        key_financial_metrics=[
+            KeyFinancialMetric(label="Revenue (TTM)", value="$395.8B"),
+            KeyFinancialMetric(label="EPS (TTM)", value="6.73"),
+            KeyFinancialMetric(label="Free Cash Flow", value="$99.6B"),
+            KeyFinancialMetric(label="Gross Margin", value="46.20%"),
+            KeyFinancialMetric(label="Operating Margin", value="31.50%"),
+            KeyFinancialMetric(label="Return on Equity (ROE)", value="151.32%"),
+        ],
         quote_details=[
             QuoteDetail(label="Trailing P/E (TTM)", value="33.19"),
             QuoteDetail(label="Forward P/E", value="29.44"),
@@ -175,6 +184,14 @@ FIXTURE_WORKSPACES: dict[str, CompanyWorkspaceSnapshot] = {
         ),
         current_price_display="$62.15",
         market_cap_display="$267.0B",
+        key_financial_metrics=[
+            KeyFinancialMetric(label="Revenue (TTM)", value="$47.1B"),
+            KeyFinancialMetric(label="EPS (TTM)", value="2.47"),
+            KeyFinancialMetric(label="Free Cash Flow", value="$9.8B"),
+            KeyFinancialMetric(label="Gross Margin", value="60.70%"),
+            KeyFinancialMetric(label="Operating Margin", value="29.80%"),
+            KeyFinancialMetric(label="Return on Equity (ROE)", value="41.87%"),
+        ],
         quote_details=[
             QuoteDetail(label="Trailing P/E (TTM)", value="25.88"),
             QuoteDetail(label="Forward P/E", value="23.54"),
@@ -327,6 +344,14 @@ FIXTURE_WORKSPACES: dict[str, CompanyWorkspaceSnapshot] = {
         ),
         current_price_display="$338.12",
         market_cap_display="$4.1T",
+        key_financial_metrics=[
+            KeyFinancialMetric(label="Revenue (TTM)", value="$281.7B"),
+            KeyFinancialMetric(label="EPS (TTM)", value="12.42"),
+            KeyFinancialMetric(label="Free Cash Flow", value="$79.5B"),
+            KeyFinancialMetric(label="Gross Margin", value="69.20%"),
+            KeyFinancialMetric(label="Operating Margin", value="44.70%"),
+            KeyFinancialMetric(label="Return on Equity (ROE)", value="33.74%"),
+        ],
         quote_details=[
             QuoteDetail(label="Trailing P/E (TTM)", value="31.64"),
             QuoteDetail(label="Forward P/E", value="28.10"),

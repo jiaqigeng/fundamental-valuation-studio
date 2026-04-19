@@ -100,6 +100,25 @@ export default async function DashboardPage({
         </section>
       </ExpandableSection>
 
+      {company.keyFinancialMetrics.length > 0 ? (
+        <ExpandableSection
+          label="Key Financial Metrics"
+          title="Latest operating performance and returns"
+          sectionClassName="key-financials-panel"
+        >
+          <section className="workspace-panel" aria-label="Key financial metrics">
+            <dl className="key-financial-metric-grid">
+              {company.keyFinancialMetrics.map((metric) => (
+                <div className="key-financial-metric-card" key={metric.label}>
+                  <dt>{metric.label}</dt>
+                  <dd>{metric.value}</dd>
+                </div>
+              ))}
+            </dl>
+          </section>
+        </ExpandableSection>
+      ) : null}
+
       {company.quoteDetails.length > 0 ? (
         <ExpandableSection
           label="Yahoo Finance Snapshot"

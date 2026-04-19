@@ -5,6 +5,11 @@ export type QuoteDetail = {
   readonly value: string;
 };
 
+export type KeyFinancialMetric = {
+  readonly label: string;
+  readonly value: string;
+};
+
 export type PerformancePoint = {
   readonly label: string;
   readonly value: number;
@@ -41,6 +46,7 @@ export type CompanyWorkspaceData = {
   readonly workspaceTagline: string;
   readonly currentPriceDisplay: string;
   readonly marketCapDisplay: string;
+  readonly keyFinancialMetrics: readonly KeyFinancialMetric[];
   readonly quoteDetails: readonly QuoteDetail[];
   readonly marketContexts: readonly MarketContextCard[];
   readonly performanceChartRanges: readonly PerformanceChartRange[];
@@ -90,6 +96,7 @@ export async function getCompanyWorkspaceData(
       workspace_tagline: string;
       current_price_display: string;
       market_cap_display: string;
+      key_financial_metrics: KeyFinancialMetric[];
       quote_details: QuoteDetail[];
       market_contexts: {
         label: string;
@@ -123,6 +130,7 @@ export async function getCompanyWorkspaceData(
       workspaceTagline: payload.workspace_tagline,
       currentPriceDisplay: payload.current_price_display,
       marketCapDisplay: payload.market_cap_display,
+      keyFinancialMetrics: payload.key_financial_metrics,
       quoteDetails: payload.quote_details,
       marketContexts: payload.market_contexts.map((context) => ({
         label: context.label,
@@ -164,6 +172,7 @@ function buildFallbackWorkspace(ticker: string): CompanyWorkspaceData | null {
     workspaceTagline: company.workspaceTagline,
     currentPriceDisplay: priceFormatter.format(company.currentPrice),
     marketCapDisplay: marketCapFormatter.format(company.marketCap),
+    keyFinancialMetrics: [],
     quoteDetails: [],
     marketContexts: [],
     performanceChartRanges: [],

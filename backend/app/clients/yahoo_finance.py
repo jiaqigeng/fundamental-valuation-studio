@@ -13,6 +13,7 @@ import yfinance as yf
 
 from app.schemas.company_workspace import (
     CompanyWorkspaceSnapshot,
+    KeyFinancialMetric,
     MarketContextCard,
     PerformanceChartRange,
     PerformancePoint,
@@ -117,6 +118,7 @@ class YahooFinanceClient:
             ),
             current_price_display=_format_currency(current_price),
             market_cap_display=_format_compact_currency(market_cap),
+            key_financial_metrics=_build_key_financial_metrics(info),
             quote_details=_build_quote_details(
                 info,
                 current_price=current_price,
@@ -342,6 +344,52 @@ def _build_quote_details(
     ]
 
     return [detail for detail in quote_details if detail is not None]
+
+
+def _build_key_financial_metrics(info: dict) -> list[KeyFinancialMetric]:
+    gross_margin = _resolve_ratio(
+        direct_value=_first_number(info.get("grossMargins")),
+        numerator=_first_number(info.get("grossProfits")),
+        denominator=_first_number(info.get("totalRevenue")),
+    )
+    operating_margin = _resolve_ratio(
+        direct_value=_first_number(info.get("operatingMargins")),
+        numerator=_first_number(info.get("operatingIncome")),
+        denominator=_first_number(info.get("totalRevenue")),
+    )
+    roic = _first_number(info.get("returnOnInvestedCapital"))
+    roe = _first_number(info.get("returnOnEquity"))
+
+    metrics = [
+        _optional_key_financial_metric(
+            "Revenue (TTM)",
+            _format_optional_compact_currency(_first_number(info.get("totalRevenue"))),
+        ),
+        _optional_key_financial_metric(
+            "EPS (TTM)",
+            _format_optional_number(_first_number(info.get("trailingEps"))),
+        ),
+        _optional_key_financial_metric(
+            "Free Cash Flow",
+            _format_optional_compact_currency(_first_number(info.get("freeCashflow"))),
+        ),
+        _optional_key_financial_metric(
+            "Gross Margin",
+            _format_optional_percent(gross_margin),
+        ),
+        _optional_key_financial_metric(
+            "Operating Margin",
+            _format_optional_percent(operating_margin),
+        ),
+        _optional_key_financial_metric(
+            "Return on Invested Capital (ROIC)"
+            if roic is not None
+            else "Return on Equity (ROE)",
+            _format_optional_percent(roic if roic is not None else roe),
+        ),
+    ]
+
+    return [metric for metric in metrics if metric is not None]
 
 
 def _build_performance_chart_ranges(
@@ -664,6 +712,15 @@ def _optional_quote_detail(label: str, value: str | None) -> QuoteDetail | None:
     return QuoteDetail(label=label, value=value)
 
 
+def _optional_key_financial_metric(
+    label: str,
+    value: str | None,
+) -> KeyFinancialMetric | None:
+    if value is None:
+        return None
+    return KeyFinancialMetric(label=label, value=value)
+
+
 def _decimal_text(value: float | int, places: str) -> str:
     quantized = Decimal(str(value)).quantize(Decimal(places), rounding=ROUND_HALF_UP)
     return f"{quantized}"
@@ -756,6 +813,12 @@ def _format_optional_number(value: float | int | None) -> str | None:
     if value is None:
         return None
     return _format_number(value)
+
+
+def _format_optional_compact_currency(value: float | int | None) -> str | None:
+    if value is None:
+        return None
+    return _format_compact_currency(value)
 
 
 def _format_optional_percent(value: float | int | None) -> str | None:

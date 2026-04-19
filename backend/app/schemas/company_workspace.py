@@ -6,6 +6,11 @@ class QuoteDetail(BaseModel):
     value: str
 
 
+class KeyFinancialMetric(BaseModel):
+    label: str
+    value: str
+
+
 class MarketContextCard(BaseModel):
     label: str
     symbol: str
@@ -42,6 +47,7 @@ class CompanyWorkspaceSnapshot(BaseModel):
     workspace_tagline: str
     current_price_display: str
     market_cap_display: str
+    key_financial_metrics: list[KeyFinancialMetric]
     quote_details: list[QuoteDetail]
     market_contexts: list[MarketContextCard]
     performance_chart_ranges: list[PerformanceChartRange]

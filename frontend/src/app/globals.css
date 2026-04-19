@@ -340,6 +340,7 @@ a {
 }
 
 .fact-item dt,
+.key-financial-metric-card dt,
 .quote-detail-card dt {
   margin: 0;
   color: var(--muted);
@@ -374,12 +375,14 @@ a {
   line-height: 1.78;
 }
 
+.key-financial-metric-grid,
 .quote-detail-grid {
   display: grid;
   gap: 0.9rem;
   margin: 0;
 }
 
+.key-financial-metric-card,
 .quote-detail-card {
   border: 1px solid var(--dashboard-line);
   border-radius: 1.15rem;
@@ -388,11 +391,22 @@ a {
   padding: 1.15rem;
 }
 
+.key-financial-metric-card {
+  background:
+    linear-gradient(135deg, rgba(33, 64, 154, 0.08), rgba(15, 118, 110, 0.06)),
+    var(--dashboard-panel-strong);
+}
+
+.key-financial-metric-card dd,
 .quote-detail-card dd {
   margin: 0.5rem 0 0;
   font-size: 1.15rem;
   font-weight: 600;
   letter-spacing: -0.03em;
+}
+
+.key-financial-metric-card dd {
+  font-size: clamp(1.35rem, 3vw, 1.8rem);
 }
 
 .comparison-chart-shell {
@@ -644,6 +658,7 @@ a {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
+  .key-financial-metric-grid,
   .quote-detail-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
