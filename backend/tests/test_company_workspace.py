@@ -38,7 +38,6 @@ def test_company_workspace_fixture_response(monkeypatch) -> None:
         {"label": "Beta (5Y Monthly)", "value": "1.13"},
         {"label": "Free Cash Flow", "value": "$71.9B"},
         {"label": "Earnings Date", "value": "Apr 29, 2026"},
-        {"label": "Dividend Date", "value": "Jun 11, 2026"},
         {"label": "Ex-Dividend Date", "value": "Mar 9, 2026"},
     ]
     assert body["market_contexts"] == [

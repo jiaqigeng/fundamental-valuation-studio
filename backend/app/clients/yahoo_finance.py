@@ -327,10 +327,6 @@ def _build_quote_details(
             ),
         ),
         _optional_quote_detail(
-            "Dividend Date",
-            _format_optional_date(_first_number(info.get("dividendDate"))),
-        ),
-        _optional_quote_detail(
             "Ex-Dividend Date",
             _format_optional_date(_first_number(info.get("exDividendDate"))),
         ),

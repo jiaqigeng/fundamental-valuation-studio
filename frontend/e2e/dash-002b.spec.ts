@@ -38,14 +38,11 @@ test("dash-002b shows a Yahoo Finance quote snapshot for the workspace", async (
   await expect(snapshot.getByText("$71.9B")).toBeVisible();
   await expect(snapshot.getByText(/earnings date/i)).toBeVisible();
   await expect(snapshot.getByText("Apr 29, 2026")).toBeVisible();
-  await expect(
-    snapshot.getByText("Dividend Date", { exact: true }),
-  ).toBeVisible();
-  await expect(snapshot.getByText("Jun 11, 2026")).toBeVisible();
   await expect(snapshot.getByText(/ex-dividend date/i)).toBeVisible();
   await expect(snapshot.getByText("Mar 9, 2026")).toBeVisible();
 
   await expect(snapshot.getByText("Previous Close", { exact: true })).toHaveCount(0);
   await expect(snapshot.getByText("Open", { exact: true })).toHaveCount(0);
   await expect(snapshot.getByText("Bid", { exact: true })).toHaveCount(0);
+  await expect(snapshot.getByText("Dividend Date", { exact: true })).toHaveCount(0);
 });

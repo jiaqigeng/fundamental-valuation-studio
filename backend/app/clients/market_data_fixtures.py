@@ -38,7 +38,6 @@ FIXTURE_WORKSPACES: dict[str, CompanyWorkspaceSnapshot] = {
             QuoteDetail(label="Beta (5Y Monthly)", value="1.24"),
             QuoteDetail(label="Free Cash Flow", value="$108.8B"),
             QuoteDetail(label="Earnings Date", value="May 1, 2026"),
-            QuoteDetail(label="Dividend Date", value="May 14, 2026"),
             QuoteDetail(label="Ex-Dividend Date", value="Feb 9, 2026"),
         ],
         market_contexts=[
@@ -191,7 +190,6 @@ FIXTURE_WORKSPACES: dict[str, CompanyWorkspaceSnapshot] = {
             QuoteDetail(label="Beta (5Y Monthly)", value="0.52"),
             QuoteDetail(label="Free Cash Flow", value="$9.6B"),
             QuoteDetail(label="Earnings Date", value="Apr 28, 2026"),
-            QuoteDetail(label="Dividend Date", value="Jul 1, 2026"),
             QuoteDetail(label="Ex-Dividend Date", value="Mar 13, 2026"),
         ],
         market_contexts=[
@@ -344,7 +342,6 @@ FIXTURE_WORKSPACES: dict[str, CompanyWorkspaceSnapshot] = {
             QuoteDetail(label="Beta (5Y Monthly)", value="1.13"),
             QuoteDetail(label="Free Cash Flow", value="$71.9B"),
             QuoteDetail(label="Earnings Date", value="Apr 29, 2026"),
-            QuoteDetail(label="Dividend Date", value="Jun 11, 2026"),
             QuoteDetail(label="Ex-Dividend Date", value="Mar 9, 2026"),
         ],
         market_contexts=[
