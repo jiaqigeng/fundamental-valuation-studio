@@ -163,14 +163,14 @@
         ]
       },
       "evidence": {
-        "commit": "3b177a0",
+        "commit": "a21dbc3",
         "verification_run": "cd frontend && npx playwright test e2e/dash-004.spec.ts",
         "output_log": "artifacts/verification/dash-004-playwright.log",
-        "timestamp": "2026-04-19T12:28:11.6662378-04:00"
+        "timestamp": "2026-04-19T12:34:00.8690969-04:00"
       },
       "depends_on": ["dash-002b"],
       "status": "passing",
-      "notes": "Implemented with a backend-for-frontend income-statement waterfall payload plus a server-rendered dashboard chart. The current statement walk now surfaces `Revenue`, `Cost of Revenue`, `Gross Profit`, `Operating Expenses`, `Operating Profit`, `Other Income / Cost`, `Taxes`, and `Net Profits` for supported fixture tickers. The live `yfinance` path derives the same bridge from the latest available income-statement rows and uses signed other-income/cost plus taxes to land exactly on net profits."
+      "notes": "Implemented with a backend-for-frontend income-statement waterfall payload plus a server-rendered dashboard chart. The current statement walk now surfaces `Revenue`, `Cost of Revenue`, `Gross Profit`, `Operating Expenses`, `Operating Profit`, `Other Income / Cost`, `Taxes`, and `Net Profits` for supported fixture tickers. The chart now wraps longer x-axis labels onto two lines so the statement labels remain readable without colliding. The live `yfinance` path derives the same bridge from the latest available income-statement rows and uses signed other-income/cost plus taxes to land exactly on net profits."
     },
     {
       "id": "dash-005",

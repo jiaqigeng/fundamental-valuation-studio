@@ -333,3 +333,15 @@
 - Files or artifacts updated: `backend/app/clients/yahoo_finance.py`, `backend/app/clients/market_data_fixtures.py`, `backend/tests/test_company_workspace.py`, `frontend/src/app/_components/income-statement-waterfall-chart.tsx`, `frontend/e2e/dash-004.spec.ts`, `artifacts/verification/dash-004-playwright.log`, `feature_list.json`, `progress.md`, `session-handoff.md`
 - Known risk or unresolved issue: The live waterfall still depends on `yfinance` income-statement row availability and naming. When Yahoo omits gross-profit, operating-income, pretax, or tax rows, the builder fills the missing bridge points with derived values or zeros, so live subtotals may be less precise than the deterministic fixture path.
 - Next best step: Resume the roadmap at `dash-005` unless the user asks for another narrow refinement to the already-passing dashboard slices.
+
+### Session 028
+
+- Date: 2026-04-19
+- Goal: Fix the `dash-004` chart labels so the longer statement names stay readable on the waterfall axis.
+- Completed: Updated the waterfall SVG to wrap long x-axis labels onto two lines, increased the chart's bottom padding so those wrapped labels have room to breathe, and kept the underlying `dash-004` line-item contract unchanged.
+- Verification run: `cd frontend && npm run lint`; `cd frontend && npm run typecheck`; `cd frontend && npx playwright test e2e/dash-004.spec.ts`
+- Evidence captured: Frontend `npm run lint` passed; frontend `npm run typecheck` passed; `cd frontend && npx playwright test e2e/dash-004.spec.ts` passed after stopping a stale local `next dev` process that blocked Playwright from starting its own frontend server; log refreshed at `artifacts/verification/dash-004-playwright.log`; implementation commit is `a21dbc3`.
+- Commits: `a21dbc3 Wrap dash-004 waterfall axis labels`
+- Files or artifacts updated: `frontend/src/app/_components/income-statement-waterfall-chart.tsx`, `frontend/src/app/globals.css`, `artifacts/verification/dash-004-playwright.log`, `feature_list.json`, `progress.md`, `session-handoff.md`
+- Known risk or unresolved issue: The wrapped axis labels are tuned for the current eight-step statement flow. If later roadmap work adds more waterfall bars or much longer labels, the chart may need another spacing pass.
+- Next best step: Resume the roadmap at `dash-005` unless the user asks for another narrow waterfall polish tweak first.
