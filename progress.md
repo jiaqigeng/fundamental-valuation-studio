@@ -6,7 +6,7 @@
 - Standard startup path: `./init.sh`
 - Standard verification path: `./init.sh` for baseline health plus `feature_list.json -> features[*].verification.command` for feature passing
 - Current highest-priority unfinished feature: `dash-006`
-- Current blocker: none recorded. `dash-006` is now the next roadmap item after the latest `dash-005` refinement merged the segment mix and waterfall into one financial-bridge card and added a supported-ticker runtime fallback so `AAPL`, `MSFT`, and `KO` show the revenue breakdown in normal local use.
+- Current blocker: none recorded. `dash-006` is now the next roadmap item after the latest `dash-005` refinement switched the segment view to a pie chart while keeping it paired with the waterfall in one financial-bridge card.
 
 ## Session Log
 
@@ -477,3 +477,15 @@
 - Files or artifacts updated: `backend/app/services/company_workspace.py`, `backend/tests/test_company_workspace.py`, `frontend/src/app/dashboard/[ticker]/page.tsx`, `frontend/src/app/_components/revenue-segment-breakdown.tsx`, `frontend/src/app/globals.css`, `frontend/e2e/dash-005.spec.ts`, `artifacts/verification/dash-005-playwright.log`, `feature_list.json`, `progress.md`, `session-handoff.md`
 - Known risk or unresolved issue: The supported-ticker runtime fallback is still curated fixture data, not true live segment disclosure parsing. Unsupported live tickers still omit the segment section when the provider does not expose that mix.
 - Next best step: Resume the roadmap at `dash-006` and add multi-year historical charts for revenue, earnings, and cash flow without regressing the combined financial-bridge card.
+
+### Session 040
+
+- Date: 2026-04-19
+- Goal: Replace the `dash-005` segment bars with a pie-chart treatment at the user's request.
+- Completed: Reworked the revenue segment breakdown component from horizontal fill bars into a donut-style pie chart with a central revenue total and a color-matched legend, updated the `dash-005` Playwright spec to assert the pie chart and slice count, and refreshed the verification log.
+- Verification run: `cd frontend && npm run lint`; `cd frontend && npm run typecheck`; `cd frontend && npx playwright test e2e/dash-005.spec.ts`
+- Evidence captured: Frontend `npm run lint` passed; frontend `npm run typecheck` passed; the first Playwright attempt hit the local sandbox `spawn EPERM`, then a stale local `next dev` process on PID `85680` blocked the outside-sandbox retry until it was stopped; after that `cd frontend && npx playwright test e2e/dash-005.spec.ts` passed outside the sandbox; the refreshed log is saved at `artifacts/verification/dash-005-playwright.log`; implementation commit is `de3bad1`.
+- Commits: `de3bad1 Render dash-005 revenue pie chart`
+- Files or artifacts updated: `frontend/src/app/_components/revenue-segment-breakdown.tsx`, `frontend/src/app/globals.css`, `frontend/e2e/dash-005.spec.ts`, `artifacts/verification/dash-005-playwright.log`, `feature_list.json`, `progress.md`, `session-handoff.md`
+- Known risk or unresolved issue: The segment colors are currently a curated fixed palette sized for the current supported segment counts. If a later ticker exposes many more segments, the color system may need another pass.
+- Next best step: Resume the roadmap at `dash-006` unless the user asks for another narrow refinement to the financial-bridge card first.
