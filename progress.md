@@ -6,7 +6,7 @@
 - Standard startup path: `./init.sh`
 - Standard verification path: `./init.sh` for baseline health plus `feature_list.json -> features[*].verification.command` for feature passing
 - Current highest-priority unfinished feature: `dash-005`
-- Current blocker: none recorded. `dash-005` remains the next roadmap item, and the latest user-requested `dash-004` refinement now computes `Other Income / Cost` as the residual balancing bucket so the waterfall reconciles to net profits.
+- Current blocker: none recorded. `dash-005` remains the next roadmap item, and the latest user-requested `dash-004` refinement now makes the zero baseline line more prominent without changing the waterfall math.
 
 ## Session Log
 
@@ -392,4 +392,16 @@
 - Commits: `07efa00 Compute dash-004 other-income residual`
 - Files or artifacts updated: `backend/app/clients/yahoo_finance.py`, `backend/tests/test_company_workspace.py`, `artifacts/verification/dash-004-playwright.log`, `feature_list.json`, `progress.md`, `session-handoff.md`
 - Known risk or unresolved issue: The live waterfall still depends on `yfinance` income-statement row availability and naming. When Yahoo omits direct statement rows, the builder still falls back to derived values or zeros, so the chart remains best-effort for incomplete live statements even though the displayed bridge now reconciles exactly.
+- Next best step: Resume the roadmap at `dash-005` unless the user asks for another narrow `dash-004` refinement.
+
+### Session 033
+
+- Date: 2026-04-19
+- Goal: Make the `dash-004` zero baseline line more noticeable.
+- Completed: Strengthened the waterfall zero baseline styling in the frontend CSS by increasing its contrast, width, and dash pattern so it stands apart more clearly from the regular chart gridlines while leaving the rest of the chart geometry unchanged.
+- Verification run: `./init.sh`; `cd frontend && npm run lint`; `cd frontend && npm run typecheck`; `cd frontend && npx playwright test e2e/dash-004.spec.ts`
+- Evidence captured: `./init.sh` completed successfully before the refinement; frontend `npm run lint` passed; frontend `npm run typecheck` passed; `cd frontend && npx playwright test e2e/dash-004.spec.ts` passed on the first run; log refreshed at `artifacts/verification/dash-004-playwright.log`; implementation commit is `3f33711`.
+- Commits: `3f33711 Highlight dash-004 zero baseline`
+- Files or artifacts updated: `frontend/src/app/globals.css`, `artifacts/verification/dash-004-playwright.log`, `feature_list.json`, `progress.md`, `session-handoff.md`
+- Known risk or unresolved issue: This is a styling-only tweak on the current chart dimensions. If the waterfall layout changes substantially later, the zero-line emphasis may need another pass to stay balanced with the rest of the chart.
 - Next best step: Resume the roadmap at `dash-005` unless the user asks for another narrow `dash-004` refinement.

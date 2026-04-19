@@ -163,14 +163,14 @@
         ]
       },
       "evidence": {
-        "commit": "07efa00",
+        "commit": "3f33711",
         "verification_run": "cd frontend && npx playwright test e2e/dash-004.spec.ts",
         "output_log": "artifacts/verification/dash-004-playwright.log",
-        "timestamp": "2026-04-19T14:23:30.3738190-04:00"
+        "timestamp": "2026-04-19T14:28:53.2420275-04:00"
       },
       "depends_on": ["dash-002b"],
       "status": "passing",
-      "notes": "Implemented with a backend-for-frontend income-statement waterfall payload plus a server-rendered dashboard chart. The current statement walk now surfaces `Revenue`, `Cost of Revenue`, `Gross Profit`, `Operating Expenses`, `Operating Profit`, `Other Income / Cost`, `Taxes`, and `Net Profits` for supported fixture tickers. The chart wraps longer x-axis labels onto two lines so the statement labels remain readable without colliding, and the dotted connector now bridges every adjacent bar pair through each bar's true entry and exit edge. The live `yfinance` path now treats `Other Income / Cost` as the residual balancing bucket after direct `Operating Profit`, `Taxes`, and `Net Profits`, so the displayed bridge reconciles exactly even when Yahoo's pretax-related fields disagree."
+      "notes": "Implemented with a backend-for-frontend income-statement waterfall payload plus a server-rendered dashboard chart. The current statement walk now surfaces `Revenue`, `Cost of Revenue`, `Gross Profit`, `Operating Expenses`, `Operating Profit`, `Other Income / Cost`, `Taxes`, and `Net Profits` for supported fixture tickers. The chart wraps longer x-axis labels onto two lines so the statement labels remain readable without colliding, the dotted connector bridges every adjacent bar pair through each bar's true entry and exit edge, and the zero baseline line is intentionally darker and thicker so it stands apart from the regular chart gridlines. The live `yfinance` path now treats `Other Income / Cost` as the residual balancing bucket after direct `Operating Profit`, `Taxes`, and `Net Profits`, so the displayed bridge reconciles exactly even when Yahoo's pretax-related fields disagree."
     },
     {
       "id": "dash-005",

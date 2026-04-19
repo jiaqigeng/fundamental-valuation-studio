@@ -1,10 +1,10 @@
-[2m[Backend] [22mINFO:     Started server process [86756]
+[2m[Backend] [22mINFO:     Started server process [89244]
 [2m[Backend] [22mINFO:     Waiting for application startup.
 [2m[Backend] [22mINFO:     Application startup complete.
 [2m[Backend] [22mINFO:     Uvicorn running on http://127.0.0.1:8100 (Press CTRL+C to quit)
 
 Running 1 test using 1 worker
 
-  ok 1 [chromium] › e2e\dash-004.spec.ts:3:5 › dash-004 shows a revenue-to-net-income waterfall that updates by company (940ms)
+  ok 1 [chromium] › e2e\dash-004.spec.ts:3:5 › dash-004 shows a revenue-to-net-income waterfall that updates by company (887ms)
 
-  1 passed (6.0s)
+  1 passed (4.6s)
