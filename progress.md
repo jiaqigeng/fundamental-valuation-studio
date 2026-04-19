@@ -6,7 +6,7 @@
 - Standard startup path: `./init.sh`
 - Standard verification path: `./init.sh` for baseline health plus `feature_list.json -> features[*].verification.command` for feature passing
 - Current highest-priority unfinished feature: `dash-005`
-- Current blocker: none recorded. `dash-005` remains the next roadmap item, and the latest user-requested `dash-004` change reversal restores the connector-only waterfall state.
+- Current blocker: none recorded. `dash-005` remains the next roadmap item, and the latest user-requested `dash-004` refinement now computes `Other Income / Cost` as the residual balancing bucket so the waterfall reconciles to net profits.
 
 ## Session Log
 
@@ -380,4 +380,16 @@
 - Commits: `c078c6a Revert "Record dash-004 negative-profit verification evidence"`; `d9c8f90 Revert "Handle dash-004 negative profit totals"`
 - Files or artifacts updated: `frontend/src/app/_components/income-statement-waterfall-chart.tsx`, `frontend/src/app/globals.css`, `frontend/e2e/dash-004.spec.ts`, `backend/app/clients/market_data_fixtures.py`, `backend/tests/test_company_workspace.py`, `artifacts/verification/dash-004-playwright.log`, `feature_list.json`, `progress.md`, `session-handoff.md`
 - Known risk or unresolved issue: The live waterfall still depends on `yfinance` income-statement row availability and naming. When Yahoo omits gross-profit, operating-income, pretax, or tax rows, the builder fills the missing bridge points with derived values or zeros, so live subtotals may be less precise than the deterministic fixture path.
+- Next best step: Resume the roadmap at `dash-005` unless the user asks for another narrow `dash-004` refinement.
+
+### Session 032
+
+- Date: 2026-04-19
+- Goal: Fix the `dash-004` waterfall so `Other Income / Cost` absorbs any residual mismatch and the displayed bridge reconciles exactly to net profits.
+- Completed: Reworked the backend waterfall builder so `Revenue`, `Cost of Revenue`, `Gross Profit`, `Operating Expenses`, `Operating Profit`, `Taxes`, and `Net Profits` still come from directly fetched statement values or their existing fallbacks, while `Other Income / Cost` is now computed as the residual bucket between operating profit, taxes, and net profits. Added a backend regression test using the live-style mismatch case (`-287.7`, `-3.9`, `-341.9`) to lock the residual at `-50.3` instead of letting a conflicting pretax-derived figure leak into the chart.
+- Verification run: `./init.sh`; `cd backend && .venv/Scripts/python.exe -m pytest tests/test_company_workspace.py -q`; `cd frontend && npm run lint`; `cd frontend && npm run typecheck`; `cd frontend && npx playwright test e2e/dash-004.spec.ts`
+- Evidence captured: `./init.sh` completed successfully before the refinement; backend `cd backend && .venv/Scripts/python.exe -m pytest tests/test_company_workspace.py -q` passed with `9 passed` plus one existing pytest cache warning; frontend `npm run lint` passed; frontend `npm run typecheck` passed; `cd frontend && npx playwright test e2e/dash-004.spec.ts` passed on the first run; log refreshed at `artifacts/verification/dash-004-playwright.log`; implementation commit is `07efa00`.
+- Commits: `07efa00 Compute dash-004 other-income residual`
+- Files or artifacts updated: `backend/app/clients/yahoo_finance.py`, `backend/tests/test_company_workspace.py`, `artifacts/verification/dash-004-playwright.log`, `feature_list.json`, `progress.md`, `session-handoff.md`
+- Known risk or unresolved issue: The live waterfall still depends on `yfinance` income-statement row availability and naming. When Yahoo omits direct statement rows, the builder still falls back to derived values or zeros, so the chart remains best-effort for incomplete live statements even though the displayed bridge now reconciles exactly.
 - Next best step: Resume the roadmap at `dash-005` unless the user asks for another narrow `dash-004` refinement.
