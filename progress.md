@@ -5,8 +5,8 @@
 - Repository root: `c:\Users\gengj\source\repos\FundamentalValuationStudio`
 - Standard startup path: `./init.sh`
 - Standard verification path: `./init.sh` for baseline health plus `feature_list.json -> features[*].verification.command` for feature passing
-- Current highest-priority unfinished feature: `dash-005`
-- Current blocker: none recorded. `dash-005` remains the next roadmap item, and the latest user-requested `dash-004` refinement renames the residual waterfall bucket from `Other Income / Cost` to `Others` while preserving the current zero-anchored axis labeling and no-baseline layout.
+- Current highest-priority unfinished feature: `dash-006`
+- Current blocker: none recorded. `dash-006` is now the next roadmap item after `dash-005` added a passing revenue segment breakdown section that reconciles to total revenue for the fixture-backed dashboard tickers and handles the single-segment `KO` case gracefully.
 
 ## Session Log
 
@@ -453,3 +453,15 @@
 - Files or artifacts updated: `frontend/src/app/_components/income-statement-waterfall-chart.tsx`, `artifacts/verification/dash-004-playwright.log`, `feature_list.json`, `progress.md`, `session-handoff.md`
 - Known risk or unresolved issue: The axis now uses a skew-aware tick strategy rather than a rigid five-tick layout. If later chart requirements demand fixed tick counts regardless of scale skew, this helper may need another pass.
 - Next best step: Resume the roadmap at `dash-005` unless the user asks for another narrow `dash-004` refinement.
+
+### Session 038
+
+- Date: 2026-04-19
+- Goal: Implement `dash-005` under the repository harness and record passing evidence.
+- Completed: Extended the backend workspace schema with a `revenue_segment_breakdown` payload, added fixture-backed revenue segment mixes for `AAPL`, `MSFT`, and a graceful single-segment `KO` case, updated the frontend workspace fetcher, added a dedicated dashboard revenue-breakdown section with proportional bars and reconciliation copy, created `frontend/e2e/dash-005.spec.ts`, and captured the passing Playwright log.
+- Verification run: `./init.sh`; `cd backend && .venv/Scripts/python.exe -m pytest tests/test_company_workspace.py -q`; `cd frontend && npm run lint`; `cd frontend && npm run typecheck`; `cd frontend && npx playwright test e2e/dash-005.spec.ts`
+- Evidence captured: `./init.sh` completed successfully before the feature work; backend `cd backend && .venv/Scripts/python.exe -m pytest tests/test_company_workspace.py -q` passed with `9 passed` plus one existing pytest cache warning; frontend `npm run lint` passed; frontend `npm run typecheck` passed; the initial Playwright attempt hit the local sandbox `spawn EPERM`, then `cd frontend && npx playwright test e2e/dash-005.spec.ts` passed when rerun outside the sandbox; log saved at `artifacts/verification/dash-005-playwright.log`; implementation commit is `facd7f4`.
+- Commits: `facd7f4 Implement dash-005 revenue segment breakdown`
+- Files or artifacts updated: `backend/app/schemas/company_workspace.py`, `backend/app/clients/market_data_fixtures.py`, `backend/app/clients/yahoo_finance.py`, `backend/tests/test_company_workspace.py`, `frontend/src/app/_lib/company-workspace.ts`, `frontend/src/app/dashboard/[ticker]/page.tsx`, `frontend/src/app/_components/revenue-segment-breakdown.tsx`, `frontend/src/app/globals.css`, `frontend/e2e/dash-005.spec.ts`, `artifacts/verification/dash-005-playwright.log`, `feature_list.json`, `progress.md`, `session-handoff.md`
+- Known risk or unresolved issue: The live Yahoo Finance path still does not expose segment detail through the current provider, so this section is fixture-backed for the passing dashboard tickers and intentionally omitted for live tickers when no segment mix is available.
+- Next best step: Resume the roadmap at `dash-006` and add multi-year historical charts for revenue, earnings, and cash flow without regressing the passing dashboard slices.
