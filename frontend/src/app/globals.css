@@ -443,6 +443,11 @@ a {
   letter-spacing: 0.03em;
 }
 
+.waterfall-chart-x-axis-label {
+  font-size: 10.5px;
+  letter-spacing: 0.02em;
+}
+
 .waterfall-bar-total {
   fill: rgba(33, 64, 154, 0.9);
 }

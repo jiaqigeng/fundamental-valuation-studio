@@ -13,11 +13,11 @@ type WaterfallBar = {
 };
 
 const CHART_WIDTH = 860;
-const CHART_HEIGHT = 360;
+const CHART_HEIGHT = 390;
 const CHART_PADDING = {
   top: 26,
   right: 20,
-  bottom: 46,
+  bottom: 78,
   left: 72,
 };
 
@@ -148,11 +148,19 @@ export function IncomeStatementWaterfallChart({
 
               <text
                 x={xForIndex(index)}
-                y={CHART_HEIGHT - 16}
-                className="waterfall-chart-axis-label"
+                y={CHART_HEIGHT - 40}
+                className="waterfall-chart-axis-label waterfall-chart-x-axis-label"
                 textAnchor="middle"
               >
-                {bar.step.label}
+                {getAxisLabelLines(bar.step.label).map((line, lineIndex) => (
+                  <tspan
+                    key={`${bar.step.label}-${line}`}
+                    x={xForIndex(index)}
+                    dy={lineIndex === 0 ? 0 : 14}
+                  >
+                    {line}
+                  </tspan>
+                ))}
               </text>
             </g>
           );
@@ -209,4 +217,32 @@ function buildBars(
       upper: Math.max(start, end),
     };
   });
+}
+
+function getAxisLabelLines(label: string): readonly string[] {
+  if (label === "Other Income / Cost") {
+    return ["Other Income /", "Cost"];
+  }
+
+  if (label === "Cost of Revenue") {
+    return ["Cost of", "Revenue"];
+  }
+
+  if (label === "Operating Expenses") {
+    return ["Operating", "Expenses"];
+  }
+
+  if (label === "Gross Profit") {
+    return ["Gross", "Profit"];
+  }
+
+  if (label === "Operating Profit") {
+    return ["Operating", "Profit"];
+  }
+
+  if (label === "Net Profits") {
+    return ["Net", "Profits"];
+  }
+
+  return [label];
 }
