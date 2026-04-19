@@ -297,12 +297,15 @@ def _build_quote_details(
             _format_optional_percent(_first_number(info.get("returnOnAssets"))),
         ),
         _optional_quote_detail(
-            "Profit Margin",
-            _format_optional_percent(_first_number(info.get("profitMargins"))),
+            "Forward Dividend & Yield",
+            _format_optional_forward_dividend(
+                _first_number(info.get("dividendRate")),
+                _first_number(info.get("dividendYield")),
+            ),
         ),
         _optional_quote_detail(
-            "Operating Margin",
-            _format_optional_percent(_first_number(info.get("operatingMargins"))),
+            "Avg. Volume",
+            _format_optional_integer(_first_number(info.get("averageVolume"))),
         ),
         _optional_quote_detail(
             "Debt to Equity",
@@ -726,10 +729,26 @@ def _format_optional_compact_currency(value: float | int | None) -> str | None:
     return _format_compact_currency(value)
 
 
+def _format_optional_integer(value: float | int | None) -> str | None:
+    if value is None:
+        return None
+    return _format_integer(value)
+
+
 def _format_optional_date(value: float | int | None) -> str | None:
     if value is None:
         return None
     return _format_date(value)
+
+
+def _format_optional_forward_dividend(
+    dividend_rate: float | int | None,
+    dividend_yield: float | int | None,
+) -> str | None:
+    formatted = _format_forward_dividend(dividend_rate, dividend_yield)
+    if formatted == "N/A":
+        return None
+    return formatted
 
 
 def _looks_like_missing_ticker(info: dict) -> bool:

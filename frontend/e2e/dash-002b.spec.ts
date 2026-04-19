@@ -26,10 +26,10 @@ test("dash-002b shows a Yahoo Finance quote snapshot for the workspace", async (
   await expect(snapshot.getByText("33.74%")).toBeVisible();
   await expect(snapshot.getByText(/return on assets \(roa\)/i)).toBeVisible();
   await expect(snapshot.getByText("14.95%")).toBeVisible();
-  await expect(snapshot.getByText(/profit margin/i)).toBeVisible();
-  await expect(snapshot.getByText("35.96%")).toBeVisible();
-  await expect(snapshot.getByText(/operating margin/i)).toBeVisible();
-  await expect(snapshot.getByText("44.64%")).toBeVisible();
+  await expect(snapshot.getByText(/forward dividend & yield/i)).toBeVisible();
+  await expect(snapshot.getByText("3.64 (0.86%)")).toBeVisible();
+  await expect(snapshot.getByText(/avg\. volume/i)).toBeVisible();
+  await expect(snapshot.getByText("32,964,050")).toBeVisible();
   await expect(snapshot.getByText(/debt to equity/i)).toBeVisible();
   await expect(snapshot.getByText("32.11")).toBeVisible();
   await expect(snapshot.getByText(/beta \(5y monthly\)/i)).toBeVisible();
@@ -45,4 +45,6 @@ test("dash-002b shows a Yahoo Finance quote snapshot for the workspace", async (
   await expect(snapshot.getByText("Open", { exact: true })).toHaveCount(0);
   await expect(snapshot.getByText("Bid", { exact: true })).toHaveCount(0);
   await expect(snapshot.getByText("Dividend Date", { exact: true })).toHaveCount(0);
+  await expect(snapshot.getByText("Profit Margin", { exact: true })).toHaveCount(0);
+  await expect(snapshot.getByText("Operating Margin", { exact: true })).toHaveCount(0);
 });
