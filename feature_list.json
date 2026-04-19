@@ -190,14 +190,14 @@
         ]
       },
       "evidence": {
-        "commit": "de3bad1",
+        "commit": "a40305c",
         "verification_run": "cd frontend && npx playwright test e2e/dash-005.spec.ts",
         "output_log": "artifacts/verification/dash-005-playwright.log",
-        "timestamp": "2026-04-19T19:03:31.4126876-04:00"
+        "timestamp": "2026-04-19T19:46:56.2719135-04:00"
       },
       "depends_on": ["dash-002b"],
       "status": "passing",
-      "notes": "Implemented with a backend-backed `revenue_segment_breakdown` payload and a dashboard financial-bridge card that now shows `Revenue breakdown by segments` first and the revenue-to-profits waterfall second inside the same accordion/card. The segment view now renders as a pie/donut chart with a matching legend instead of horizontal bars. For `AAPL`, `MSFT`, and `KO`, the runtime still falls back to the fixture segment mix when the live Yahoo path omits segment detail, so the section stays visible in normal local use for those supported tickers. The single-segment `KO` case renders as one full slice."
+      "notes": "Implemented with a backend-backed `revenue_segment_breakdown` payload and a dashboard financial-bridge card that now shows `Revenue breakdown by segments` first and the revenue-to-profits waterfall second inside the same accordion/card. The segment view renders as a pie/donut chart with a matching legend. The live runtime now calls Financial Modeling Prep's stable revenue product segmentation endpoint using `FVS_FMP_API_KEY`, selects the annual segment row whose total is closest to the company's current revenue, and maps that into the existing segment schema. For supported fixture tickers, the service still falls back to curated fixture segment data when live segment detail is unavailable."
     },
     {
       "id": "dash-006",

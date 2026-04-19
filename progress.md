@@ -6,7 +6,7 @@
 - Standard startup path: `./init.sh`
 - Standard verification path: `./init.sh` for baseline health plus `feature_list.json -> features[*].verification.command` for feature passing
 - Current highest-priority unfinished feature: `dash-006`
-- Current blocker: none recorded. `dash-006` is still the next roadmap item. Separately, the backend now loads `backend/.env` at startup, and that file is the local place to put `FVS_FMP_API_KEY` before we wire the real FMP segment-data client.
+- Current blocker: none recorded. `dash-006` is still the next roadmap item. Separately, the backend now loads `backend/.env` at startup, and the real FMP segment-data client is now wired to `FVS_FMP_API_KEY` for live revenue-segmentation fetches.
 
 ## Session Log
 
@@ -501,3 +501,15 @@
 - Files or artifacts updated: `backend/app/main.py`, `backend/requirements.txt`, `backend/.env` (local ignored file), `docs/backend.md`, `progress.md`, `session-handoff.md`
 - Known risk or unresolved issue: `backend/.env` is intentionally ignored by git, so the file exists locally in this workspace but is not part of repository history. The FMP client itself is still not wired in yet; only the config path now exists.
 - Next best step: The user can place the FMP key in `backend/.env` under `FVS_FMP_API_KEY=...`, then we can implement the real FMP revenue-segmentation client on top of that config.
+
+### Session 042
+
+- Date: 2026-04-19
+- Goal: Replace the fixture-only live segment fallback with a real FMP-backed revenue segmentation path using the configured API key.
+- Completed: Added a dedicated `FinancialModelingPrepClient`, switched it to FMP's current stable revenue product segmentation endpoint, mapped the returned `data` payload into the existing `RevenueSegmentBreakdown` schema, wired the company workspace service to prefer live FMP segment data before falling back to fixtures, and added backend tests that cover both the service preference order and the stable-response parser.
+- Verification run: `cd backend && .venv/Scripts/python.exe -m pytest tests/test_company_workspace.py -q`; `cd frontend && npx playwright test e2e/dash-005.spec.ts`
+- Evidence captured: Backend `cd backend && .venv/Scripts/python.exe -m pytest tests/test_company_workspace.py -q` passed with `12 passed` plus one existing pytest cache warning; `cd frontend && npx playwright test e2e/dash-005.spec.ts` passed outside the sandbox and refreshed `artifacts/verification/dash-005-playwright.log`; a direct outside-sandbox FMP client check for `AAPL` returned a real segment breakdown with `iPhone`, `Services`, `Wearables, Home and Accessories`, `Mac`, and `iPad`, totaling `$391.0B`; implementation commit is `a40305c`.
+- Commits: `a40305c Fetch live dash-005 revenue segments from FMP`
+- Files or artifacts updated: `backend/app/clients/financial_modeling_prep.py`, `backend/app/services/company_workspace.py`, `backend/tests/test_company_workspace.py`, `artifacts/verification/dash-005-playwright.log`, `feature_list.json`, `progress.md`, `session-handoff.md`
+- Known risk or unresolved issue: The full live workspace route still depends on Yahoo for the broader company snapshot, so in environments where Yahoo is blocked but FMP is reachable, the direct FMP client works but the end-to-end live dashboard route can still fail before it gets to the segment fetch. The FMP selector currently chooses the annual segment row whose total is closest to the current revenue anchor; if fiscal-year alignment needs to become stricter later, that heuristic may need refinement.
+- Next best step: Resume the roadmap at `dash-006`, or if the user wants more live-data hardening first, reduce the dashboard's dependency on Yahoo for other sections that still block end-to-end live workspace fetches.
