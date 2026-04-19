@@ -49,6 +49,8 @@ export function IncomeStatementWaterfallChart({
 
   const xForIndex = (index: number) =>
     CHART_PADDING.left + (plotWidth * (index + 0.5)) / steps.length;
+  const leftXForIndex = (index: number) => xForIndex(index) - barWidth / 2;
+  const rightXForIndex = (index: number) => xForIndex(index) + barWidth / 2;
 
   const yForValue = (value: number) =>
     CHART_PADDING.top + ((paddedMax - value) / paddedRange) * plotHeight;
@@ -112,12 +114,39 @@ export function IncomeStatementWaterfallChart({
           className="waterfall-chart-baseline"
         />
 
+        {bars.slice(0, -1).map((bar, index) => {
+          const nextBar = bars[index + 1];
+
+          if (!nextBar) {
+            return null;
+          }
+
+          const connectorStartY = yForValue(getConnectorExitValue(bar));
+          const connectorEndY = yForValue(getConnectorEntryValue(nextBar));
+          const connectorStartX = rightXForIndex(index);
+          const connectorEndX = leftXForIndex(index + 1);
+          const connectorMidX =
+            connectorStartX + (connectorEndX - connectorStartX) / 2;
+          const connectorPath =
+            Math.abs(connectorStartY - connectorEndY) < 0.5
+              ? `M ${connectorStartX} ${connectorStartY} H ${connectorEndX}`
+              : `M ${connectorStartX} ${connectorStartY} H ${connectorMidX} V ${connectorEndY} H ${connectorEndX}`;
+
+          return (
+            <path
+              key={`${bar.step.label}-${nextBar.step.label}`}
+              d={connectorPath}
+              fill="none"
+              className="waterfall-chart-connector"
+            />
+          );
+        })}
+
         {bars.map((bar, index) => {
-          const previousBar = bars[index - 1];
           const rawHeight = yForValue(bar.lower) - yForValue(bar.upper);
           const barHeight = Math.max(rawHeight, 3);
           const barY = rawHeight < 3 ? yForValue(bar.upper) - 1.5 : yForValue(bar.upper);
-          const x = xForIndex(index) - barWidth / 2;
+          const x = leftXForIndex(index);
           const toneClass =
             bar.step.stepType === "total"
               ? "waterfall-bar-total"
@@ -127,16 +156,6 @@ export function IncomeStatementWaterfallChart({
 
           return (
             <g key={bar.step.label}>
-              {previousBar && bar.step.stepType === "delta" ? (
-                <line
-                  x1={xForIndex(index - 1) + barWidth / 2}
-                  x2={xForIndex(index) - barWidth / 2}
-                  y1={yForValue(bar.start)}
-                  y2={yForValue(bar.start)}
-                  className="waterfall-chart-connector"
-                />
-              ) : null}
-
               <rect
                 x={x}
                 y={barY}
@@ -217,6 +236,14 @@ function buildBars(
       upper: Math.max(start, end),
     };
   });
+}
+
+function getConnectorEntryValue(bar: WaterfallBar) {
+  return bar.step.stepType === "total" ? bar.end : bar.start;
+}
+
+function getConnectorExitValue(bar: WaterfallBar) {
+  return bar.end;
 }
 
 function getAxisLabelLines(label: string): readonly string[] {

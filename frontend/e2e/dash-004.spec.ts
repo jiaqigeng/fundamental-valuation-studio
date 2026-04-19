@@ -10,9 +10,9 @@ test("dash-004 shows a revenue-to-net-income waterfall that updates by company",
   });
 
   await expect(waterfall).toBeVisible();
-  await expect(
-    waterfall.getByLabel("Revenue to net income waterfall chart"),
-  ).toBeVisible();
+  const waterfallChart = waterfall.getByLabel("Revenue to net income waterfall chart");
+  await expect(waterfallChart).toBeVisible();
+  await expect(waterfallChart.locator("path.waterfall-chart-connector")).toHaveCount(7);
   await expectWaterfallMetric(waterfall, "Revenue", "$391.0B");
   await expectWaterfallMetric(waterfall, "Cost of Revenue", "-$223.5B");
   await expectWaterfallMetric(waterfall, "Gross Profit", "$167.5B");
@@ -29,6 +29,12 @@ test("dash-004 shows a revenue-to-net-income waterfall that updates by company",
   });
 
   await expect(consumerWaterfall).toBeVisible();
+  const consumerWaterfallChart = consumerWaterfall.getByLabel(
+    "Revenue to net income waterfall chart",
+  );
+  await expect(consumerWaterfallChart.locator("path.waterfall-chart-connector")).toHaveCount(
+    7,
+  );
   await expectWaterfallMetric(consumerWaterfall, "Revenue", "$47.1B");
   await expectWaterfallMetric(consumerWaterfall, "Cost of Revenue", "-$18.5B");
   await expectWaterfallMetric(consumerWaterfall, "Gross Profit", "$28.6B");
