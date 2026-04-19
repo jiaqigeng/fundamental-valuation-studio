@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { PerformanceComparisonChart } from "@/app/_components/performance-comparison-chart";
+import type { PerformanceSeries } from "@/app/_lib/company-workspace";
 import type { PerformanceChartRange } from "@/app/_lib/company-workspace";
 
 type PerformanceComparisonSectionProps = {
@@ -69,7 +70,9 @@ export function PerformanceComparisonSection({
                 />
                 <p className="market-context-symbol">{series.symbol}</p>
               </div>
-              <p className="market-context-change">{series.dailyChange}</p>
+              <p className="market-context-change">
+                {formatSelectedRangeReturn(series)}
+              </p>
             </div>
             <p className="market-context-label">{series.label}</p>
             <p className="market-context-value">{series.currentValue}</p>
@@ -78,4 +81,22 @@ export function PerformanceComparisonSection({
       </div>
     </section>
   );
+}
+
+const percentFormatter = new Intl.NumberFormat("en-US", {
+  minimumFractionDigits: 1,
+  maximumFractionDigits: 1,
+  signDisplay: "always",
+});
+
+function formatSelectedRangeReturn(series: PerformanceSeries): string {
+  const firstPoint = series.points[0];
+  const lastPoint = series.points[series.points.length - 1];
+
+  if (!firstPoint || !lastPoint || firstPoint.value === 0) {
+    return "N/A";
+  }
+
+  const percentReturn = ((lastPoint.value - firstPoint.value) / firstPoint.value) * 100;
+  return `${percentFormatter.format(percentReturn)}%`;
 }

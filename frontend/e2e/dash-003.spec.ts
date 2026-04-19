@@ -27,13 +27,14 @@ test("dash-003 shows broad-market and sector-relevant context that updates by co
   await expect(marketContext.getByText("^GSPC", { exact: true })).toBeVisible();
   await expect(marketContext.getByText("$212.48")).toBeVisible();
   await expect(marketContext.getByText("7,126.06")).toBeVisible();
-  await expect(marketContext.getByText("+84.78 (+1.20%)")).toBeVisible();
+  await expect(marketContext.getByText("+8.2%")).toBeVisible();
+  await expect(marketContext.getByText("+5.0%")).toBeVisible();
   await expect(
     marketContext.getByText("Technology sector benchmark", { exact: true }),
   ).toBeVisible();
   await expect(marketContext.getByText("XLK", { exact: true })).toBeVisible();
   await expect(marketContext.getByText("154.35")).toBeVisible();
-  await expect(marketContext.getByText("+2.33 (+1.53%)")).toBeVisible();
+  await expect(marketContext.getByText("+9.6%")).toBeVisible();
   await expect(marketContext.getByText("May 2025", { exact: true })).toBeVisible();
 
   await marketContext.getByRole("button", { name: "5Y" }).click();
@@ -45,6 +46,9 @@ test("dash-003 shows broad-market and sector-relevant context that updates by co
     marketContext.getByText("Showing 5 year normalized performance.", { exact: true }),
   ).toBeVisible();
   await expect(marketContext.getByText("Apr 2021", { exact: true })).toBeVisible();
+  await expect(marketContext.getByText("+76.4%")).toBeVisible();
+  await expect(marketContext.getByText("+46.0%")).toBeVisible();
+  await expect(marketContext.getByText("+68.8%")).toBeVisible();
 
   await page.goto("/dashboard/KO");
 
@@ -62,7 +66,8 @@ test("dash-003 shows broad-market and sector-relevant context that updates by co
   await expect(consumerContext.getByText("$62.15")).toBeVisible();
   await expect(consumerContext.getByText("XLP", { exact: true })).toBeVisible();
   await expect(consumerContext.getByText("82.46")).toBeVisible();
-  await expect(consumerContext.getByText("+1.03 (+1.26%)")).toBeVisible();
+  await expect(consumerContext.getByText("+4.4%")).toBeVisible();
+  await expect(consumerContext.getByText("+3.8%")).toBeVisible();
   await expect(
     consumerContext.getByRole("button", { name: "1Y" }),
   ).toHaveAttribute("aria-pressed", "true");
