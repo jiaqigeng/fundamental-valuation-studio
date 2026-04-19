@@ -1,5 +1,6 @@
 from fastapi.testclient import TestClient
 
+from app.clients.yahoo_finance import _format_forward_dividend
 from app.main import app
 
 
@@ -25,6 +26,10 @@ def test_company_workspace_fixture_response(monkeypatch) -> None:
         "label": "Ex-Dividend Date",
         "value": "Mar 9, 2026",
     }
+    assert body["quote_details"][-2] == {
+        "label": "Forward Dividend & Yield",
+        "value": "3.64 (0.86%)",
+    }
     assert body["market_contexts"] == [
         {
             "label": "S&P 500",
@@ -41,6 +46,14 @@ def test_company_workspace_fixture_response(monkeypatch) -> None:
             "description": "Sector proxy chosen from the company's reported sector.",
         },
     ]
+    assert len(body["performance_chart"]) == 3
+    assert body["performance_chart"][0]["symbol"] == "MSFT"
+    assert body["performance_chart"][0]["points"][0] == {
+        "label": "Mar 18",
+        "value": 100.0,
+    }
+    assert body["performance_chart"][1]["symbol"] == "^GSPC"
+    assert body["performance_chart"][2]["symbol"] == "XLK"
 
 
 def test_company_workspace_fixture_404(monkeypatch) -> None:
@@ -49,3 +62,7 @@ def test_company_workspace_fixture_404(monkeypatch) -> None:
     response = client.get("/companies/ZZZZ/workspace")
 
     assert response.status_code == 404
+
+
+def test_format_forward_dividend_uses_yfinance_percent_points() -> None:
+    assert _format_forward_dividend(1.04, 0.38) == "1.04 (0.38%)"

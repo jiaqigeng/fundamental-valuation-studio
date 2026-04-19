@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import date
 from datetime import UTC, datetime
 from decimal import Decimal, ROUND_HALF_UP
 from pathlib import Path
@@ -11,6 +12,8 @@ import yfinance as yf
 from app.schemas.company_workspace import (
     CompanyWorkspaceSnapshot,
     MarketContextCard,
+    PerformancePoint,
+    PerformanceSeries,
     QuoteDetail,
 )
 
@@ -46,6 +49,7 @@ class YahooFinanceLookupError(RuntimeError):
 class YahooWorkspacePayload:
     company_info: dict
     market_contexts: list[MarketContextCard]
+    performance_chart: list[PerformanceSeries]
 
 
 class YahooFinanceClient:
@@ -72,6 +76,10 @@ class YahooFinanceClient:
             info.get("regularMarketPrice"),
         )
         market_cap = _first_number(info.get("marketCap"))
+        company_daily_change = _format_daily_change(
+            _first_number(info.get("regularMarketChange")),
+            _first_number(info.get("regularMarketChangePercent")),
+        )
 
         return CompanyWorkspaceSnapshot(
             ticker=ticker,
@@ -159,6 +167,7 @@ class YahooFinanceClient:
                 ),
             ],
             market_contexts=payload.market_contexts,
+            performance_chart=payload.performance_chart,
         )
 
     def _fetch_payload(self, ticker: str) -> YahooWorkspacePayload:
@@ -175,10 +184,41 @@ class YahooFinanceClient:
             )
 
         sector = _string_field(company_info, "sector") or "Unknown sector"
+        current_price = _first_number(
+            company_info.get("currentPrice"),
+            company_info.get("regularMarketPrice"),
+        )
+        company_daily_change = _format_daily_change(
+            _first_number(company_info.get("regularMarketChange")),
+            _first_number(company_info.get("regularMarketChangePercent")),
+        )
+        benchmark_symbol, benchmark_label = SECTOR_INDEXES.get(
+            sector,
+            ("XLK", "Sector benchmark"),
+        )
+        market_contexts = [
+            _build_market_context_card(
+                label="S&P 500",
+                symbol="^GSPC",
+                description="Broad-market baseline for the current U.S. session.",
+            ),
+            _build_market_context_card(
+                label=benchmark_label,
+                symbol=benchmark_symbol,
+                description="Sector proxy chosen from the company's reported sector.",
+            ),
+        ]
 
         return YahooWorkspacePayload(
             company_info=company_info,
-            market_contexts=_build_market_contexts(sector),
+            market_contexts=market_contexts,
+            performance_chart=_build_performance_chart(
+                ticker=ticker,
+                company_name=_string_field(company_info, "shortName") or ticker,
+                company_current_value=_format_currency(current_price),
+                company_daily_change=company_daily_change,
+                market_contexts=market_contexts,
+            ),
         )
 
 
@@ -193,25 +233,6 @@ def _configure_yfinance_cache() -> None:
         YFINANCE_CACHE_DIR.mkdir(parents=True, exist_ok=True)
         yf.set_tz_cache_location(str(YFINANCE_CACHE_DIR))
         _CACHE_CONFIGURED = True
-
-
-def _build_market_contexts(sector: str) -> list[MarketContextCard]:
-    benchmark_symbol, benchmark_label = SECTOR_INDEXES.get(
-        sector,
-        ("XLK", "Sector benchmark"),
-    )
-    return [
-        _build_market_context_card(
-            label="S&P 500",
-            symbol="^GSPC",
-            description="Broad-market baseline for the current U.S. session.",
-        ),
-        _build_market_context_card(
-            label=benchmark_label,
-            symbol=benchmark_symbol,
-            description="Sector proxy chosen from the company's reported sector.",
-        ),
-    ]
 
 
 def _build_market_context_card(
@@ -247,6 +268,114 @@ def _build_market_context_card(
         ),
         description=description,
     )
+
+
+def _build_performance_chart(
+    *,
+    ticker: str,
+    company_name: str,
+    company_current_value: str,
+    company_daily_change: str,
+    market_contexts: list[MarketContextCard],
+) -> list[PerformanceSeries]:
+    comparison_series = [
+        (
+            company_name,
+            ticker,
+            company_current_value,
+            company_daily_change,
+            "#21409A",
+        ),
+        (
+            market_contexts[0].label,
+            market_contexts[0].symbol,
+            market_contexts[0].value,
+            market_contexts[0].daily_change,
+            "#0F766E",
+        ),
+        (
+            market_contexts[1].label,
+            market_contexts[1].symbol,
+            market_contexts[1].value,
+            market_contexts[1].daily_change,
+            "#C48A2C",
+        ),
+    ]
+
+    history_by_symbol = {
+        symbol: _fetch_history_points(symbol) for _, symbol, _, _, _ in comparison_series
+    }
+    common_dates = sorted(
+        set.intersection(*(set(history.keys()) for history in history_by_symbol.values()))
+    )[-20:]
+
+    if len(common_dates) < 2:
+        raise YahooFinanceLookupError(
+            f"Yahoo Finance returned insufficient history to compare ticker {ticker}."
+        )
+
+    chart_series: list[PerformanceSeries] = []
+    for label, symbol, current_value, daily_change, line_color in comparison_series:
+        history = history_by_symbol[symbol]
+        baseline = history[common_dates[0]]
+        chart_series.append(
+            PerformanceSeries(
+                label=label,
+                symbol=symbol,
+                current_value=current_value,
+                daily_change=daily_change,
+                line_color=line_color,
+                points=[
+                    PerformancePoint(
+                        label=_format_history_label(point_date),
+                        value=_normalize_history_value(history[point_date], baseline),
+                    )
+                    for point_date in common_dates
+                ],
+            )
+        )
+
+    return chart_series
+
+
+def _fetch_history_points(symbol: str) -> dict[date, float]:
+    try:
+        history = yf.Ticker(symbol).history(period="1mo", interval="1d", auto_adjust=False)
+    except Exception as exc:  # pragma: no cover - upstream library errors vary.
+        raise YahooFinanceLookupError(
+            f"yfinance history request failed for symbol {symbol}."
+        ) from exc
+
+    close_history = history.get("Close")
+    if close_history is None:
+        raise YahooFinanceLookupError(
+            f"Yahoo Finance returned no close history for symbol {symbol}."
+        )
+
+    history_points: dict[date, float] = {}
+    for timestamp, close_value in close_history.items():
+        if isinstance(close_value, (int, float)):
+            history_points[timestamp.to_pydatetime().date()] = float(close_value)
+
+    if not history_points:
+        raise YahooFinanceLookupError(
+            f"Yahoo Finance returned empty history for symbol {symbol}."
+        )
+
+    return history_points
+
+
+def _format_history_label(value: date) -> str:
+    return value.strftime("%b %d").replace(" 0", " ")
+
+
+def _normalize_history_value(value: float, baseline: float) -> float:
+    if baseline == 0:
+        return 100.0
+    normalized = Decimal(str((value / baseline) * 100)).quantize(
+        Decimal("0.01"), rounding=ROUND_HALF_UP
+    )
+    return float(normalized)
 
 
 def _string_field(payload: dict, key: str) -> str | None:
@@ -406,12 +535,7 @@ def _format_forward_dividend(
     if dividend_yield is None:
         return rate_text
 
-    normalized_yield = (
-        float(dividend_yield) * 100
-        if abs(float(dividend_yield)) <= 1
-        else float(dividend_yield)
-    )
-    yield_percent = Decimal(str(normalized_yield)).quantize(
+    yield_percent = Decimal(str(float(dividend_yield))).quantize(
         Decimal("0.01"), rounding=ROUND_HALF_UP
     )
     return f"{rate_text} ({yield_percent}%)"

@@ -2,20 +2,20 @@
 
 ## Verified Now
 
-- What is currently working: The repo boots with `./init.sh`, the landing page accepts a ticker, `/dashboard/[ticker]` loads company identity plus key stats, the dashboard shows a `yfinance`-backed quote snapshot and a market-context section with the S&P 500 plus a sector-relevant benchmark, backend health-check and workspace tests pass, and `dash-001`, `dash-002`, `dash-002b`, and `dash-003` are recorded as passing.
-- What verification actually ran: `./init.sh`; `cd backend && .venv/Scripts/python.exe -m pytest -q`; `cd frontend && npm run lint`; `cd frontend && npm run typecheck`; `cd frontend && npx playwright test e2e/dash-003.spec.ts`
+- What is currently working: The repo boots with `./init.sh`, the landing page accepts a ticker, `/dashboard/[ticker]` loads company identity plus key stats, the quote snapshot now formats forward dividend and yield without the 100x inflation bug, and the last dashboard section renders a normalized three-line comparison chart for the company, the S&P 500, and the sector benchmark. Backend health-check and workspace tests pass, and `dash-001`, `dash-002`, `dash-002b`, and `dash-003` remain recorded as passing.
+- What verification actually ran: `./init.sh`; `cd backend && .venv/Scripts/python.exe -m pytest -q`; `cd frontend && npm run lint`; `cd frontend && npm run typecheck`; `cd frontend && npx playwright test e2e/dash-002b.spec.ts e2e/dash-003.spec.ts`
 
 ## Changed This Session
 
-- Code or behavior added: Swapped the backend market-data provider from hand-rolled Yahoo HTTP calls to `yfinance`, pointed the library cache at a repo-local writable directory, extended the workspace payload with market-context cards, and rendered a new dashboard section that shows company price alongside the S&P 500 and a sector-relevant benchmark.
-- Infrastructure or harness changes: Added `yfinance` to `backend/requirements.txt`, extended fixture and pytest coverage for the workspace payload, created `frontend/e2e/dash-003.spec.ts`, moved Playwright's test-only ports to `3100/8100` so it does not accidentally reuse stale local servers on `3000/8000`, and captured the passing output at `artifacts/verification/dash-003-playwright.log`.
-- Documentation changes: Repository tracking artifacts now record the resolved live-provider blocker and the new active next step.
+- Code or behavior added: Corrected the `yfinance` forward-dividend formatter so yields are no longer inflated by 100x, extended the workspace payload with normalized recent-history series, and replaced the last dashboard section with a chart that starts the company, S&P 500, and sector benchmark at the same baseline so their growth paths are directly comparable.
+- Infrastructure or harness changes: Extended backend pytest coverage with a forward-dividend formatting assertion and fixture performance-chart assertions, and updated the affected Playwright specs for `dash-002b` and `dash-003`.
+- Documentation changes: Repository tracking artifacts now record this user-requested exception update while keeping `dash-004` as the next unfinished feature.
 
 ## Broken Or Unverified
 
 - Unverified path: Later per-feature verification files in `feature_list.json` remain unstarted until their features become active.
-- Risk for the next session: `yfinance` is still an unofficial Yahoo wrapper, so upstream field names and availability can drift even though the current live `NVDA` check succeeded after the provider swap.
-- Working tree note: User-owned changes still exist in `AGENTS.md` and `.claude/`; they were intentionally left untouched while recording `dash-003`.
+- Risk for the next session: `yfinance` is still an unofficial Yahoo wrapper, so upstream field names and recent-history availability can drift even though the current live checks succeeded after the provider swap.
+- Working tree note: User-owned changes still exist in `AGENTS.md` and `.claude/`; they were intentionally left untouched while recording this exception update.
 
 ## Next Best Step
 

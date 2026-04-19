@@ -1,22 +1,32 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f5efe3;
-  --foreground: #14213d;
-  --surface: rgba(255, 252, 245, 0.84);
-  --surface-strong: #fffaf0;
-  --accent: #c25b2a;
-  --accent-strong: #8f3b17;
-  --muted: #5f6b7a;
-  --border: rgba(20, 33, 61, 0.14);
-  --shadow: 0 24px 80px rgba(20, 33, 61, 0.12);
+  --background: #eaf1f7;
+  --foreground: #162033;
+  --surface: rgba(247, 250, 253, 0.94);
+  --surface-strong: #ffffff;
+  --accent: #21409a;
+  --accent-strong: #0f766e;
+  --muted: #54657d;
+  --border: rgba(22, 32, 51, 0.12);
+  --shadow: 0 24px 60px rgba(29, 48, 84, 0.1);
+  --dashboard-ink: #132033;
+  --dashboard-panel: rgba(255, 255, 255, 0.9);
+  --dashboard-panel-strong: #ffffff;
+  --dashboard-line: rgba(33, 64, 154, 0.12);
+  --dashboard-highlight: #c48a2c;
+  --dashboard-teal: #0f766e;
+  --dashboard-blue: #21409a;
+  --dashboard-soft-blue: rgba(33, 64, 154, 0.08);
+  --dashboard-soft-teal: rgba(15, 118, 110, 0.08);
+  --dashboard-soft-gold: rgba(196, 138, 44, 0.1);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-fira-sans);
+  --font-mono: var(--font-fira-code);
 }
 
 * {
@@ -31,10 +41,11 @@ body {
   min-height: 100vh;
   margin: 0;
   background:
-    radial-gradient(circle at top, rgba(194, 91, 42, 0.22), transparent 34%),
-    linear-gradient(180deg, #f9f4ea 0%, #efe5d0 100%);
+    radial-gradient(circle at top left, rgba(33, 64, 154, 0.16), transparent 32%),
+    radial-gradient(circle at top right, rgba(15, 118, 110, 0.12), transparent 28%),
+    linear-gradient(180deg, #f6f9fc 0%, #deebf5 100%);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), sans-serif;
+  font-family: var(--font-fira-sans), sans-serif;
 }
 
 a {
@@ -44,7 +55,7 @@ a {
 
 .landing-shell,
 .dashboard-shell {
-  width: min(100%, 72rem);
+  width: min(100%, 78rem);
   margin: 0 auto;
   padding: 4rem 1.5rem 5rem;
 }
@@ -59,7 +70,7 @@ a {
 .supported-companies,
 .dashboard-hero {
   border: 1px solid var(--border);
-  border-radius: 1.75rem;
+  border-radius: 1.5rem;
   background: var(--surface);
   box-shadow: var(--shadow);
   backdrop-filter: blur(14px);
@@ -70,13 +81,28 @@ a {
   padding: 2rem;
 }
 
-.dashboard-shell {
-  display: grid;
-  gap: 1.25rem;
+.dashboard-hero,
+.workspace-accordion {
+  border-color: var(--dashboard-line);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(241, 247, 252, 0.95));
+  box-shadow: 0 20px 44px rgba(29, 48, 84, 0.1);
 }
 
-.dashboard-hero-header,
-.overview-header {
+.dashboard-hero {
+  background:
+    radial-gradient(circle at top right, rgba(15, 118, 110, 0.1), transparent 30%),
+    radial-gradient(circle at left center, rgba(33, 64, 154, 0.12), transparent 36%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(239, 246, 252, 0.96));
+}
+
+.dashboard-shell {
+  display: grid;
+  gap: 1rem;
+  color: var(--dashboard-ink);
+}
+
+.dashboard-hero-header {
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -85,18 +111,19 @@ a {
 .dashboard-hero h1,
 .landing-hero h1 {
   margin: 0;
-  font-size: clamp(2.75rem, 8vw, 5rem);
-  line-height: 0.95;
-  letter-spacing: -0.06em;
+  font-size: clamp(2.8rem, 7vw, 4.6rem);
+  line-height: 0.98;
+  letter-spacing: -0.05em;
 }
 
 .eyebrow,
 .panel-label {
-  margin: 0 0 0.9rem;
-  color: var(--accent-strong);
-  font-size: 0.82rem;
-  font-weight: 700;
-  letter-spacing: 0.16em;
+  margin: 0 0 0.8rem;
+  color: var(--dashboard-blue);
+  font-family: var(--font-fira-code), monospace;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
 }
 
@@ -104,10 +131,10 @@ a {
 .panel-copy,
 .ticker-search-help {
   margin: 1rem 0 0;
-  max-width: 40rem;
+  max-width: 44rem;
   color: var(--muted);
-  font-size: 1rem;
-  line-height: 1.65;
+  font-size: 0.98rem;
+  line-height: 1.7;
 }
 
 .ticker-search-form {
@@ -137,16 +164,17 @@ a {
 .ticker-search-input {
   width: 100%;
   min-height: 3.5rem;
-  border: 1px solid rgba(20, 33, 61, 0.16);
+  border: 1px solid rgba(15, 23, 42, 0.16);
   background: rgba(255, 255, 255, 0.78);
   padding: 0 1.1rem;
   font-size: 1rem;
   color: var(--foreground);
 }
 
-.ticker-search-input:focus-visible {
-  outline: 2px solid rgba(194, 91, 42, 0.4);
-  outline-offset: 2px;
+.ticker-search-input:focus-visible,
+.workspace-accordion-summary:focus-visible {
+  outline: 2px solid rgba(33, 64, 154, 0.28);
+  outline-offset: 3px;
 }
 
 .ticker-search-button,
@@ -157,10 +185,10 @@ a {
   justify-content: center;
   min-height: 3.5rem;
   border: none;
-  background: linear-gradient(135deg, var(--accent) 0%, #d58a51 100%);
+  background: linear-gradient(135deg, #21409a 0%, #0f766e 100%);
   padding: 0 1.5rem;
-  color: #fff8f0;
-  font-size: 0.96rem;
+  color: #f8fafc;
+  font-size: 0.92rem;
   font-weight: 700;
   transition:
     transform 160ms ease,
@@ -172,7 +200,7 @@ a {
 .ticker-chip:hover,
 .back-link:hover {
   transform: translateY(-1px);
-  box-shadow: 0 12px 28px rgba(143, 59, 23, 0.2);
+  box-shadow: 0 12px 28px rgba(33, 64, 154, 0.22);
 }
 
 .ticker-search-button:disabled {
@@ -182,25 +210,85 @@ a {
 
 .supported-companies,
 .workspace-panel {
-  padding: 1.5rem 1.75rem;
+  padding: 1.35rem 1.5rem;
 }
 
-.overview-grid {
-  display: grid;
+.workspace-accordion {
+  border: 1px solid var(--dashboard-line);
+  border-radius: 1.5rem;
+  overflow: hidden;
+  position: relative;
+}
+
+.workspace-accordion::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--dashboard-blue), var(--dashboard-teal), var(--dashboard-highlight));
+  opacity: 0.9;
+}
+
+.workspace-accordion h2 {
+  margin: 0;
+  font-size: clamp(1.45rem, 3.5vw, 1.95rem);
+  letter-spacing: -0.03em;
+  line-height: 1.12;
+}
+
+.workspace-accordion-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   gap: 1.25rem;
+  list-style: none;
+  cursor: pointer;
+  padding: 1.2rem 1.5rem;
 }
 
-.quote-snapshot-panel h2,
-.market-context-panel h2 {
-  margin: 0;
-  font-size: clamp(1.8rem, 4vw, 2.3rem);
-  letter-spacing: -0.04em;
+.workspace-accordion-summary::-webkit-details-marker {
+  display: none;
 }
 
-.overview-card h2 {
-  margin: 0;
-  font-size: clamp(1.8rem, 4vw, 2.5rem);
-  letter-spacing: -0.04em;
+.workspace-accordion-toggle {
+  position: relative;
+  flex: 0 0 auto;
+  width: 2.4rem;
+  height: 2.4rem;
+  border: 1px solid rgba(33, 64, 154, 0.16);
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(232, 240, 249, 0.92));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    background-color 160ms ease;
+}
+
+.workspace-accordion-summary:hover .workspace-accordion-toggle {
+  border-color: rgba(33, 64, 154, 0.32);
+  background: linear-gradient(180deg, rgba(236, 244, 255, 0.98), rgba(220, 235, 252, 0.96));
+}
+
+.workspace-accordion-toggle::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0.58rem;
+  height: 0.58rem;
+  border-right: 2px solid var(--dashboard-blue);
+  border-bottom: 2px solid var(--dashboard-blue);
+  transform: translate(-50%, -62%) rotate(45deg);
+  transition: transform 160ms ease;
+}
+
+.workspace-accordion[open] .workspace-accordion-toggle::after {
+  transform: translate(-50%, -38%) rotate(225deg);
+}
+
+.workspace-accordion-body {
+  padding: 0 1.5rem 1.5rem;
 }
 
 .ticker-pill,
@@ -210,124 +298,166 @@ a {
   justify-content: center;
   align-self: flex-start;
   border-radius: 999px;
-  background: rgba(20, 33, 61, 0.08);
-  padding: 0.55rem 0.9rem;
-  font-size: 0.92rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  background: rgba(33, 64, 154, 0.08);
+  color: var(--dashboard-blue);
+  padding: 0.5rem 0.85rem;
+  font-family: var(--font-fira-code), monospace;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 
-.fact-list {
-  margin: 1.5rem 0 0;
+.overview-card {
+  padding: 0;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.overview-meta-grid {
+  display: grid;
+  gap: 0.9rem;
+  margin: 0;
 }
 
 .fact-item {
   display: grid;
   gap: 0.35rem;
+  border: 1px solid var(--dashboard-line);
+  border-radius: 1.15rem;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(244, 248, 252, 0.92));
+  padding: 1.1rem 1.15rem;
 }
 
 .fact-item dt,
-.stat-label {
+.quote-detail-card dt {
   margin: 0;
   color: var(--muted);
-  font-size: 0.82rem;
-  font-weight: 700;
+  font-family: var(--font-fira-code), monospace;
+  font-size: 0.74rem;
+  font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
-.fact-item dd,
-.stat-value {
+.fact-item dd {
   margin: 0;
-  font-size: clamp(1.55rem, 3vw, 2.15rem);
-  font-weight: 700;
-  letter-spacing: -0.05em;
+  font-size: clamp(1.28rem, 2.6vw, 1.72rem);
+  font-weight: 600;
+  letter-spacing: -0.035em;
 }
 
-.company-summary,
-.stat-copy {
-  margin: 1.25rem 0 0;
+.overview-summary-block {
+  margin-top: 0.95rem;
+  border: 1px solid var(--dashboard-line);
+  border-radius: 1.15rem;
+  background:
+    linear-gradient(135deg, rgba(33, 64, 154, 0.04), rgba(255, 255, 255, 0.98)),
+    var(--dashboard-panel-strong);
+  padding: 1.35rem 1.45rem;
+}
+
+.company-summary {
+  margin: 0;
   color: var(--muted);
-  line-height: 1.7;
-}
-
-.stats-grid {
-  display: grid;
-  gap: 1rem;
-}
-
-.quote-snapshot-header {
-  display: grid;
-  gap: 1rem;
-}
-
-.market-context-header {
-  display: grid;
-  gap: 1rem;
-}
-
-.quote-snapshot-copy {
-  max-width: 30rem;
-}
-
-.market-context-copy {
-  max-width: 36rem;
+  font-size: 1rem;
+  line-height: 1.78;
 }
 
 .quote-detail-grid {
   display: grid;
-  gap: 1rem;
-  margin: 1.5rem 0 0;
+  gap: 0.9rem;
+  margin: 0;
 }
 
 .quote-detail-card {
-  border: 1px solid rgba(20, 33, 61, 0.08);
-  border-radius: 1.4rem;
-  background: rgba(255, 255, 255, 0.56);
-  padding: 1.2rem;
-}
-
-.quote-detail-card dt {
-  margin: 0;
-  color: var(--muted);
-  font-size: 0.82rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  border: 1px solid var(--dashboard-line);
+  border-radius: 1.15rem;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(245, 249, 253, 0.92));
+  padding: 1.15rem;
 }
 
 .quote-detail-card dd {
   margin: 0.5rem 0 0;
-  font-size: 1.25rem;
-  font-weight: 700;
+  font-size: 1.15rem;
+  font-weight: 600;
   letter-spacing: -0.03em;
 }
 
-.stat-card {
-  border: 1px solid rgba(20, 33, 61, 0.08);
-  border-radius: 1.4rem;
-  background: rgba(255, 255, 255, 0.56);
-  padding: 1.2rem;
+.comparison-chart-shell {
+  display: grid;
+  gap: 1rem;
+}
+
+.comparison-chart-copy-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.comparison-chart-copy {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.94rem;
+  line-height: 1.6;
+}
+
+.comparison-chart {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.comparison-chart-frame {
+  fill: rgba(246, 250, 253, 0.95);
+  stroke: rgba(33, 64, 154, 0.08);
+}
+
+.comparison-chart-gridline {
+  stroke: rgba(33, 64, 154, 0.1);
+  stroke-width: 1;
+}
+
+.comparison-chart-baseline {
+  stroke: rgba(196, 138, 44, 0.5);
+  stroke-width: 1.4;
+  stroke-dasharray: 6 5;
+}
+
+.comparison-chart-axis-label {
+  fill: var(--muted);
+  font-family: var(--font-fira-code), monospace;
+  font-size: 11px;
+  letter-spacing: 0.03em;
 }
 
 .market-context-grid {
   display: grid;
-  gap: 1rem;
-  margin: 1.5rem 0 0;
+  gap: 0.9rem;
+  margin: 0;
+}
+
+.market-context-grid-legend {
+  margin-top: 1rem;
 }
 
 .market-context-card {
-  border: 1px solid rgba(20, 33, 61, 0.08);
-  border-radius: 1.4rem;
-  background: rgba(255, 255, 255, 0.56);
-  padding: 1.2rem;
+  border: 1px solid var(--dashboard-line);
+  border-radius: 1.15rem;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(241, 249, 248, 0.9));
+  padding: 1.15rem;
 }
 
 .market-context-card-company {
   background:
-    linear-gradient(135deg, rgba(194, 91, 42, 0.14), rgba(255, 255, 255, 0.84)),
-    rgba(255, 255, 255, 0.72);
+    linear-gradient(135deg, rgba(33, 64, 154, 0.12), rgba(15, 118, 110, 0.08)),
+    var(--dashboard-panel-strong);
 }
 
 .market-context-card-header {
@@ -335,6 +465,19 @@ a {
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
+}
+
+.market-context-card-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.market-context-swatch {
+  width: 0.72rem;
+  height: 0.72rem;
+  border-radius: 999px;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.72);
 }
 
 .market-context-symbol,
@@ -345,9 +488,10 @@ a {
 
 .market-context-symbol,
 .market-context-change {
-  color: var(--accent-strong);
-  font-size: 0.82rem;
-  font-weight: 700;
+  color: var(--dashboard-blue);
+  font-family: var(--font-fira-code), monospace;
+  font-size: 0.74rem;
+  font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -355,23 +499,28 @@ a {
 .market-context-label {
   margin-top: 0.95rem;
   color: var(--muted);
-  font-size: 0.82rem;
-  font-weight: 700;
+  font-family: var(--font-fira-code), monospace;
+  font-size: 0.74rem;
+  font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
 .market-context-value {
   margin: 0.5rem 0 0;
-  font-size: clamp(1.7rem, 4vw, 2.35rem);
-  font-weight: 700;
-  letter-spacing: -0.05em;
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  font-weight: 600;
+  letter-spacing: -0.04em;
 }
 
 .market-context-description {
   margin: 1rem 0 0;
   color: var(--muted);
-  line-height: 1.6;
+  line-height: 1.7;
+}
+
+.market-context-change {
+  color: var(--dashboard-teal);
 }
 
 .ticker-chip-row {
@@ -409,26 +558,14 @@ a {
     min-width: 12rem;
   }
 
-  .dashboard-hero-header,
-  .overview-header {
+  .dashboard-hero-header {
     flex-direction: row;
     align-items: flex-start;
     justify-content: space-between;
   }
 
-  .overview-grid,
-  .stats-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .quote-snapshot-header {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 22rem);
-    align-items: start;
-  }
-
-  .market-context-header {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 24rem);
-    align-items: start;
+  .overview-meta-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
   .quote-detail-grid {

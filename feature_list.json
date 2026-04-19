@@ -115,7 +115,7 @@
       },
       "depends_on": ["dash-001", "dash-002"],
       "status": "passing",
-      "notes": "Implemented with a FastAPI backend-for-frontend route that now uses `yfinance` for runtime market data and fixture mode for deterministic Playwright and pytest coverage."
+      "notes": "Implemented with a FastAPI backend-for-frontend route that now uses `yfinance` for runtime market data and fixture mode for deterministic Playwright and pytest coverage. Forward dividend and yield now treat `yfinance`'s `dividendYield` value as percentage points instead of multiplying it again."
     },
     {
       "id": "dash-003",
@@ -142,7 +142,7 @@
       },
       "depends_on": ["dash-002b"],
       "status": "passing",
-      "notes": "Implemented with backend-provided market context cards that show the S&P 500 plus a sector-relevant benchmark alongside the company price, with fixture-backed Playwright coverage and a `yfinance` live provider."
+      "notes": "Implemented with a normalized comparison chart that plots the company, the S&P 500, and a sector-relevant benchmark from the same starting level so relative growth is directly comparable, with fixture-backed Playwright coverage and a `yfinance` live provider."
     },
     {
       "id": "dash-004",
