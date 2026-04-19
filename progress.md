@@ -345,3 +345,15 @@
 - Files or artifacts updated: `frontend/src/app/_components/income-statement-waterfall-chart.tsx`, `frontend/src/app/globals.css`, `artifacts/verification/dash-004-playwright.log`, `feature_list.json`, `progress.md`, `session-handoff.md`
 - Known risk or unresolved issue: The wrapped axis labels are tuned for the current eight-step statement flow. If later roadmap work adds more waterfall bars or much longer labels, the chart may need another spacing pass.
 - Next best step: Resume the roadmap at `dash-005` unless the user asks for another narrow waterfall polish tweak first.
+
+### Session 029
+
+- Date: 2026-04-19
+- Goal: Fix the remaining `dash-004` waterfall bar issue where negative subtotal bars and cards still looked like positive totals.
+- Completed: Updated the shared waterfall component so total/subtotal steps now pick their tone from the sign of the value, which means negative `Operating Profit` and `Net Profits` bars/cards now render with the negative styling instead of the earlier blue total styling. The underlying statement values and step order did not change.
+- Verification run: `cd frontend && npm run lint`; `cd frontend && npm run typecheck`; `cd frontend && npx playwright test e2e/dash-004.spec.ts`
+- Evidence captured: Frontend `npm run lint` passed; frontend `npm run typecheck` passed; `cd frontend && npx playwright test e2e/dash-004.spec.ts` passed after stopping a stale local `next dev` process that blocked Playwright from starting its own frontend server; log refreshed at `artifacts/verification/dash-004-playwright.log`; implementation commit is `0dd1a80`.
+- Commits: `0dd1a80 Fix dash-004 negative subtotal styling`
+- Files or artifacts updated: `frontend/src/app/_components/income-statement-waterfall-chart.tsx`, `frontend/src/app/globals.css`, `artifacts/verification/dash-004-playwright.log`, `feature_list.json`, `progress.md`, `session-handoff.md`
+- Known risk or unresolved issue: This polish pass only changes the visual tone selection for subtotal bars and cards. If the user wants a different visual language for subtotal bars versus delta bars later, that would be a separate styling pass rather than a data-path change.
+- Next best step: Resume the roadmap at `dash-005` unless the user asks for another narrow waterfall polish tweak first.
