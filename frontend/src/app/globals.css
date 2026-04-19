@@ -448,8 +448,12 @@ a {
   letter-spacing: 0.02em;
 }
 
-.waterfall-bar-total {
+.waterfall-bar-total-positive {
   fill: rgba(33, 64, 154, 0.9);
+}
+
+.waterfall-bar-total-negative {
+  fill: rgba(154, 54, 44, 0.92);
 }
 
 .waterfall-bar-positive {
@@ -495,8 +499,12 @@ a {
   letter-spacing: -0.03em;
 }
 
-.waterfall-step-value-total {
+.waterfall-step-value-total-positive {
   color: var(--dashboard-blue);
+}
+
+.waterfall-step-value-total-negative {
+  color: #9a362c;
 }
 
 .waterfall-step-value-positive {

@@ -41,6 +41,25 @@ test("dash-004 shows a revenue-to-net-income waterfall that updates by company",
   await expectWaterfallMetric(consumerWaterfall, "Operating Profit", "$14.6B");
   await expectWaterfallMetric(consumerWaterfall, "Other Income / Cost", "-$1.1B");
   await expectWaterfallMetric(consumerWaterfall, "Net Profits", "$11.0B");
+
+  await page.goto("/dashboard/LOSS");
+
+  const lossWaterfall = page.getByRole("region", {
+    name: /revenue to net income waterfall/i,
+  });
+
+  await expect(lossWaterfall).toBeVisible();
+  await expectWaterfallMetric(lossWaterfall, "Operating Profit", "-$1.3B");
+  await expectWaterfallMetric(lossWaterfall, "Taxes", "$300.0M");
+  await expectWaterfallMetric(lossWaterfall, "Net Profits", "-$1.4B");
+
+  const lossWaterfallChart = lossWaterfall.getByLabel("Revenue to net income waterfall chart");
+  await expect(
+    lossWaterfallChart.locator('rect[data-step-label="Operating Profit"]'),
+  ).toHaveAttribute("class", /waterfall-bar-total-negative/);
+  await expect(
+    lossWaterfallChart.locator('rect[data-step-label="Net Profits"]'),
+  ).toHaveAttribute("class", /waterfall-bar-total-negative/);
 });
 
 async function expectWaterfallMetric(
