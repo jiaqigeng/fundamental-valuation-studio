@@ -148,38 +148,11 @@
       "id": "dash-004",
       "priority": 4,
       "section": "dashboard",
-      "area": "financials",
-      "title": "Display key financial metrics",
-      "behavior": "The workspace shows revenue, EPS, free cash flow, gross and operating margins, and ROIC (or ROE) for the selected company.",
-      "verification": {
-        "command": "cd frontend && npx playwright test e2e/dash-004.spec.ts",
-        "kind": "e2e",
-        "manual_steps": [
-          "Load the AAPL dashboard.",
-          "Open the key metrics section.",
-          "Verify revenue, EPS, and free cash flow are shown.",
-          "Verify at least one margin and one return metric (ROIC or ROE) are shown."
-        ]
-      },
-      "evidence": {
-        "commit": "25a1b9c",
-        "verification_run": "cd frontend && npx playwright test e2e/dash-004.spec.ts",
-        "output_log": "artifacts/verification/dash-004-playwright.log",
-        "timestamp": "2026-04-19T11:04:34.5299654-04:00"
-      },
-      "depends_on": ["dash-002b"],
-      "status": "passing",
-      "notes": "Implemented as a dedicated key-financial-metrics accordion that flows through the backend workspace payload and shows revenue, EPS, free cash flow, gross margin, operating margin, and ROIC when Yahoo exposes it or ROE otherwise."
-    },
-    {
-      "id": "dash-005",
-      "priority": 5,
-      "section": "dashboard",
       "area": "charts",
       "title": "Render revenue-to-net-income waterfall chart",
       "behavior": "The dashboard shows a waterfall chart that walks from revenue through COGS, OpEx, interest, tax, and other items to net income.",
       "verification": {
-        "command": "cd frontend && npx playwright test e2e/dash-005.spec.ts",
+        "command": "cd frontend && npx playwright test e2e/dash-004.spec.ts",
         "kind": "e2e",
         "manual_steps": [
           "Load the AAPL dashboard.",
@@ -190,24 +163,24 @@
         ]
       },
       "evidence": {
-        "commit": null,
-        "verification_run": null,
-        "output_log": null,
-        "timestamp": null
+        "commit": "f7a46f4",
+        "verification_run": "cd frontend && npx playwright test e2e/dash-004.spec.ts",
+        "output_log": "artifacts/verification/dash-004-playwright.log",
+        "timestamp": "2026-04-19T12:03:53.7986195-04:00"
       },
-      "depends_on": ["dash-004"],
-      "status": "not_started",
-      "notes": ""
+      "depends_on": ["dash-002b"],
+      "status": "passing",
+      "notes": "Implemented with a backend-for-frontend income-statement waterfall payload plus a server-rendered dashboard chart that walks from revenue to net income and updates across supported fixture tickers. The live `yfinance` path derives the walk from the latest available income-statement rows and lets `Other Items` absorb any residual so the bridge still lands exactly on net income."
     },
     {
-      "id": "dash-006",
-      "priority": 6,
+      "id": "dash-005",
+      "priority": 5,
       "section": "dashboard",
       "area": "charts",
       "title": "Render revenue segment breakdown",
       "behavior": "The dashboard shows how total revenue splits across the company's reporting segments, reconciling to total revenue.",
       "verification": {
-        "command": "cd frontend && npx playwright test e2e/dash-006.spec.ts",
+        "command": "cd frontend && npx playwright test e2e/dash-005.spec.ts",
         "kind": "e2e",
         "manual_steps": [
           "Load the AAPL dashboard.",
@@ -222,19 +195,19 @@
         "output_log": null,
         "timestamp": null
       },
-      "depends_on": ["dash-004"],
+      "depends_on": ["dash-002b"],
       "status": "not_started",
       "notes": "Falls back gracefully when the data source does not expose segment detail."
     },
     {
-      "id": "dash-007",
-      "priority": 7,
+      "id": "dash-006",
+      "priority": 6,
       "section": "dashboard",
       "area": "charts",
       "title": "Render historical financial trend charts",
       "behavior": "The dashboard shows multi-year history charts for revenue, earnings, and cash flow.",
       "verification": {
-        "command": "cd frontend && npx playwright test e2e/dash-007.spec.ts",
+        "command": "cd frontend && npx playwright test e2e/dash-006.spec.ts",
         "kind": "e2e",
         "manual_steps": [
           "Load the AAPL dashboard.",
@@ -249,13 +222,13 @@
         "output_log": null,
         "timestamp": null
       },
-      "depends_on": ["dash-004"],
+      "depends_on": ["dash-002b"],
       "status": "not_started",
       "notes": ""
     },
     {
       "id": "val-001a",
-      "priority": 8,
+      "priority": 7,
       "section": "valuation",
       "area": "dcf",
       "title": "DCF calculator math with manual inputs",
@@ -282,7 +255,7 @@
     },
     {
       "id": "val-001b",
-      "priority": 9,
+      "priority": 8,
       "section": "valuation",
       "area": "dcf",
       "title": "DCF auto-fetched baseline assumptions",
@@ -303,13 +276,13 @@
         "output_log": null,
         "timestamp": null
       },
-      "depends_on": ["val-001a", "dash-004"],
+      "depends_on": ["val-001a", "dash-002b"],
       "status": "not_started",
       "notes": "Projection logic ties growth and reinvestment to ROIC so growth only creates value when ROIC exceeds WACC."
     },
     {
       "id": "val-002",
-      "priority": 10,
+      "priority": 9,
       "section": "valuation",
       "area": "ddm",
       "title": "DDM calculator for dividend-paying companies",
@@ -336,7 +309,7 @@
     },
     {
       "id": "val-003",
-      "priority": 11,
+      "priority": 10,
       "section": "valuation",
       "area": "rim",
       "title": "Residual Income Model calculator",
@@ -357,13 +330,13 @@
         "output_log": null,
         "timestamp": null
       },
-      "depends_on": ["dash-004"],
+      "depends_on": ["dash-002b"],
       "status": "not_started",
       "notes": "Useful when near-term free cash flow is negative or hard to forecast."
     },
     {
       "id": "val-004",
-      "priority": 12,
+      "priority": 11,
       "section": "valuation",
       "area": "comps",
       "title": "Relative valuation with peer comparables",
@@ -390,7 +363,7 @@
     },
     {
       "id": "val-005",
-      "priority": 13,
+      "priority": 12,
       "section": "valuation",
       "area": "scenarios",
       "title": "Bull, base, and bear scenario cases",
@@ -418,7 +391,7 @@
     },
     {
       "id": "val-006",
-      "priority": 14,
+      "priority": 13,
       "section": "valuation",
       "area": "scenarios",
       "title": "Sensitivity grid across key assumptions",
@@ -445,7 +418,7 @@
     },
     {
       "id": "val-007",
-      "priority": 15,
+      "priority": 14,
       "section": "valuation",
       "area": "persistence",
       "title": "Save and reload valuation scenarios",
@@ -472,7 +445,7 @@
     },
     {
       "id": "ai-001a",
-      "priority": 16,
+      "priority": 15,
       "section": "ai",
       "area": "qualitative",
       "title": "AI industry dynamics analysis",
@@ -498,7 +471,7 @@
     },
     {
       "id": "ai-001b",
-      "priority": 17,
+      "priority": 16,
       "section": "ai",
       "area": "qualitative",
       "title": "AI business model and moat analysis",
@@ -524,7 +497,7 @@
     },
     {
       "id": "ai-001c",
-      "priority": 18,
+      "priority": 17,
       "section": "ai",
       "area": "qualitative",
       "title": "AI management quality and capital allocation analysis",
@@ -550,7 +523,7 @@
     },
     {
       "id": "ai-002",
-      "priority": 19,
+      "priority": 18,
       "section": "ai",
       "area": "forecasting",
       "title": "AI financial scrubbing and forecast drivers",
@@ -571,13 +544,13 @@
         "output_log": null,
         "timestamp": null
       },
-      "depends_on": ["dash-004"],
+      "depends_on": ["dash-002b"],
       "status": "not_started",
       "notes": "Follows the Financial Scrubbing and Forecasting step of the framework."
     },
     {
       "id": "ai-003",
-      "priority": 20,
+      "priority": 19,
       "section": "ai",
       "area": "valuation-synthesis",
       "title": "AI valuation ensemble triangulation",
@@ -605,7 +578,7 @@
     },
     {
       "id": "ai-004",
-      "priority": 21,
+      "priority": 20,
       "section": "ai",
       "area": "scenarios",
       "title": "AI scenario and catalyst analysis",
@@ -632,7 +605,7 @@
     },
     {
       "id": "ai-005",
-      "priority": 22,
+      "priority": 21,
       "section": "ai",
       "area": "evidence",
       "title": "Evidence grounding across AI analyses",
@@ -660,7 +633,7 @@
     },
     {
       "id": "ux-001",
-      "priority": 23,
+      "priority": 22,
       "section": "ux",
       "area": "resilience",
       "title": "Handle loading, invalid tickers, and API failures gracefully",

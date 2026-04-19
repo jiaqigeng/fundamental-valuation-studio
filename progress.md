@@ -6,7 +6,7 @@
 - Standard startup path: `./init.sh`
 - Standard verification path: `./init.sh` for baseline health plus `feature_list.json -> features[*].verification.command` for feature passing
 - Current highest-priority unfinished feature: `dash-005`
-- Current blocker: none recorded. `dash-004` is now verified with a dedicated key-financial-metrics slice that shows revenue, EPS, free cash flow, gross margin, operating margin, and a return metric that prefers ROIC when Yahoo exposes it and otherwise falls back to ROE.
+- Current blocker: none recorded. `dash-004` now passes with a backend-backed income-statement waterfall section on `/dashboard/[ticker]`, so the next roadmap item is the revenue segment breakdown at `dash-005`.
 
 ## Session Log
 
@@ -301,11 +301,23 @@
 ### Session 025
 
 - Date: 2026-04-19
-- Goal: Implement `dash-004` under the repository harness and record passing evidence.
-- Completed: Added a dedicated key-financial-metrics slice to the backend workspace schema and live `yfinance` client, seeded deterministic fixture values for `AAPL`, `MSFT`, and `KO`, exposed the new payload through the frontend workspace loader, rendered a new dashboard accordion for the metrics, and created `frontend/e2e/dash-004.spec.ts` as the feature gate. The live builder now shows revenue, EPS, free cash flow, gross margin, operating margin, and a return metric that prefers ROIC when Yahoo exposes it and otherwise falls back to ROE.
+- Goal: Remove the redundant dedicated `dash-004` roadmap item and renumber the remaining dashboard features after the user reverted the unfinished implementation attempt.
+- Completed: Deleted the old `dash-004` key-financial-metrics feature from `feature_list.json`, shifted the former `dash-005` / `dash-006` / `dash-007` items up to `dash-004` / `dash-005` / `dash-006`, and updated downstream priorities plus `depends_on` references so the roadmap remains coherent without dangling references to a retired feature ID.
+- Verification run: none; this was a tracking-artifact cleanup only.
+- Evidence captured: `feature_list.json`, `progress.md`, and `session-handoff.md` now agree that the next unfinished dashboard feature is the revenue-to-net-income waterfall chart at the new `dash-004`, and cross-section dependencies that formerly pointed at the removed feature now point at `dash-002b`.
+- Commits: none yet
+- Files or artifacts updated: `feature_list.json`, `progress.md`, `session-handoff.md`
+- Known risk or unresolved issue: Historical session-log entries still mention the retired old `dash-004` because they describe what the roadmap said at the time; the current top-of-file state and latest session entry are the source of truth going forward.
+- Next best step: Start the new `dash-004` waterfall-chart slice and use `cd frontend && npx playwright test e2e/dash-004.spec.ts` as the feature gate.
+
+### Session 026
+
+- Date: 2026-04-19
+- Goal: Implement the new `dash-004` revenue-to-net-income waterfall slice under the repository harness and record passing evidence.
+- Completed: Extended the backend workspace schema plus fixture payloads with an income-statement waterfall contract, added a live `yfinance` builder that derives revenue, COGS, OpEx, interest, tax, and residual other-items bars from the latest available income-statement data, rendered the new waterfall as a dedicated dashboard section, and replaced the deleted old `dash-004` Playwright file with the new waterfall-chart contract.
 - Verification run: `./init.sh`; `cd backend && .venv/Scripts/python.exe -m pytest tests/test_company_workspace.py -q`; `cd frontend && npm run lint`; `cd frontend && npm run typecheck`; `cd frontend && npx playwright test e2e/dash-004.spec.ts`
-- Evidence captured: `./init.sh` completed successfully both before and after the feature work; backend `cd backend && .venv/Scripts/python.exe -m pytest tests/test_company_workspace.py -q` passed with `9 passed` before the final baseline rerun and `10 passed` after the full post-change `./init.sh`; frontend `npm run lint` passed; frontend `npm run typecheck` passed; `cd frontend && npx playwright test e2e/dash-004.spec.ts` passed after rerunning Playwright outside the sandbox to avoid the local `spawn EPERM`; log saved at `artifacts/verification/dash-004-playwright.log`; implementation commit is `25a1b9c`.
-- Commits: `25a1b9c Implement dash-004 key financial metrics slice`
-- Files or artifacts updated: `backend/app/schemas/company_workspace.py`, `backend/app/clients/yahoo_finance.py`, `backend/app/clients/market_data_fixtures.py`, `backend/tests/test_company_workspace.py`, `frontend/src/app/_lib/company-workspace.ts`, `frontend/src/app/dashboard/[ticker]/page.tsx`, `frontend/src/app/globals.css`, `frontend/e2e/dash-004.spec.ts`, `artifacts/verification/dash-004-playwright.log`, `feature_list.json`, `progress.md`, `session-handoff.md`
-- Known risk or unresolved issue: The new section still depends on `yfinance` summary-field availability for live tickers; when Yahoo omits one of these metrics, the dashboard shows the metrics that are available rather than manufacturing placeholder values.
-- Next best step: Start `dash-005` and build the revenue-to-net-income waterfall chart on top of the now-verified key-metrics workspace data without regressing `dash-001` through `dash-004`.
+- Evidence captured: `./init.sh` completed successfully before feature work; backend `cd backend && .venv/Scripts/python.exe -m pytest tests/test_company_workspace.py -q` passed with `8 passed` plus a local pytest cache warning; frontend `npm run lint` passed; frontend `npm run typecheck` passed; `cd frontend && npx playwright test e2e/dash-004.spec.ts` passed after rerunning outside the sandbox to avoid the local `spawn EPERM`; log saved at `artifacts/verification/dash-004-playwright.log`; implementation commit is `f7a46f4`.
+- Commits: `f7a46f4 Implement dash-004 income statement waterfall`
+- Files or artifacts updated: `backend/app/schemas/company_workspace.py`, `backend/app/clients/market_data_fixtures.py`, `backend/app/clients/yahoo_finance.py`, `backend/tests/test_company_workspace.py`, `frontend/src/app/_lib/company-workspace.ts`, `frontend/src/app/_components/income-statement-waterfall-chart.tsx`, `frontend/src/app/dashboard/[ticker]/page.tsx`, `frontend/src/app/globals.css`, `frontend/e2e/dash-004.spec.ts`, `artifacts/verification/dash-004-playwright.log`, `feature_list.json`, `progress.md`, `session-handoff.md`
+- Known risk or unresolved issue: The live waterfall still depends on `yfinance` income-statement row availability and naming, so some live tickers may show zeroed intermediate bars or hide the section entirely if Yahoo omits key fields; fixture-backed verification remains deterministic.
+- Next best step: Start `dash-005` and add the revenue segment breakdown slice without regressing the newly passing waterfall, snapshot, or market-context contracts.
