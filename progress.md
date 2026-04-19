@@ -149,7 +149,7 @@
 - Completed: Removed the `Company Overview` eyebrow from the hero so the first card now just shows the company name, renamed the overview accordion title to `Business summary and key stats`, adjusted the chart x-axis label anchoring so the first and last dates stay inside the frame, added a small gap below the selected-range status line, and refreshed `dash-002` so its regression coverage matches the intentional hero-plus-overview layout.
 - Verification run: `./init.sh`; `cd frontend && npm run lint`; `cd frontend && npm run typecheck`; `cd frontend && npx playwright test e2e/dash-002.spec.ts e2e/dash-002b.spec.ts e2e/dash-003.spec.ts`
 - Evidence captured: `./init.sh` completed successfully before the UI change; frontend `npm run lint` passed; frontend `npm run typecheck` passed; `cd frontend && npx playwright test e2e/dash-002.spec.ts e2e/dash-002b.spec.ts e2e/dash-003.spec.ts` passed after rerunning Playwright outside the sandbox to avoid the local `spawn EPERM`.
-- Commits: pending
+- Commits: `3a155e7 Polish dashboard hero and chart framing`
 - Files or artifacts updated: `frontend/src/app/dashboard/[ticker]/page.tsx`, `frontend/src/app/_components/performance-comparison-chart.tsx`, `frontend/src/app/globals.css`, `frontend/e2e/dash-002.spec.ts`, `progress.md`, `session-handoff.md`
 - Known risk or unresolved issue: No new blocker was introduced; this remains a narrow dashboard exception update on top of the passing slices, so `dash-004` is still unstarted and its spec file is still missing.
 - Next best step: Resume roadmap work at `dash-004` unless the user requests another narrow dashboard exception update first.
