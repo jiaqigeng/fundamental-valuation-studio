@@ -6,7 +6,7 @@
 - Standard startup path: `./init.sh`
 - Standard verification path: `./init.sh` for baseline health plus `feature_list.json -> features[*].verification.command` for feature passing
 - Current highest-priority unfinished feature: `dash-006`
-- Current blocker: none recorded. `dash-006` is still the next roadmap item. Separately, the backend now loads `backend/.env` at startup, and the real FMP segment-data client is now wired to `FVS_FMP_API_KEY` for live revenue-segmentation fetches.
+- Current blocker: none recorded. `dash-006` is still the next roadmap item. Separately, the live FMP segment-data client now chooses between product and geographic segmentation, so one-bucket product disclosures like Netflix can still render a more informative live revenue mix.
 
 ## Session Log
 
@@ -513,3 +513,15 @@
 - Files or artifacts updated: `backend/app/clients/financial_modeling_prep.py`, `backend/app/services/company_workspace.py`, `backend/tests/test_company_workspace.py`, `artifacts/verification/dash-005-playwright.log`, `feature_list.json`, `progress.md`, `session-handoff.md`
 - Known risk or unresolved issue: The full live workspace route still depends on Yahoo for the broader company snapshot, so in environments where Yahoo is blocked but FMP is reachable, the direct FMP client works but the end-to-end live dashboard route can still fail before it gets to the segment fetch. The FMP selector currently chooses the annual segment row whose total is closest to the current revenue anchor; if fiscal-year alignment needs to become stricter later, that heuristic may need refinement.
 - Next best step: Resume the roadmap at `dash-006`, or if the user wants more live-data hardening first, reduce the dashboard's dependency on Yahoo for other sections that still block end-to-end live workspace fetches.
+
+### Session 043
+
+- Date: 2026-04-19
+- Goal: Make live segment data more informative for companies whose product segmentation is trivial by automatically falling back to geographic segmentation.
+- Completed: Extended the FMP client to call both the stable product and stable geographic segmentation endpoints, added chooser logic that keeps product segmentation when it is meaningfully detailed but switches to geographic segmentation when the product view is trivial or dominated by a single bucket, and added backend tests for geographic parsing plus the Netflix-style fallback decision.
+- Verification run: `cd backend && .venv/Scripts/python.exe -m pytest tests/test_company_workspace.py -q`; `cd frontend && npm run lint`; `cd frontend && npm run typecheck`; `cd frontend && npx playwright test e2e/dash-005.spec.ts`
+- Evidence captured: Backend `cd backend && .venv/Scripts/python.exe -m pytest tests/test_company_workspace.py -q` passed with `14 passed` plus one existing pytest cache warning; frontend `npm run lint` passed; frontend `npm run typecheck` passed; `cd frontend && npx playwright test e2e/dash-005.spec.ts` passed outside the sandbox and refreshed `artifacts/verification/dash-005-playwright.log`; a direct outside-sandbox FMP client check for `NFLX` returned a real geographic breakdown with `United States And Canada`, `EMEA`, `Latin America`, and `Asia Pacific`, totaling `$45.2B`; implementation commit is `d94f7e5`.
+- Commits: `d94f7e5 Prefer geographic fallback for trivial live segments`
+- Files or artifacts updated: `backend/app/clients/financial_modeling_prep.py`, `backend/tests/test_company_workspace.py`, `artifacts/verification/dash-005-playwright.log`, `feature_list.json`, `progress.md`, `session-handoff.md`
+- Known risk or unresolved issue: The chooser is heuristic-based. It currently treats a single-segment or overwhelmingly dominant product view as too trivial and then prefers geographic segmentation when that result is richer. If we later want industry-specific rules, this selection logic may need another pass.
+- Next best step: Resume the roadmap at `dash-006`, or keep hardening the live data path if you want more Yahoo-dependent sections reduced.
