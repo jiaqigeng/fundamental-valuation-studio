@@ -177,13 +177,6 @@ export function IncomeStatementWaterfallChart({
           );
         })}
 
-        <line
-          x1={CHART_PADDING.left}
-          x2={CHART_WIDTH - CHART_PADDING.right}
-          y1={yForValue(0)}
-          y2={yForValue(0)}
-          className="waterfall-chart-baseline"
-        />
       </svg>
 
       <div className="waterfall-step-grid">
