@@ -17,6 +17,7 @@
   --dashboard-highlight: #c48a2c;
   --dashboard-teal: #0f766e;
   --dashboard-blue: #21409a;
+  --dashboard-red: #b42318;
   --dashboard-soft-blue: rgba(33, 64, 154, 0.08);
   --dashboard-soft-teal: rgba(15, 118, 110, 0.08);
   --dashboard-soft-gold: rgba(196, 138, 44, 0.1);
@@ -575,7 +576,15 @@ a {
 }
 
 .market-context-change {
+  color: var(--dashboard-blue);
+}
+
+.market-context-change-positive {
   color: var(--dashboard-teal);
+}
+
+.market-context-change-negative {
+  color: var(--dashboard-red);
 }
 
 .ticker-chip-row {

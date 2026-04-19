@@ -142,7 +142,7 @@
       },
       "depends_on": ["dash-002b"],
       "status": "passing",
-      "notes": "Implemented with a normalized comparison chart that plots the company, the S&P 500, and a sector-relevant benchmark from the same starting level so relative growth is directly comparable, with fixture-backed Playwright coverage and a `yfinance` live provider."
+      "notes": "Implemented with a normalized comparison chart that plots the company, the S&P 500, and a sector-relevant benchmark from the same starting level so relative growth is directly comparable, with fixture-backed Playwright coverage and a `yfinance` live provider. Market-context cards derive their displayed range return from the selected normalized series and render negative performance in red."
     },
     {
       "id": "dash-004",

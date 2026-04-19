@@ -59,25 +59,34 @@ export function PerformanceComparisonSection({
       <PerformanceComparisonChart series={selectedRange.series} />
 
       <div className="market-context-grid market-context-grid-legend">
-        {selectedRange.series.map((series) => (
-          <article className="market-context-card" key={`${selectedRange.rangeKey}-${series.symbol}`}>
-            <div className="market-context-card-header">
-              <div className="market-context-card-heading">
-                <span
-                  aria-hidden="true"
-                  className="market-context-swatch"
-                  style={{ backgroundColor: series.lineColor }}
-                />
-                <p className="market-context-symbol">{series.symbol}</p>
+        {selectedRange.series.map((series) => {
+          const rangeReturn = getSelectedRangeReturn(series);
+
+          return (
+            <article
+              className="market-context-card"
+              key={`${selectedRange.rangeKey}-${series.symbol}`}
+            >
+              <div className="market-context-card-header">
+                <div className="market-context-card-heading">
+                  <span
+                    aria-hidden="true"
+                    className="market-context-swatch"
+                    style={{ backgroundColor: series.lineColor }}
+                  />
+                  <p className="market-context-symbol">{series.symbol}</p>
+                </div>
+                <p
+                  className={`market-context-change market-context-change-${rangeReturn.tone}`}
+                >
+                  {rangeReturn.display}
+                </p>
               </div>
-              <p className="market-context-change">
-                {formatSelectedRangeReturn(series)}
-              </p>
-            </div>
-            <p className="market-context-label">{series.label}</p>
-            <p className="market-context-value">{series.currentValue}</p>
-          </article>
-        ))}
+              <p className="market-context-label">{series.label}</p>
+              <p className="market-context-value">{series.currentValue}</p>
+            </article>
+          );
+        })}
       </div>
     </section>
   );
@@ -89,14 +98,26 @@ const percentFormatter = new Intl.NumberFormat("en-US", {
   signDisplay: "always",
 });
 
-function formatSelectedRangeReturn(series: PerformanceSeries): string {
+function getSelectedRangeReturn(series: PerformanceSeries): {
+  readonly display: string;
+  readonly tone: "positive" | "negative" | "neutral";
+} {
   const firstPoint = series.points[0];
   const lastPoint = series.points[series.points.length - 1];
 
   if (!firstPoint || !lastPoint || firstPoint.value === 0) {
-    return "N/A";
+    return {
+      display: "N/A",
+      tone: "neutral",
+    };
   }
 
   const percentReturn = ((lastPoint.value - firstPoint.value) / firstPoint.value) * 100;
-  return `${percentFormatter.format(percentReturn)}%`;
+  const tone =
+    percentReturn > 0 ? "positive" : percentReturn < 0 ? "negative" : "neutral";
+
+  return {
+    display: `${percentFormatter.format(percentReturn)}%`,
+    tone,
+  };
 }

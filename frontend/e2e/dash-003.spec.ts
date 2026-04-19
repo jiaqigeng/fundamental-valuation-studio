@@ -67,7 +67,11 @@ test("dash-003 shows broad-market and sector-relevant context that updates by co
   await expect(consumerContext.getByText("XLP", { exact: true })).toBeVisible();
   await expect(consumerContext.getByText("82.46")).toBeVisible();
   await expect(consumerContext.getByText("+4.4%")).toBeVisible();
-  await expect(consumerContext.getByText("+3.8%")).toBeVisible();
+  const negativeChange = consumerContext.locator(".market-context-change-negative");
+  await expect(negativeChange).toContainText("1.9%");
+  await expect(negativeChange).toHaveClass(
+    /market-context-change-negative/,
+  );
   await expect(
     consumerContext.getByRole("button", { name: "1Y" }),
   ).toHaveAttribute("aria-pressed", "true");

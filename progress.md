@@ -6,7 +6,7 @@
 - Standard startup path: `./init.sh`
 - Standard verification path: `./init.sh` for baseline health plus `feature_list.json -> features[*].verification.command` for feature passing
 - Current highest-priority unfinished feature: `dash-004`
-- Current blocker: none recorded. The latest requested dashboard market-context exception update is verified, so the roadmap can return to `dash-004` unless the user asks for more dashboard refinements first.
+- Current blocker: none recorded. The latest requested dashboard market-context percentage and negative-color exception update is verified, so the roadmap can return to `dash-004` unless the user asks for more dashboard refinements first.
 
 ## Session Log
 
@@ -164,4 +164,16 @@
 - Commits: `6c67841 Show range returns in market context cards`
 - Files or artifacts updated: `frontend/src/app/_components/performance-comparison-section.tsx`, `frontend/e2e/dash-003.spec.ts`, `progress.md`, `session-handoff.md`
 - Known risk or unresolved issue: The range percentages are derived from the normalized chart series returned for the selected range, so if a live provider range is unavailable it will still be omitted entirely rather than showing a stale percentage.
+- Next best step: Resume roadmap work at `dash-004` unless the user requests another narrow dashboard exception update first.
+
+### Session 014
+
+- Date: 2026-04-18
+- Goal: Verify the market-context card percentage math and add a clear negative-performance color treatment before resuming `dash-004`.
+- Completed: Confirmed the market-context cards derive their displayed percentage from the first and last points of the selected normalized series, refactored that calculation into an explicit return-and-tone helper, added red styling for negative performance, updated fixture data to include a negative sector-benchmark return case, and refreshed `dash-003` regression coverage to assert the negative styling.
+- Verification run: `./init.sh`; `cd backend && .venv/Scripts/python.exe -m pytest tests/test_company_workspace.py -q`; `cd frontend && npm run lint`; `cd frontend && npm run typecheck`; `cd frontend && npx playwright test e2e/dash-003.spec.ts`
+- Evidence captured: `./init.sh` completed successfully before the targeted UI change; backend `cd backend && .venv/Scripts/python.exe -m pytest tests/test_company_workspace.py -q` passed with `3 passed`; frontend `npm run lint` passed; frontend `npm run typecheck` passed; `cd frontend && npx playwright test e2e/dash-003.spec.ts` passed after rerunning Playwright outside the sandbox to avoid the local `spawn EPERM`; log saved at `artifacts/verification/dash-003-playwright.log`.
+- Commits: none yet
+- Files or artifacts updated: `frontend/src/app/_components/performance-comparison-section.tsx`, `frontend/src/app/globals.css`, `backend/app/clients/market_data_fixtures.py`, `frontend/e2e/dash-003.spec.ts`, `artifacts/verification/dash-003-playwright.log`, `progress.md`, `session-handoff.md`, `feature_list.json`
+- Known risk or unresolved issue: The displayed return remains only as accurate as the normalized comparison series returned for the selected range; live provider history gaps will still remove the affected range entirely rather than displaying a misleading percentage.
 - Next best step: Resume roadmap work at `dash-004` unless the user requests another narrow dashboard exception update first.
