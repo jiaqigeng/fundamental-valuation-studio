@@ -247,7 +247,19 @@ function buildYAxisLabels({
   readonly paddedMin: number;
   readonly yForValue: (value: number) => number;
 }) {
-  return [paddedMax, paddedMax / 2, 0, paddedMin / 2, paddedMin].map((value) => ({
+  const positiveSpan = Math.max(paddedMax, 0);
+  const negativeSpan = Math.max(-paddedMin, 0);
+  const dominantSpan = Math.max(positiveSpan, negativeSpan, 1);
+  const smallerSpan = Math.min(positiveSpan, negativeSpan);
+  const shouldCompressSmallerSide = smallerSpan / dominantSpan < 0.4;
+
+  const values = shouldCompressSmallerSide
+    ? positiveSpan >= negativeSpan
+      ? [paddedMax, paddedMax / 2, 0, paddedMin]
+      : [paddedMax, 0, paddedMin / 2, paddedMin]
+    : [paddedMax, paddedMax / 2, 0, paddedMin / 2, paddedMin];
+
+  return values.map((value) => ({
     value,
     y: yForValue(value),
   }));
