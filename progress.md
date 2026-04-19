@@ -6,7 +6,7 @@
 - Standard startup path: `./init.sh`
 - Standard verification path: `./init.sh` for baseline health plus `feature_list.json -> features[*].verification.command` for feature passing
 - Current highest-priority unfinished feature: `dash-005`
-- Current blocker: none recorded. `dash-005` remains the next roadmap item, and the latest user-requested `dash-004` refinement now keeps the stronger zero baseline but shifts it away from the blue family.
+- Current blocker: none recorded. `dash-005` remains the next roadmap item, and the latest user-requested `dash-004` refinement now keeps the zero baseline distinct from the bars while softening it back toward the other dotted guides.
 
 ## Session Log
 
@@ -416,4 +416,16 @@
 - Commits: `bea8da8 Warm dash-004 zero baseline color`
 - Files or artifacts updated: `frontend/src/app/globals.css`, `artifacts/verification/dash-004-playwright.log`, `feature_list.json`, `progress.md`, `session-handoff.md`
 - Known risk or unresolved issue: This remains a styling-only tweak on the current chart dimensions. If the waterfall palette changes substantially later, the zero-line accent may need another color pass to stay harmonious.
+- Next best step: Resume the roadmap at `dash-005` unless the user asks for another narrow `dash-004` refinement.
+
+### Session 035
+
+- Date: 2026-04-19
+- Goal: Keep the `dash-004` zero baseline off the blue/red/green families while making it less visually assertive.
+- Completed: Changed the zero baseline stroke to a muted neutral taupe so it remains different from the blue totals and red/green delta bars, but sits closer to the other dotted guide lines in overall presence. Left the line weight and dash pattern unchanged per the user's request to solve this with color rather than geometry.
+- Verification run: `./init.sh`; `cd frontend && npm run lint`; `cd frontend && npm run typecheck`; `cd frontend && npx playwright test e2e/dash-004.spec.ts`
+- Evidence captured: `./init.sh` completed successfully before the refinement; frontend `npm run lint` passed; frontend `npm run typecheck` passed; `cd frontend && npx playwright test e2e/dash-004.spec.ts` passed on the first run; log refreshed at `artifacts/verification/dash-004-playwright.log`; implementation commit is `e640c0c`.
+- Commits: `e640c0c Soften dash-004 zero baseline color`
+- Files or artifacts updated: `frontend/src/app/globals.css`, `artifacts/verification/dash-004-playwright.log`, `feature_list.json`, `progress.md`, `session-handoff.md`
+- Known risk or unresolved issue: This remains a styling-only tweak on the current chart dimensions. If the waterfall palette changes substantially later, the neutral baseline accent may need another pass to stay balanced.
 - Next best step: Resume the roadmap at `dash-005` unless the user asks for another narrow `dash-004` refinement.

@@ -163,14 +163,14 @@
         ]
       },
       "evidence": {
-        "commit": "bea8da8",
+        "commit": "e640c0c",
         "verification_run": "cd frontend && npx playwright test e2e/dash-004.spec.ts",
         "output_log": "artifacts/verification/dash-004-playwright.log",
-        "timestamp": "2026-04-19T14:33:25.1345508-04:00"
+        "timestamp": "2026-04-19T14:37:58.2147157-04:00"
       },
       "depends_on": ["dash-002b"],
       "status": "passing",
-      "notes": "Implemented with a backend-for-frontend income-statement waterfall payload plus a server-rendered dashboard chart. The current statement walk now surfaces `Revenue`, `Cost of Revenue`, `Gross Profit`, `Operating Expenses`, `Operating Profit`, `Other Income / Cost`, `Taxes`, and `Net Profits` for supported fixture tickers. The chart wraps longer x-axis labels onto two lines so the statement labels remain readable without colliding, the dotted connector bridges every adjacent bar pair through each bar's true entry and exit edge, and the zero baseline line is intentionally darker, thicker, and warmer-toned so it stands apart from the regular chart gridlines without using a blueish hue. The live `yfinance` path now treats `Other Income / Cost` as the residual balancing bucket after direct `Operating Profit`, `Taxes`, and `Net Profits`, so the displayed bridge reconciles exactly even when Yahoo's pretax-related fields disagree."
+      "notes": "Implemented with a backend-for-frontend income-statement waterfall payload plus a server-rendered dashboard chart. The current statement walk now surfaces `Revenue`, `Cost of Revenue`, `Gross Profit`, `Operating Expenses`, `Operating Profit`, `Other Income / Cost`, `Taxes`, and `Net Profits` for supported fixture tickers. The chart wraps longer x-axis labels onto two lines so the statement labels remain readable without colliding, the dotted connector bridges every adjacent bar pair through each bar's true entry and exit edge, and the zero baseline line uses a muted neutral taupe so it remains distinct from the blue/red/green bars without overpowering the other dotted guide lines. The live `yfinance` path now treats `Other Income / Cost` as the residual balancing bucket after direct `Operating Profit`, `Taxes`, and `Net Profits`, so the displayed bridge reconciles exactly even when Yahoo's pretax-related fields disagree."
     },
     {
       "id": "dash-005",
