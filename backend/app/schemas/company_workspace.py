@@ -1,3 +1,5 @@
+from typing import Literal
+
 from pydantic import BaseModel
 
 
@@ -6,9 +8,11 @@ class QuoteDetail(BaseModel):
     value: str
 
 
-class KeyFinancialMetric(BaseModel):
+class IncomeStatementWaterfallStep(BaseModel):
     label: str
-    value: str
+    value: float
+    display_value: str
+    step_type: Literal["total", "delta"]
 
 
 class MarketContextCard(BaseModel):
@@ -47,7 +51,7 @@ class CompanyWorkspaceSnapshot(BaseModel):
     workspace_tagline: str
     current_price_display: str
     market_cap_display: str
-    key_financial_metrics: list[KeyFinancialMetric]
+    income_statement_waterfall: list[IncomeStatementWaterfallStep]
     quote_details: list[QuoteDetail]
     market_contexts: list[MarketContextCard]
     performance_chart_ranges: list[PerformanceChartRange]

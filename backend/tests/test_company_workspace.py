@@ -2,7 +2,7 @@ from datetime import date
 
 from fastapi.testclient import TestClient
 
-from app.clients.yahoo_finance import _build_key_financial_metrics
+from app.clients.yahoo_finance import _build_income_statement_waterfall_from_values
 from app.clients.yahoo_finance import _build_quote_details
 from app.clients.yahoo_finance import _build_normalized_points
 from app.clients.yahoo_finance import _select_anchor_value
@@ -25,13 +25,49 @@ def test_company_workspace_fixture_response(monkeypatch) -> None:
     assert body["name"] == "Microsoft Corporation"
     assert body["current_price_display"] == "$338.12"
     assert body["market_cap_display"] == "$4.1T"
-    assert body["key_financial_metrics"] == [
-        {"label": "Revenue (TTM)", "value": "$281.7B"},
-        {"label": "EPS (TTM)", "value": "12.42"},
-        {"label": "Free Cash Flow", "value": "$79.5B"},
-        {"label": "Gross Margin", "value": "69.20%"},
-        {"label": "Operating Margin", "value": "44.70%"},
-        {"label": "Return on Equity (ROE)", "value": "33.74%"},
+    assert body["income_statement_waterfall"] == [
+        {
+            "label": "Revenue",
+            "value": 245100000000.0,
+            "display_value": "$245.1B",
+            "step_type": "total",
+        },
+        {
+            "label": "COGS",
+            "value": -76000000000.0,
+            "display_value": "-$76.0B",
+            "step_type": "delta",
+        },
+        {
+            "label": "OpEx",
+            "value": -87300000000.0,
+            "display_value": "-$87.3B",
+            "step_type": "delta",
+        },
+        {
+            "label": "Interest",
+            "value": -2100000000.0,
+            "display_value": "-$2.1B",
+            "step_type": "delta",
+        },
+        {
+            "label": "Other Items",
+            "value": 1900000000.0,
+            "display_value": "$1.9B",
+            "step_type": "delta",
+        },
+        {
+            "label": "Tax",
+            "value": -11400000000.0,
+            "display_value": "-$11.4B",
+            "step_type": "delta",
+        },
+        {
+            "label": "Net Income",
+            "value": 70200000000.0,
+            "display_value": "$70.2B",
+            "step_type": "total",
+        },
     ]
     assert body["quote_details"] == [
         {"label": "Trailing P/E (TTM)", "value": "31.64"},
@@ -119,38 +155,63 @@ def test_build_quote_details_skips_missing_metrics() -> None:
     ]
 
 
-def test_build_key_financial_metrics_prefers_roic_and_computes_margins() -> None:
-    metrics = _build_key_financial_metrics(
-        {
-            "totalRevenue": 245_120_000_000,
-            "trailingEps": 12.42,
-            "freeCashflow": 79_510_000_000,
-            "grossProfits": 169_132_800_000,
-            "operatingIncome": 109_078_400_000,
-            "returnOnInvestedCapital": 0.2145,
-            "returnOnEquity": 0.3374,
-        }
+def test_build_income_statement_waterfall_balances_to_net_income() -> None:
+    steps = _build_income_statement_waterfall_from_values(
+        info={
+            "totalRevenue": 245_100_000_000,
+            "netIncomeToCommon": 70_200_000_000,
+        },
+        statement_values={
+            "cost_of_revenue": 76_000_000_000,
+            "operating_expense": 87_300_000_000,
+            "interest_expense": 2_100_000_000,
+            "tax_provision": 11_400_000_000,
+        },
     )
 
-    assert [metric.model_dump() for metric in metrics] == [
-        {"label": "Revenue (TTM)", "value": "$245.1B"},
-        {"label": "EPS (TTM)", "value": "12.42"},
-        {"label": "Free Cash Flow", "value": "$79.5B"},
-        {"label": "Gross Margin", "value": "69.00%"},
-        {"label": "Operating Margin", "value": "44.50%"},
-        {"label": "Return on Invested Capital (ROIC)", "value": "21.45%"},
-    ]
-
-
-def test_build_key_financial_metrics_falls_back_to_roe_when_roic_missing() -> None:
-    metrics = _build_key_financial_metrics(
+    assert [step.model_dump() for step in steps] == [
         {
-            "returnOnEquity": 0.15132,
-        }
-    )
-
-    assert [metric.model_dump() for metric in metrics] == [
-        {"label": "Return on Equity (ROE)", "value": "15.13%"},
+            "label": "Revenue",
+            "value": 245100000000.0,
+            "display_value": "$245.1B",
+            "step_type": "total",
+        },
+        {
+            "label": "COGS",
+            "value": -76000000000.0,
+            "display_value": "-$76.0B",
+            "step_type": "delta",
+        },
+        {
+            "label": "OpEx",
+            "value": -87300000000.0,
+            "display_value": "-$87.3B",
+            "step_type": "delta",
+        },
+        {
+            "label": "Interest",
+            "value": -2100000000.0,
+            "display_value": "-$2.1B",
+            "step_type": "delta",
+        },
+        {
+            "label": "Other Items",
+            "value": 1900000000.0,
+            "display_value": "$1.9B",
+            "step_type": "delta",
+        },
+        {
+            "label": "Tax",
+            "value": -11400000000.0,
+            "display_value": "-$11.4B",
+            "step_type": "delta",
+        },
+        {
+            "label": "Net Income",
+            "value": 70200000000.0,
+            "display_value": "$70.2B",
+            "step_type": "total",
+        },
     ]
 
 

@@ -1,6 +1,6 @@
 from app.schemas.company_workspace import (
     CompanyWorkspaceSnapshot,
-    KeyFinancialMetric,
+    IncomeStatementWaterfallStep,
     MarketContextCard,
     PerformanceChartRange,
     PerformancePoint,
@@ -24,13 +24,49 @@ FIXTURE_WORKSPACES: dict[str, CompanyWorkspaceSnapshot] = {
         ),
         current_price_display="$212.48",
         market_cap_display="$3.2T",
-        key_financial_metrics=[
-            KeyFinancialMetric(label="Revenue (TTM)", value="$395.8B"),
-            KeyFinancialMetric(label="EPS (TTM)", value="6.73"),
-            KeyFinancialMetric(label="Free Cash Flow", value="$99.6B"),
-            KeyFinancialMetric(label="Gross Margin", value="46.20%"),
-            KeyFinancialMetric(label="Operating Margin", value="31.50%"),
-            KeyFinancialMetric(label="Return on Equity (ROE)", value="151.32%"),
+        income_statement_waterfall=[
+            IncomeStatementWaterfallStep(
+                label="Revenue",
+                value=391_000_000_000,
+                display_value="$391.0B",
+                step_type="total",
+            ),
+            IncomeStatementWaterfallStep(
+                label="COGS",
+                value=-223_500_000_000,
+                display_value="-$223.5B",
+                step_type="delta",
+            ),
+            IncomeStatementWaterfallStep(
+                label="OpEx",
+                value=-57_500_000_000,
+                display_value="-$57.5B",
+                step_type="delta",
+            ),
+            IncomeStatementWaterfallStep(
+                label="Interest",
+                value=-3_900_000_000,
+                display_value="-$3.9B",
+                step_type="delta",
+            ),
+            IncomeStatementWaterfallStep(
+                label="Other Items",
+                value=-1_400_000_000,
+                display_value="-$1.4B",
+                step_type="delta",
+            ),
+            IncomeStatementWaterfallStep(
+                label="Tax",
+                value=-17_200_000_000,
+                display_value="-$17.2B",
+                step_type="delta",
+            ),
+            IncomeStatementWaterfallStep(
+                label="Net Income",
+                value=87_500_000_000,
+                display_value="$87.5B",
+                step_type="total",
+            ),
         ],
         quote_details=[
             QuoteDetail(label="Trailing P/E (TTM)", value="33.19"),
@@ -184,13 +220,49 @@ FIXTURE_WORKSPACES: dict[str, CompanyWorkspaceSnapshot] = {
         ),
         current_price_display="$62.15",
         market_cap_display="$267.0B",
-        key_financial_metrics=[
-            KeyFinancialMetric(label="Revenue (TTM)", value="$47.1B"),
-            KeyFinancialMetric(label="EPS (TTM)", value="2.47"),
-            KeyFinancialMetric(label="Free Cash Flow", value="$9.8B"),
-            KeyFinancialMetric(label="Gross Margin", value="60.70%"),
-            KeyFinancialMetric(label="Operating Margin", value="29.80%"),
-            KeyFinancialMetric(label="Return on Equity (ROE)", value="41.87%"),
+        income_statement_waterfall=[
+            IncomeStatementWaterfallStep(
+                label="Revenue",
+                value=47_100_000_000,
+                display_value="$47.1B",
+                step_type="total",
+            ),
+            IncomeStatementWaterfallStep(
+                label="COGS",
+                value=-18_500_000_000,
+                display_value="-$18.5B",
+                step_type="delta",
+            ),
+            IncomeStatementWaterfallStep(
+                label="OpEx",
+                value=-14_000_000_000,
+                display_value="-$14.0B",
+                step_type="delta",
+            ),
+            IncomeStatementWaterfallStep(
+                label="Interest",
+                value=-1_700_000_000,
+                display_value="-$1.7B",
+                step_type="delta",
+            ),
+            IncomeStatementWaterfallStep(
+                label="Other Items",
+                value=600_000_000,
+                display_value="$0.6B",
+                step_type="delta",
+            ),
+            IncomeStatementWaterfallStep(
+                label="Tax",
+                value=-2_500_000_000,
+                display_value="-$2.5B",
+                step_type="delta",
+            ),
+            IncomeStatementWaterfallStep(
+                label="Net Income",
+                value=11_000_000_000,
+                display_value="$11.0B",
+                step_type="total",
+            ),
         ],
         quote_details=[
             QuoteDetail(label="Trailing P/E (TTM)", value="25.88"),
@@ -344,13 +416,49 @@ FIXTURE_WORKSPACES: dict[str, CompanyWorkspaceSnapshot] = {
         ),
         current_price_display="$338.12",
         market_cap_display="$4.1T",
-        key_financial_metrics=[
-            KeyFinancialMetric(label="Revenue (TTM)", value="$281.7B"),
-            KeyFinancialMetric(label="EPS (TTM)", value="12.42"),
-            KeyFinancialMetric(label="Free Cash Flow", value="$79.5B"),
-            KeyFinancialMetric(label="Gross Margin", value="69.20%"),
-            KeyFinancialMetric(label="Operating Margin", value="44.70%"),
-            KeyFinancialMetric(label="Return on Equity (ROE)", value="33.74%"),
+        income_statement_waterfall=[
+            IncomeStatementWaterfallStep(
+                label="Revenue",
+                value=245_100_000_000,
+                display_value="$245.1B",
+                step_type="total",
+            ),
+            IncomeStatementWaterfallStep(
+                label="COGS",
+                value=-76_000_000_000,
+                display_value="-$76.0B",
+                step_type="delta",
+            ),
+            IncomeStatementWaterfallStep(
+                label="OpEx",
+                value=-87_300_000_000,
+                display_value="-$87.3B",
+                step_type="delta",
+            ),
+            IncomeStatementWaterfallStep(
+                label="Interest",
+                value=-2_100_000_000,
+                display_value="-$2.1B",
+                step_type="delta",
+            ),
+            IncomeStatementWaterfallStep(
+                label="Other Items",
+                value=1_900_000_000,
+                display_value="$1.9B",
+                step_type="delta",
+            ),
+            IncomeStatementWaterfallStep(
+                label="Tax",
+                value=-11_400_000_000,
+                display_value="-$11.4B",
+                step_type="delta",
+            ),
+            IncomeStatementWaterfallStep(
+                label="Net Income",
+                value=70_200_000_000,
+                display_value="$70.2B",
+                step_type="total",
+            ),
         ],
         quote_details=[
             QuoteDetail(label="Trailing P/E (TTM)", value="31.64"),

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
+import { IncomeStatementWaterfallChart } from "@/app/_components/income-statement-waterfall-chart";
 import { PerformanceComparisonSection } from "@/app/_components/performance-comparison-section";
 import { SUPPORTED_TICKERS } from "@/app/_lib/company-directory";
 import { getCompanyWorkspaceData } from "@/app/_lib/company-workspace";
@@ -100,21 +101,19 @@ export default async function DashboardPage({
         </section>
       </ExpandableSection>
 
-      {company.keyFinancialMetrics.length > 0 ? (
+      {company.incomeStatementWaterfall.length > 0 ? (
         <ExpandableSection
-          label="Key Financial Metrics"
-          title="Latest operating performance and returns"
-          sectionClassName="key-financials-panel"
+          label="Income Statement Bridge"
+          title="Revenue to net income waterfall"
+          sectionClassName="waterfall-panel"
         >
-          <section className="workspace-panel" aria-label="Key financial metrics">
-            <dl className="key-financial-metric-grid">
-              {company.keyFinancialMetrics.map((metric) => (
-                <div className="key-financial-metric-card" key={metric.label}>
-                  <dt>{metric.label}</dt>
-                  <dd>{metric.value}</dd>
-                </div>
-              ))}
-            </dl>
+          <section
+            className="workspace-panel"
+            aria-label="Revenue to net income waterfall"
+          >
+            <IncomeStatementWaterfallChart
+              steps={company.incomeStatementWaterfall}
+            />
           </section>
         </ExpandableSection>
       ) : null}
