@@ -15,6 +15,19 @@ class IncomeStatementWaterfallStep(BaseModel):
     step_type: Literal["total", "delta"]
 
 
+class RevenueSegment(BaseModel):
+    label: str
+    value: float
+    display_value: str
+    share_of_total: float
+
+
+class RevenueSegmentBreakdown(BaseModel):
+    total_revenue: float
+    total_revenue_display: str
+    segments: list[RevenueSegment]
+
+
 class MarketContextCard(BaseModel):
     label: str
     symbol: str
@@ -52,6 +65,7 @@ class CompanyWorkspaceSnapshot(BaseModel):
     current_price_display: str
     market_cap_display: str
     income_statement_waterfall: list[IncomeStatementWaterfallStep]
+    revenue_segment_breakdown: RevenueSegmentBreakdown | None = None
     quote_details: list[QuoteDetail]
     market_contexts: list[MarketContextCard]
     performance_chart_ranges: list[PerformanceChartRange]

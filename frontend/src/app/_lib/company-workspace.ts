@@ -12,6 +12,19 @@ export type IncomeStatementWaterfallStep = {
   readonly stepType: "total" | "delta";
 };
 
+export type RevenueSegment = {
+  readonly label: string;
+  readonly value: number;
+  readonly displayValue: string;
+  readonly shareOfTotal: number;
+};
+
+export type RevenueSegmentBreakdown = {
+  readonly totalRevenue: number;
+  readonly totalRevenueDisplay: string;
+  readonly segments: readonly RevenueSegment[];
+};
+
 export type PerformancePoint = {
   readonly label: string;
   readonly value: number;
@@ -49,6 +62,7 @@ export type CompanyWorkspaceData = {
   readonly currentPriceDisplay: string;
   readonly marketCapDisplay: string;
   readonly incomeStatementWaterfall: readonly IncomeStatementWaterfallStep[];
+  readonly revenueSegmentBreakdown: RevenueSegmentBreakdown | null;
   readonly quoteDetails: readonly QuoteDetail[];
   readonly marketContexts: readonly MarketContextCard[];
   readonly performanceChartRanges: readonly PerformanceChartRange[];
@@ -104,6 +118,16 @@ export async function getCompanyWorkspaceData(
         display_value: string;
         step_type: "total" | "delta";
       }[];
+      revenue_segment_breakdown: {
+        total_revenue: number;
+        total_revenue_display: string;
+        segments: {
+          label: string;
+          value: number;
+          display_value: string;
+          share_of_total: number;
+        }[];
+      } | null;
       quote_details: QuoteDetail[];
       market_contexts: {
         label: string;
@@ -143,6 +167,18 @@ export async function getCompanyWorkspaceData(
         displayValue: step.display_value,
         stepType: step.step_type,
       })),
+      revenueSegmentBreakdown: payload.revenue_segment_breakdown
+        ? {
+            totalRevenue: payload.revenue_segment_breakdown.total_revenue,
+            totalRevenueDisplay: payload.revenue_segment_breakdown.total_revenue_display,
+            segments: payload.revenue_segment_breakdown.segments.map((segment) => ({
+              label: segment.label,
+              value: segment.value,
+              displayValue: segment.display_value,
+              shareOfTotal: segment.share_of_total,
+            })),
+          }
+        : null,
       quoteDetails: payload.quote_details,
       marketContexts: payload.market_contexts.map((context) => ({
         label: context.label,
@@ -185,6 +221,7 @@ function buildFallbackWorkspace(ticker: string): CompanyWorkspaceData | null {
     currentPriceDisplay: priceFormatter.format(company.currentPrice),
     marketCapDisplay: marketCapFormatter.format(company.marketCap),
     incomeStatementWaterfall: [],
+    revenueSegmentBreakdown: null,
     quoteDetails: [],
     marketContexts: [],
     performanceChartRanges: [],

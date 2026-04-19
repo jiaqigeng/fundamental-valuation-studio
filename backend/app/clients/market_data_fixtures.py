@@ -6,6 +6,8 @@ from app.schemas.company_workspace import (
     PerformancePoint,
     PerformanceSeries,
     QuoteDetail,
+    RevenueSegment,
+    RevenueSegmentBreakdown,
 )
 
 
@@ -74,6 +76,42 @@ FIXTURE_WORKSPACES: dict[str, CompanyWorkspaceSnapshot] = {
                 step_type="total",
             ),
         ],
+        revenue_segment_breakdown=RevenueSegmentBreakdown(
+            total_revenue=391_000_000_000,
+            total_revenue_display="$391.0B",
+            segments=[
+                RevenueSegment(
+                    label="iPhone",
+                    value=201_200_000_000,
+                    display_value="$201.2B",
+                    share_of_total=201_200_000_000 / 391_000_000_000,
+                ),
+                RevenueSegment(
+                    label="Mac",
+                    value=29_900_000_000,
+                    display_value="$29.9B",
+                    share_of_total=29_900_000_000 / 391_000_000_000,
+                ),
+                RevenueSegment(
+                    label="iPad",
+                    value=28_300_000_000,
+                    display_value="$28.3B",
+                    share_of_total=28_300_000_000 / 391_000_000_000,
+                ),
+                RevenueSegment(
+                    label="Wearables, Home & Accessories",
+                    value=39_800_000_000,
+                    display_value="$39.8B",
+                    share_of_total=39_800_000_000 / 391_000_000_000,
+                ),
+                RevenueSegment(
+                    label="Services",
+                    value=91_800_000_000,
+                    display_value="$91.8B",
+                    share_of_total=91_800_000_000 / 391_000_000_000,
+                ),
+            ],
+        ),
         quote_details=[
             QuoteDetail(label="Trailing P/E (TTM)", value="33.19"),
             QuoteDetail(label="Forward P/E", value="29.44"),
@@ -276,6 +314,18 @@ FIXTURE_WORKSPACES: dict[str, CompanyWorkspaceSnapshot] = {
                 step_type="total",
             ),
         ],
+        revenue_segment_breakdown=RevenueSegmentBreakdown(
+            total_revenue=47_100_000_000,
+            total_revenue_display="$47.1B",
+            segments=[
+                RevenueSegment(
+                    label="Single reporting segment",
+                    value=47_100_000_000,
+                    display_value="$47.1B",
+                    share_of_total=1.0,
+                ),
+            ],
+        ),
         quote_details=[
             QuoteDetail(label="Trailing P/E (TTM)", value="25.88"),
             QuoteDetail(label="Forward P/E", value="23.54"),
@@ -478,6 +528,30 @@ FIXTURE_WORKSPACES: dict[str, CompanyWorkspaceSnapshot] = {
                 step_type="total",
             ),
         ],
+        revenue_segment_breakdown=RevenueSegmentBreakdown(
+            total_revenue=245_100_000_000,
+            total_revenue_display="$245.1B",
+            segments=[
+                RevenueSegment(
+                    label="Productivity and Business Processes",
+                    value=77_600_000_000,
+                    display_value="$77.6B",
+                    share_of_total=77_600_000_000 / 245_100_000_000,
+                ),
+                RevenueSegment(
+                    label="Intelligent Cloud",
+                    value=105_400_000_000,
+                    display_value="$105.4B",
+                    share_of_total=105_400_000_000 / 245_100_000_000,
+                ),
+                RevenueSegment(
+                    label="More Personal Computing",
+                    value=62_100_000_000,
+                    display_value="$62.1B",
+                    share_of_total=62_100_000_000 / 245_100_000_000,
+                ),
+            ],
+        ),
         quote_details=[
             QuoteDetail(label="Trailing P/E (TTM)", value="31.64"),
             QuoteDetail(label="Forward P/E", value="28.10"),

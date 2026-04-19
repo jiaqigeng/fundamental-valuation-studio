@@ -75,6 +75,30 @@ def test_company_workspace_fixture_response(monkeypatch) -> None:
             "step_type": "total",
         },
     ]
+    assert body["revenue_segment_breakdown"] == {
+        "total_revenue": 245100000000.0,
+        "total_revenue_display": "$245.1B",
+        "segments": [
+            {
+                "label": "Productivity and Business Processes",
+                "value": 77600000000.0,
+                "display_value": "$77.6B",
+                "share_of_total": 77600000000.0 / 245100000000.0,
+            },
+            {
+                "label": "Intelligent Cloud",
+                "value": 105400000000.0,
+                "display_value": "$105.4B",
+                "share_of_total": 105400000000.0 / 245100000000.0,
+            },
+            {
+                "label": "More Personal Computing",
+                "value": 62100000000.0,
+                "display_value": "$62.1B",
+                "share_of_total": 62100000000.0 / 245100000000.0,
+            },
+        ],
+    }
     assert body["quote_details"] == [
         {"label": "Trailing P/E (TTM)", "value": "31.64"},
         {"label": "Forward P/E", "value": "28.10"},

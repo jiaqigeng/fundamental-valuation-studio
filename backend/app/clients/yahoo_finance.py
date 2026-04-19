@@ -122,6 +122,7 @@ class YahooFinanceClient:
                 ticker=ticker,
                 info=info,
             ),
+            revenue_segment_breakdown=None,
             quote_details=_build_quote_details(
                 info,
                 current_price=current_price,

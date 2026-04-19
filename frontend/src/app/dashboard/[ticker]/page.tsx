@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 import { IncomeStatementWaterfallChart } from "@/app/_components/income-statement-waterfall-chart";
 import { PerformanceComparisonSection } from "@/app/_components/performance-comparison-section";
+import { RevenueSegmentBreakdownSection } from "@/app/_components/revenue-segment-breakdown";
 import { SUPPORTED_TICKERS } from "@/app/_lib/company-directory";
 import { getCompanyWorkspaceData } from "@/app/_lib/company-workspace";
 
@@ -115,6 +116,16 @@ export default async function DashboardPage({
               steps={company.incomeStatementWaterfall}
             />
           </section>
+        </ExpandableSection>
+      ) : null}
+
+      {company.revenueSegmentBreakdown ? (
+        <ExpandableSection
+          label="Revenue Mix"
+          title="Revenue segment breakdown"
+          sectionClassName="segment-breakdown-panel"
+        >
+          <RevenueSegmentBreakdownSection breakdown={company.revenueSegmentBreakdown} />
         </ExpandableSection>
       ) : null}
 
