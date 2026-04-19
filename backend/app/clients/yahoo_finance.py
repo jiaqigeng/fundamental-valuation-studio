@@ -365,11 +365,6 @@ INCOME_STATEMENT_ROW_ALIASES: dict[str, tuple[str, ...]] = {
         "Net Income Common Stockholders",
         "Net Income From Continuing Ops",
     ),
-    "interest_expense": (
-        "Interest Expense",
-        "Interest Expense Non Operating",
-        "Net Interest Income",
-    ),
 }
 
 
@@ -412,47 +407,58 @@ def _build_income_statement_waterfall_from_values(
     cost_of_revenue = _first_number(statement_values.get("cost_of_revenue"))
     if cost_of_revenue is None and gross_profit is not None:
         cost_of_revenue = max(float(revenue) - float(gross_profit), 0.0)
+    if cost_of_revenue is None:
+        cost_of_revenue = 0.0
+
+    gross_profit_value = _first_number(gross_profit)
+    if gross_profit_value is None:
+        gross_profit_value = float(revenue) - abs(float(cost_of_revenue))
 
     operating_expense = _first_number(statement_values.get("operating_expense"))
     if (
         operating_expense is None
-        and gross_profit is not None
+        and gross_profit_value is not None
         and operating_income is not None
     ):
-        operating_expense = max(float(gross_profit) - float(operating_income), 0.0)
+        operating_expense = max(
+            float(gross_profit_value) - float(operating_income),
+            0.0,
+        )
+    if operating_expense is None:
+        operating_expense = 0.0
 
-    interest_expense = _first_number(statement_values.get("interest_expense"))
-    if interest_expense is None and operating_income is not None and pretax_income is not None:
-        inferred_interest = float(operating_income) - float(pretax_income)
-        if inferred_interest > 0:
-            interest_expense = inferred_interest
+    operating_profit_value = _first_number(operating_income)
+    if operating_profit_value is None:
+        operating_profit_value = float(gross_profit_value) - abs(float(operating_expense))
 
     tax_provision = _first_number(statement_values.get("tax_provision"))
     if tax_provision is None and pretax_income is not None:
-        inferred_tax = float(pretax_income) - float(net_income)
-        if inferred_tax > 0:
-            tax_provision = inferred_tax
+        tax_provision = float(pretax_income) - float(net_income)
+    if tax_provision is None:
+        tax_provision = 0.0
 
     revenue_value = float(revenue)
-    cogs_delta = -_expense_magnitude(cost_of_revenue)
-    opex_delta = -_expense_magnitude(operating_expense)
-    interest_delta = -_expense_magnitude(interest_expense)
-    tax_delta = -_expense_magnitude(tax_provision)
-    other_items_delta = float(net_income) - (
-        revenue_value + cogs_delta + opex_delta + interest_delta + tax_delta
-    )
+    cost_of_revenue_delta = -_expense_magnitude(cost_of_revenue)
+    operating_expense_delta = -_expense_magnitude(operating_expense)
+    taxes_delta = -float(tax_provision)
 
-    if abs(other_items_delta) < 0.005:
-        other_items_delta = 0.0
+    pretax_value = _first_number(pretax_income)
+    if pretax_value is None:
+        pretax_value = float(net_income) - taxes_delta
+
+    other_income_or_cost_delta = float(pretax_value) - float(operating_profit_value)
+    if abs(other_income_or_cost_delta) < 0.005:
+        other_income_or_cost_delta = 0.0
 
     return [
         _build_waterfall_step("Revenue", revenue_value, "total"),
-        _build_waterfall_step("COGS", cogs_delta, "delta"),
-        _build_waterfall_step("OpEx", opex_delta, "delta"),
-        _build_waterfall_step("Interest", interest_delta, "delta"),
-        _build_waterfall_step("Other Items", other_items_delta, "delta"),
-        _build_waterfall_step("Tax", tax_delta, "delta"),
-        _build_waterfall_step("Net Income", float(net_income), "total"),
+        _build_waterfall_step("Cost of Revenue", cost_of_revenue_delta, "delta"),
+        _build_waterfall_step("Gross Profit", float(gross_profit_value), "total"),
+        _build_waterfall_step("Operating Expenses", operating_expense_delta, "delta"),
+        _build_waterfall_step("Operating Profit", float(operating_profit_value), "total"),
+        _build_waterfall_step("Other Income / Cost", other_income_or_cost_delta, "delta"),
+        _build_waterfall_step("Taxes", taxes_delta, "delta"),
+        _build_waterfall_step("Net Profits", float(net_income), "total"),
     ]
 
 

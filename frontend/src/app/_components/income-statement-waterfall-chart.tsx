@@ -64,8 +64,9 @@ export function IncomeStatementWaterfallChart({
   return (
     <div className="waterfall-chart-shell">
       <p className="waterfall-chart-copy">
-        Starting from revenue, each expense or non-operating bar steps the latest
-        income statement down to net income.
+        Starting from revenue, the chart now surfaces gross profit and operating
+        profit as subtotal checkpoints before bridging through other income or cost
+        and taxes to net profits.
       </p>
 
       <svg
