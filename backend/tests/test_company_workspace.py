@@ -46,14 +46,19 @@ def test_company_workspace_fixture_response(monkeypatch) -> None:
             "description": "Sector proxy chosen from the company's reported sector.",
         },
     ]
-    assert len(body["performance_chart"]) == 3
-    assert body["performance_chart"][0]["symbol"] == "MSFT"
-    assert body["performance_chart"][0]["points"][0] == {
-        "label": "Mar 18",
+    assert [entry["range_key"] for entry in body["performance_chart_ranges"]] == [
+        "1Y",
+        "5Y",
+    ]
+    assert body["performance_chart_ranges"][0]["label"] == "1 year"
+    assert len(body["performance_chart_ranges"][0]["series"]) == 3
+    assert body["performance_chart_ranges"][0]["series"][0]["symbol"] == "MSFT"
+    assert body["performance_chart_ranges"][0]["series"][0]["points"][0] == {
+        "label": "May 2025",
         "value": 100.0,
     }
-    assert body["performance_chart"][1]["symbol"] == "^GSPC"
-    assert body["performance_chart"][2]["symbol"] == "XLK"
+    assert body["performance_chart_ranges"][1]["series"][1]["symbol"] == "^GSPC"
+    assert body["performance_chart_ranges"][1]["series"][2]["symbol"] == "XLK"
 
 
 def test_company_workspace_fixture_404(monkeypatch) -> None:

@@ -6,7 +6,7 @@
 - Standard startup path: `./init.sh`
 - Standard verification path: `./init.sh` for baseline health plus `feature_list.json -> features[*].verification.command` for feature passing
 - Current highest-priority unfinished feature: `dash-004`
-- Current blocker: none recorded. The latest requested dashboard UX/copy polish pass is verified, so the roadmap can return to `dash-004` unless the user asks for more dashboard refinements first.
+- Current blocker: none recorded. The latest requested dashboard market-context exception update is verified, so the roadmap can return to `dash-004` unless the user asks for more dashboard refinements first.
 
 ## Session Log
 
@@ -129,3 +129,15 @@
 - Files or artifacts updated: `frontend/src/app/dashboard/[ticker]/page.tsx`, `frontend/src/app/globals.css`, `progress.md`, `session-handoff.md`
 - Known risk or unresolved issue: No new blocker was introduced; this remains a dashboard-polish exception on top of the passing slices, so `dash-004` is still unstarted and its spec file is still missing.
 - Next best step: Resume roadmap work at `dash-004` unless the user requests another narrow dashboard polish change first.
+
+### Session 011
+
+- Date: 2026-04-18
+- Goal: Add a selectable time range to the normalized comparison chart before resuming `dash-004`.
+- Completed: Extended the backend workspace payload so the market-context chart can expose whichever comparison ranges are available, currently `1Y` and `5Y`; updated fixture data and backend tests to cover both ranges; added a client-side selector for the comparison section so users can switch between `1Y` and `5Y`; and updated `dash-003` Playwright coverage to verify the range toggle changes the rendered comparison window.
+- Verification run: `./init.sh`; `cd backend && .venv/Scripts/python.exe -m pytest -q`; `cd frontend && npm run lint`; `cd frontend && npm run typecheck`; `cd frontend && npx playwright test e2e/dash-002b.spec.ts e2e/dash-003.spec.ts`
+- Evidence captured: `./init.sh` completed successfully before the change; backend `cd backend && .venv/Scripts/python.exe -m pytest -q` passed with `4 passed` and one existing `.pytest_cache` warning; frontend `npm run lint` passed; frontend `npm run typecheck` passed; `cd frontend && npx playwright test e2e/dash-002b.spec.ts e2e/dash-003.spec.ts` passed with the new selector assertions.
+- Commits: pending
+- Files or artifacts updated: `backend/app/schemas/company_workspace.py`, `backend/app/clients/yahoo_finance.py`, `backend/app/clients/market_data_fixtures.py`, `backend/tests/test_company_workspace.py`, `frontend/src/app/_lib/company-workspace.ts`, `frontend/src/app/_components/performance-comparison-chart.tsx`, `frontend/src/app/_components/performance-comparison-section.tsx`, `frontend/src/app/dashboard/[ticker]/page.tsx`, `frontend/src/app/globals.css`, `frontend/e2e/dash-003.spec.ts`, `progress.md`, `session-handoff.md`
+- Known risk or unresolved issue: The live `5Y` selector depends on longer-range `yfinance` history being available for the company, the S&P 500, and the sector benchmark; the backend now skips any unavailable range and only renders what is actually accessible, but upstream availability can still drift.
+- Next best step: Resume roadmap work at `dash-004` unless the user requests another narrow dashboard exception update first.

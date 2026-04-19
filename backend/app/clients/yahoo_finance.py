@@ -12,6 +12,7 @@ import yfinance as yf
 from app.schemas.company_workspace import (
     CompanyWorkspaceSnapshot,
     MarketContextCard,
+    PerformanceChartRange,
     PerformancePoint,
     PerformanceSeries,
     QuoteDetail,
@@ -40,6 +41,11 @@ SECTOR_INDEXES: dict[str, tuple[str, str]] = {
     "Utilities": ("XLU", "Utilities sector benchmark"),
 }
 
+PERFORMANCE_RANGE_SPECS: tuple[tuple[str, str, str, str], ...] = (
+    ("1Y", "1 year", "1y", "1mo"),
+    ("5Y", "5 year", "5y", "3mo"),
+)
+
 
 class YahooFinanceLookupError(RuntimeError):
     """Raised when Yahoo Finance data is missing or unavailable."""
@@ -49,7 +55,7 @@ class YahooFinanceLookupError(RuntimeError):
 class YahooWorkspacePayload:
     company_info: dict
     market_contexts: list[MarketContextCard]
-    performance_chart: list[PerformanceSeries]
+    performance_chart_ranges: list[PerformanceChartRange]
 
 
 class YahooFinanceClient:
@@ -167,7 +173,7 @@ class YahooFinanceClient:
                 ),
             ],
             market_contexts=payload.market_contexts,
-            performance_chart=payload.performance_chart,
+            performance_chart_ranges=payload.performance_chart_ranges,
         )
 
     def _fetch_payload(self, ticker: str) -> YahooWorkspacePayload:
@@ -212,7 +218,7 @@ class YahooFinanceClient:
         return YahooWorkspacePayload(
             company_info=company_info,
             market_contexts=market_contexts,
-            performance_chart=_build_performance_chart(
+            performance_chart_ranges=_build_performance_chart_ranges(
                 ticker=ticker,
                 company_name=_string_field(company_info, "shortName") or ticker,
                 company_current_value=_format_currency(current_price),
@@ -270,6 +276,48 @@ def _build_market_context_card(
     )
 
 
+def _build_performance_chart_ranges(
+    *,
+    ticker: str,
+    company_name: str,
+    company_current_value: str,
+    company_daily_change: str,
+    market_contexts: list[MarketContextCard],
+) -> list[PerformanceChartRange]:
+    chart_ranges: list[PerformanceChartRange] = []
+    last_error: YahooFinanceLookupError | None = None
+
+    for range_key, label, period, interval in PERFORMANCE_RANGE_SPECS:
+        try:
+            chart_ranges.append(
+                PerformanceChartRange(
+                    range_key=range_key,
+                    label=label,
+                    series=_build_performance_chart(
+                        ticker=ticker,
+                        company_name=company_name,
+                        company_current_value=company_current_value,
+                        company_daily_change=company_daily_change,
+                        market_contexts=market_contexts,
+                        period=period,
+                        interval=interval,
+                    ),
+                )
+            )
+        except YahooFinanceLookupError as exc:
+            last_error = exc
+
+    if chart_ranges:
+        return chart_ranges
+
+    if last_error is not None:
+        raise last_error
+
+    raise YahooFinanceLookupError(
+        f"Yahoo Finance returned insufficient history to compare ticker {ticker}."
+    )
+
+
 def _build_performance_chart(
     *,
     ticker: str,
@@ -277,6 +325,8 @@ def _build_performance_chart(
     company_current_value: str,
     company_daily_change: str,
     market_contexts: list[MarketContextCard],
+    period: str,
+    interval: str,
 ) -> list[PerformanceSeries]:
     comparison_series = [
         (
@@ -303,11 +353,12 @@ def _build_performance_chart(
     ]
 
     history_by_symbol = {
-        symbol: _fetch_history_points(symbol) for _, symbol, _, _, _ in comparison_series
+        symbol: _fetch_history_points(symbol, period=period, interval=interval)
+        for _, symbol, _, _, _ in comparison_series
     }
     common_dates = sorted(
         set.intersection(*(set(history.keys()) for history in history_by_symbol.values()))
-    )[-20:]
+    )
 
     if len(common_dates) < 2:
         raise YahooFinanceLookupError(
@@ -338,9 +389,18 @@ def _build_performance_chart(
     return chart_series
 
 
-def _fetch_history_points(symbol: str) -> dict[date, float]:
+def _fetch_history_points(
+    symbol: str,
+    *,
+    period: str,
+    interval: str,
+) -> dict[date, float]:
     try:
-        history = yf.Ticker(symbol).history(period="1mo", interval="1d", auto_adjust=False)
+        history = yf.Ticker(symbol).history(
+            period=period,
+            interval=interval,
+            auto_adjust=False,
+        )
     except Exception as exc:  # pragma: no cover - upstream library errors vary.
         raise YahooFinanceLookupError(
             f"yfinance history request failed for symbol {symbol}."
@@ -366,7 +426,7 @@ def _fetch_history_points(symbol: str) -> dict[date, float]:
 
 
 def _format_history_label(value: date) -> str:
-    return value.strftime("%b %d").replace(" 0", " ")
+    return value.strftime("%b %Y")
 
 
 def _normalize_history_value(value: float, baseline: float) -> float:

@@ -28,6 +28,12 @@ class PerformanceSeries(BaseModel):
     points: list[PerformancePoint]
 
 
+class PerformanceChartRange(BaseModel):
+    range_key: str
+    label: str
+    series: list[PerformanceSeries]
+
+
 class CompanyWorkspaceSnapshot(BaseModel):
     ticker: str
     name: str
@@ -38,4 +44,4 @@ class CompanyWorkspaceSnapshot(BaseModel):
     market_cap_display: str
     quote_details: list[QuoteDetail]
     market_contexts: list[MarketContextCard]
-    performance_chart: list[PerformanceSeries]
+    performance_chart_ranges: list[PerformanceChartRange]

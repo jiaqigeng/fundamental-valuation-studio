@@ -61,12 +61,6 @@ export function PerformanceComparisonChart({
 
   return (
     <div className="comparison-chart-shell">
-      <div className="comparison-chart-copy-row">
-        <p className="comparison-chart-copy">
-          All three lines start at 100 so relative growth is directly comparable.
-        </p>
-      </div>
-
       <svg
         aria-label="Normalized comparison chart"
         className="comparison-chart"

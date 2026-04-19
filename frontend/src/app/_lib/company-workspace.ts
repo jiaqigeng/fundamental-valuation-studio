@@ -19,6 +19,12 @@ export type PerformanceSeries = {
   readonly points: readonly PerformancePoint[];
 };
 
+export type PerformanceChartRange = {
+  readonly rangeKey: string;
+  readonly label: string;
+  readonly series: readonly PerformanceSeries[];
+};
+
 export type MarketContextCard = {
   readonly label: string;
   readonly symbol: string;
@@ -37,7 +43,7 @@ export type CompanyWorkspaceData = {
   readonly marketCapDisplay: string;
   readonly quoteDetails: readonly QuoteDetail[];
   readonly marketContexts: readonly MarketContextCard[];
-  readonly performanceChart: readonly PerformanceSeries[];
+  readonly performanceChartRanges: readonly PerformanceChartRange[];
 };
 
 const BACKEND_BASE_URL =
@@ -92,15 +98,19 @@ export async function getCompanyWorkspaceData(
         daily_change: string;
         description: string;
       }[];
-      performance_chart: {
+      performance_chart_ranges: {
+        range_key: string;
         label: string;
-        symbol: string;
-        current_value: string;
-        daily_change: string;
-        line_color: string;
-        points: {
+        series: {
           label: string;
-          value: number;
+          symbol: string;
+          current_value: string;
+          daily_change: string;
+          line_color: string;
+          points: {
+            label: string;
+            value: number;
+          }[];
         }[];
       }[];
     };
@@ -121,13 +131,17 @@ export async function getCompanyWorkspaceData(
         dailyChange: context.daily_change,
         description: context.description,
       })),
-      performanceChart: payload.performance_chart.map((series) => ({
-        label: series.label,
-        symbol: series.symbol,
-        currentValue: series.current_value,
-        dailyChange: series.daily_change,
-        lineColor: series.line_color,
-        points: series.points,
+      performanceChartRanges: payload.performance_chart_ranges.map((range) => ({
+        rangeKey: range.range_key,
+        label: range.label,
+        series: range.series.map((series) => ({
+          label: series.label,
+          symbol: series.symbol,
+          currentValue: series.current_value,
+          dailyChange: series.daily_change,
+          lineColor: series.line_color,
+          points: series.points,
+        })),
       })),
     };
   } catch {
@@ -152,6 +166,6 @@ function buildFallbackWorkspace(ticker: string): CompanyWorkspaceData | null {
     marketCapDisplay: marketCapFormatter.format(company.marketCap),
     quoteDetails: [],
     marketContexts: [],
-    performanceChart: [],
+    performanceChartRanges: [],
   };
 }

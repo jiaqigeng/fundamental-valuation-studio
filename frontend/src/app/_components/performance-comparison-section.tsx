@@ -1,0 +1,81 @@
+"use client";
+
+import { useState } from "react";
+import { PerformanceComparisonChart } from "@/app/_components/performance-comparison-chart";
+import type { PerformanceChartRange } from "@/app/_lib/company-workspace";
+
+type PerformanceComparisonSectionProps = {
+  readonly chartRanges: readonly PerformanceChartRange[];
+};
+
+export function PerformanceComparisonSection({
+  chartRanges,
+}: PerformanceComparisonSectionProps) {
+  const [selectedRangeKey, setSelectedRangeKey] = useState(
+    chartRanges[0]?.rangeKey ?? "",
+  );
+
+  const selectedRange =
+    chartRanges.find((range) => range.rangeKey === selectedRangeKey) ?? chartRanges[0];
+
+  if (!selectedRange) {
+    return null;
+  }
+
+  return (
+    <section className="workspace-panel" aria-label="Market context">
+      <div className="comparison-chart-copy-row">
+        <p className="comparison-chart-copy">
+          All three lines start at 100 over the selected period so relative growth is
+          directly comparable.
+        </p>
+
+        {chartRanges.length > 1 ? (
+          <div className="comparison-chart-range-picker" role="group" aria-label="Comparison range">
+            {chartRanges.map((range) => {
+              const isActive = range.rangeKey === selectedRange.rangeKey;
+
+              return (
+                <button
+                  key={range.rangeKey}
+                  type="button"
+                  className={`comparison-chart-range-button${isActive ? " comparison-chart-range-button-active" : ""}`}
+                  aria-pressed={isActive}
+                  onClick={() => setSelectedRangeKey(range.rangeKey)}
+                >
+                  {range.rangeKey}
+                </button>
+              );
+            })}
+          </div>
+        ) : null}
+      </div>
+
+      <p className="comparison-chart-range-status">
+        Showing {selectedRange.label} normalized performance.
+      </p>
+
+      <PerformanceComparisonChart series={selectedRange.series} />
+
+      <div className="market-context-grid market-context-grid-legend">
+        {selectedRange.series.map((series) => (
+          <article className="market-context-card" key={`${selectedRange.rangeKey}-${series.symbol}`}>
+            <div className="market-context-card-header">
+              <div className="market-context-card-heading">
+                <span
+                  aria-hidden="true"
+                  className="market-context-swatch"
+                  style={{ backgroundColor: series.lineColor }}
+                />
+                <p className="market-context-symbol">{series.symbol}</p>
+              </div>
+              <p className="market-context-change">{series.dailyChange}</p>
+            </div>
+            <p className="market-context-label">{series.label}</p>
+            <p className="market-context-value">{series.currentValue}</p>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}

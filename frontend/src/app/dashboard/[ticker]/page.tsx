@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
-import { PerformanceComparisonChart } from "@/app/_components/performance-comparison-chart";
+import { PerformanceComparisonSection } from "@/app/_components/performance-comparison-section";
 import { SUPPORTED_TICKERS } from "@/app/_lib/company-directory";
 import { getCompanyWorkspaceData } from "@/app/_lib/company-workspace";
 
@@ -120,38 +120,15 @@ export default async function DashboardPage({
         </ExpandableSection>
       ) : null}
 
-      {company.performanceChart.length > 0 ? (
+      {company.performanceChartRanges.length > 0 ? (
         <ExpandableSection
           label="Market Context"
           title="Normalized growth comparison"
           sectionClassName="market-context-panel"
         >
-          <section className="workspace-panel" aria-label="Market context">
-            <PerformanceComparisonChart series={company.performanceChart} />
-
-            <div className="market-context-grid market-context-grid-legend">
-              {company.performanceChart.map((series) => (
-                <article className="market-context-card" key={series.symbol}>
-                  <div className="market-context-card-header">
-                    <div className="market-context-card-heading">
-                      <span
-                        aria-hidden="true"
-                        className="market-context-swatch"
-                        style={{ backgroundColor: series.lineColor }}
-                      />
-                      <p className="market-context-symbol">{series.symbol}</p>
-                    </div>
-                    <p className="market-context-change">{series.dailyChange}</p>
-                  </div>
-                  <p className="market-context-label">{series.label}</p>
-                  <p className="market-context-value">{series.currentValue}</p>
-                </article>
-              ))}
-            </div>
-          </section>
+          <PerformanceComparisonSection chartRanges={company.performanceChartRanges} />
         </ExpandableSection>
       ) : null}
-
     </main>
   );
 }
