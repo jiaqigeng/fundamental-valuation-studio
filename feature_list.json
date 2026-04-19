@@ -163,14 +163,14 @@
         ]
       },
       "evidence": {
-        "commit": "f7a46f4",
+        "commit": "3b177a0",
         "verification_run": "cd frontend && npx playwright test e2e/dash-004.spec.ts",
         "output_log": "artifacts/verification/dash-004-playwright.log",
-        "timestamp": "2026-04-19T12:03:53.7986195-04:00"
+        "timestamp": "2026-04-19T12:28:11.6662378-04:00"
       },
       "depends_on": ["dash-002b"],
       "status": "passing",
-      "notes": "Implemented with a backend-for-frontend income-statement waterfall payload plus a server-rendered dashboard chart that walks from revenue to net income and updates across supported fixture tickers. The live `yfinance` path derives the walk from the latest available income-statement rows and lets `Other Items` absorb any residual so the bridge still lands exactly on net income."
+      "notes": "Implemented with a backend-for-frontend income-statement waterfall payload plus a server-rendered dashboard chart. The current statement walk now surfaces `Revenue`, `Cost of Revenue`, `Gross Profit`, `Operating Expenses`, `Operating Profit`, `Other Income / Cost`, `Taxes`, and `Net Profits` for supported fixture tickers. The live `yfinance` path derives the same bridge from the latest available income-statement rows and uses signed other-income/cost plus taxes to land exactly on net profits."
     },
     {
       "id": "dash-005",
