@@ -23,7 +23,7 @@ test("dash-002b shows a Yahoo Finance quote snapshot for the workspace", async (
   await expect(snapshot.getByText(/peg ratio/i)).toBeVisible();
   await expect(snapshot.getByText("2.21")).toBeVisible();
   await expect(snapshot.getByText(/debt to equity/i)).toBeVisible();
-  await expect(snapshot.getByText("32.11")).toBeVisible();
+  await expect(snapshot.getByText("32.11%")).toBeVisible();
   await expect(snapshot.getByText(/beta \(5y monthly\)/i)).toBeVisible();
   await expect(snapshot.getByText("1.13")).toBeVisible();
   await expect(snapshot.getByText(/return on equity \(roe\)/i)).toBeVisible();
@@ -34,7 +34,7 @@ test("dash-002b shows a Yahoo Finance quote snapshot for the workspace", async (
   await expect(snapshot.getByText("3.64 (0.86%)")).toBeVisible();
   await expect(snapshot.getByText(/trailing dividend/i)).toBeVisible();
   await expect(snapshot.getByText("3.32")).toBeVisible();
-  await expect(snapshot.getByText(/avg\. volume/i)).toBeVisible();
+  await expect(snapshot.getByText(/avg\. volume \(3m\)/i)).toBeVisible();
   await expect(snapshot.getByText("32,964,050")).toBeVisible();
   await expect(snapshot.getByText(/earnings date/i)).toBeVisible();
   await expect(snapshot.getByText("Apr 29, 2026")).toBeVisible();

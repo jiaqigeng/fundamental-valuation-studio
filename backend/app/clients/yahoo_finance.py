@@ -296,7 +296,7 @@ def _build_quote_details(
         ),
         _optional_quote_detail(
             "Debt to Equity",
-            _format_optional_number(_first_number(info.get("debtToEquity"))),
+            _format_optional_suffix_percent(_first_number(info.get("debtToEquity"))),
         ),
         _optional_quote_detail(
             "Beta (5Y Monthly)",
@@ -322,7 +322,7 @@ def _build_quote_details(
             _format_optional_number(trailing_ttm_dividend),
         ),
         _optional_quote_detail(
-            "Avg. Volume",
+            "Avg. Volume (3M)",
             _format_optional_integer(_first_number(info.get("averageVolume"))),
         ),
         _optional_quote_detail(
@@ -765,6 +765,12 @@ def _format_optional_percent(value: float | int | None) -> str | None:
         Decimal("0.01"), rounding=ROUND_HALF_UP
     )
     return f"{percent_value}%"
+
+
+def _format_optional_suffix_percent(value: float | int | None) -> str | None:
+    if value is None:
+        return None
+    return f"{_format_number(value)}%"
 
 
 def _format_optional_integer(value: float | int | None) -> str | None:
