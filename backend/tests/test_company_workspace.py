@@ -4,6 +4,8 @@ from fastapi.testclient import TestClient
 
 from app.clients.yahoo_finance import _build_normalized_points
 from app.clients.yahoo_finance import _format_forward_dividend
+from app.clients.yahoo_finance import _select_anchor_value
+from app.clients.yahoo_finance import _subtract_years
 from app.main import app
 
 
@@ -57,7 +59,7 @@ def test_company_workspace_fixture_response(monkeypatch) -> None:
     assert len(body["performance_chart_ranges"][0]["series"]) == 3
     assert body["performance_chart_ranges"][0]["series"][0]["symbol"] == "MSFT"
     assert body["performance_chart_ranges"][0]["series"][0]["points"][0] == {
-        "label": "May 2025",
+        "label": "Apr 2025",
         "value": 100.0,
     }
     assert body["performance_chart_ranges"][1]["series"][1]["symbol"] == "^GSPC"
@@ -78,15 +80,36 @@ def test_format_forward_dividend_uses_yfinance_percent_points() -> None:
 
 def test_build_normalized_points_ends_series_at_current_quote() -> None:
     history = {
+        date(2025, 4, 20): 103.0,
         date(2025, 5, 1): 100.0,
         date(2025, 7, 1): 92.0,
+        date(2026, 4, 1): 111.0,
     }
 
     points = _build_normalized_points(
         history=history,
         ordered_dates=sorted(history.keys()),
+        anchor_date=date(2025, 4, 18),
+        current_date=date(2026, 4, 18),
+        baseline=100.0,
         current_value=115.0,
     )
 
     assert points[0].value == 100.0
+    assert points[0].label == "Apr 2025"
     assert points[-1].value == 115.0
+    assert points[-1].label == "Apr 2026"
+
+
+def test_select_anchor_value_prefers_latest_point_on_or_before_target_date() -> None:
+    history = {
+        date(2025, 4, 15): 97.0,
+        date(2025, 4, 17): 99.5,
+        date(2025, 4, 21): 101.0,
+    }
+
+    assert _select_anchor_value(history, date(2025, 4, 18)) == 99.5
+
+
+def test_subtract_years_handles_leap_day() -> None:
+    assert _subtract_years(date(2024, 2, 29), 1) == date(2023, 2, 28)

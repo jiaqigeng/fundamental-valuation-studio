@@ -35,7 +35,7 @@ test("dash-003 shows broad-market and sector-relevant context that updates by co
   await expect(marketContext.getByText("XLK", { exact: true })).toBeVisible();
   await expect(marketContext.getByText("154.35")).toBeVisible();
   await expect(marketContext.getByText("+9.6%")).toBeVisible();
-  await expect(marketContext.getByText("May 2025", { exact: true })).toBeVisible();
+  await expect(marketContext.getByText("Apr 2025", { exact: true })).toBeVisible();
 
   await marketContext.getByRole("button", { name: "5Y" }).click();
 

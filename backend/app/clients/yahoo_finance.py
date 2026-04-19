@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import date
 from datetime import UTC, datetime
+from datetime import timedelta
 from decimal import Decimal, ROUND_HALF_UP
 from pathlib import Path
 from threading import Lock
@@ -41,9 +42,9 @@ SECTOR_INDEXES: dict[str, tuple[str, str]] = {
     "Utilities": ("XLU", "Utilities sector benchmark"),
 }
 
-PERFORMANCE_RANGE_SPECS: tuple[tuple[str, str, str, str], ...] = (
-    ("1Y", "1 year", "1y", "1mo"),
-    ("5Y", "5 year", "5y", "3mo"),
+PERFORMANCE_RANGE_SPECS: tuple[tuple[str, str, int, str, str], ...] = (
+    ("1Y", "1 year", 1, "1y", "1mo"),
+    ("5Y", "5 year", 5, "5y", "3mo"),
 )
 
 
@@ -326,7 +327,7 @@ def _build_performance_chart_ranges(
     chart_ranges: list[PerformanceChartRange] = []
     last_error: YahooFinanceLookupError | None = None
 
-    for range_key, label, period, interval in PERFORMANCE_RANGE_SPECS:
+    for range_key, label, years, period, interval in PERFORMANCE_RANGE_SPECS:
         try:
             chart_ranges.append(
                 PerformanceChartRange(
@@ -335,6 +336,7 @@ def _build_performance_chart_ranges(
                     series=_build_performance_chart(
                         ticker=ticker,
                         comparison_series=comparison_series,
+                        years=years,
                         period=period,
                         interval=interval,
                     ),
@@ -358,11 +360,18 @@ def _build_performance_chart(
     *,
     ticker: str,
     comparison_series: list[ComparisonSeriesSeed],
+    years: int,
     period: str,
     interval: str,
 ) -> list[PerformanceSeries]:
+    current_date = datetime.now(UTC).date()
+    anchor_date = _subtract_years(current_date, years)
     history_by_symbol = {
         symbol: _fetch_history_points(symbol, period=period, interval=interval)
+        for symbol in {series.symbol for series in comparison_series}
+    }
+    anchor_value_by_symbol = {
+        symbol: _fetch_anchor_value(symbol, anchor_date)
         for symbol in {series.symbol for series in comparison_series}
     }
     common_dates = sorted(
@@ -386,6 +395,9 @@ def _build_performance_chart(
                 points=_build_normalized_points(
                     history=history_by_symbol[series.symbol],
                     ordered_dates=common_dates,
+                    anchor_date=anchor_date,
+                    current_date=current_date,
+                    baseline=anchor_value_by_symbol[series.symbol],
                     current_value=series.current_value_number,
                 ),
             )
@@ -398,22 +410,34 @@ def _build_normalized_points(
     *,
     history: dict[date, float],
     ordered_dates: list[date],
+    anchor_date: date,
+    current_date: date,
+    baseline: float,
     current_value: float | int | None,
 ) -> list[PerformancePoint]:
-    baseline = history[ordered_dates[0]]
-    historical_dates = ordered_dates[:-1] if current_value is not None else ordered_dates
-    points = [
-        PerformancePoint(
-            label=_format_history_label(point_date),
-            value=_normalize_history_value(history[point_date], baseline),
+    anchor_label = _format_history_label(anchor_date)
+    current_label = _format_history_label(current_date)
+    points = [PerformancePoint(label=anchor_label, value=100.0)]
+
+    for point_date in ordered_dates:
+        if point_date <= anchor_date:
+            continue
+
+        point_label = _format_history_label(point_date)
+        if point_label in {anchor_label, current_label}:
+            continue
+
+        points.append(
+            PerformancePoint(
+                label=point_label,
+                value=_normalize_history_value(history[point_date], baseline),
+            )
         )
-        for point_date in historical_dates
-    ]
 
     if current_value is not None:
         points.append(
             PerformancePoint(
-                label=_format_history_label(datetime.now(UTC).date()),
+                label=current_label,
                 value=_normalize_history_value(float(current_value), baseline),
             )
         )
@@ -455,6 +479,76 @@ def _fetch_history_points(
         )
 
     return history_points
+
+
+def _fetch_anchor_value(symbol: str, target_date: date) -> float:
+    history = _fetch_history_points_for_dates(
+        symbol,
+        start_date=target_date - timedelta(days=14),
+        end_date=target_date + timedelta(days=14),
+        interval="1d",
+    )
+    return _select_anchor_value(history, target_date)
+
+
+def _fetch_history_points_for_dates(
+    symbol: str,
+    *,
+    start_date: date,
+    end_date: date,
+    interval: str,
+) -> dict[date, float]:
+    try:
+        history = yf.Ticker(symbol).history(
+            start=start_date.isoformat(),
+            end=(end_date + timedelta(days=1)).isoformat(),
+            interval=interval,
+            auto_adjust=False,
+        )
+    except Exception as exc:  # pragma: no cover - upstream library errors vary.
+        raise YahooFinanceLookupError(
+            f"yfinance history request failed for symbol {symbol}."
+        ) from exc
+
+    close_history = history.get("Close")
+    if close_history is None:
+        raise YahooFinanceLookupError(
+            f"Yahoo Finance returned no close history for symbol {symbol}."
+        )
+
+    history_points: dict[date, float] = {}
+    for timestamp, close_value in close_history.items():
+        if isinstance(close_value, (int, float)):
+            history_points[timestamp.to_pydatetime().date()] = float(close_value)
+
+    if not history_points:
+        raise YahooFinanceLookupError(
+            f"Yahoo Finance returned empty history for symbol {symbol}."
+        )
+
+    return history_points
+
+
+def _select_anchor_value(history: dict[date, float], target_date: date) -> float:
+    dates = sorted(history)
+    on_or_before = [point_date for point_date in dates if point_date <= target_date]
+    if on_or_before:
+        return history[on_or_before[-1]]
+
+    on_or_after = [point_date for point_date in dates if point_date > target_date]
+    if on_or_after:
+        return history[on_or_after[0]]
+
+    raise YahooFinanceLookupError(
+        f"Yahoo Finance returned no usable anchor point near {target_date.isoformat()}."
+    )
+
+
+def _subtract_years(value: date, years: int) -> date:
+    try:
+        return value.replace(year=value.year - years)
+    except ValueError:
+        return value.replace(month=2, day=28, year=value.year - years)
 
 
 def _format_history_label(value: date) -> str:

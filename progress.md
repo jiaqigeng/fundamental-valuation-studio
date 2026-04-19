@@ -6,7 +6,7 @@
 - Standard startup path: `./init.sh`
 - Standard verification path: `./init.sh` for baseline health plus `feature_list.json -> features[*].verification.command` for feature passing
 - Current highest-priority unfinished feature: `dash-004`
-- Current blocker: none recorded. The latest requested dashboard market-context endpoint fix is verified, so the roadmap can return to `dash-004` unless the user asks for more dashboard refinements first.
+- Current blocker: none recorded. The latest requested dashboard market-context exact-anchor fix is verified, so the roadmap can return to `dash-004` unless the user asks for more dashboard refinements first.
 
 ## Session Log
 
@@ -188,4 +188,16 @@
 - Commits: none yet
 - Files or artifacts updated: `backend/app/clients/yahoo_finance.py`, `backend/tests/test_company_workspace.py`, `backend/app/clients/market_data_fixtures.py`, `frontend/e2e/dash-003.spec.ts`, `artifacts/verification/dash-003-playwright.log`, `progress.md`, `session-handoff.md`, `feature_list.json`
 - Known risk or unresolved issue: The live chart now ends on the current quote instead of the last sampled history bar, but the first point is still the earliest available sampled bar in the requested period, so upstream `yfinance` history availability still governs the exact anchor date.
+- Next best step: Resume roadmap work at `dash-004` unless the user requests another narrow dashboard exception update first.
+
+### Session 016
+
+- Date: 2026-04-18
+- Goal: Fix the market-context baseline so `1Y` and `5Y` are anchored to exactly one year or five years ago from today instead of the earliest sparse sample returned by Yahoo.
+- Completed: Reworked the live `yfinance` range builder to compute an explicit anchor date from today, fetch the nearest usable daily close around that anchor, normalize each series from that anchor value, and insert the anchor as the first chart point while still ending the chart on today's current quote. Updated fixture data so the one-year charts begin at `Apr 2025`, added backend tests for anchor selection and leap-day-safe year subtraction, and refreshed `dash-003` to assert the corrected one-year anchor label.
+- Verification run: `./init.sh`; `cd backend && .venv/Scripts/python.exe -m pytest tests/test_company_workspace.py -q`; `cd frontend && npm run lint`; `cd frontend && npm run typecheck`; `cd frontend && npx playwright test e2e/dash-003.spec.ts`
+- Evidence captured: `./init.sh` completed successfully before the fix; backend `cd backend && .venv/Scripts/python.exe -m pytest tests/test_company_workspace.py -q` passed with `6 passed`; frontend `npm run lint` passed; frontend `npm run typecheck` passed; `cd frontend && npx playwright test e2e/dash-003.spec.ts` passed after rerunning Playwright outside the sandbox to avoid the local `spawn EPERM`; log saved at `artifacts/verification/dash-003-playwright.log`.
+- Commits: none yet
+- Files or artifacts updated: `backend/app/clients/yahoo_finance.py`, `backend/tests/test_company_workspace.py`, `backend/app/clients/market_data_fixtures.py`, `frontend/e2e/dash-003.spec.ts`, `artifacts/verification/dash-003-playwright.log`, `progress.md`, `session-handoff.md`, `feature_list.json`
+- Known risk or unresolved issue: The exact anchor still depends on the nearest available trading close returned around the target date, so weekends and holidays will use the closest usable market session rather than a non-trading calendar date.
 - Next best step: Resume roadmap work at `dash-004` unless the user requests another narrow dashboard exception update first.

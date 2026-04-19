@@ -68,7 +68,7 @@ FIXTURE_WORKSPACES: dict[str, CompanyWorkspaceSnapshot] = {
                         daily_change="+2.41 (+1.15%)",
                         line_color="#21409A",
                         points=[
-                            PerformancePoint(label="May 2025", value=100.0),
+                            PerformancePoint(label="Apr 2025", value=100.0),
                             PerformancePoint(label="Jul 2025", value=102.4),
                             PerformancePoint(label="Sep 2025", value=101.1),
                             PerformancePoint(label="Nov 2025", value=104.8),
@@ -83,7 +83,7 @@ FIXTURE_WORKSPACES: dict[str, CompanyWorkspaceSnapshot] = {
                         daily_change="+84.78 (+1.20%)",
                         line_color="#0F766E",
                         points=[
-                            PerformancePoint(label="May 2025", value=100.0),
+                            PerformancePoint(label="Apr 2025", value=100.0),
                             PerformancePoint(label="Jul 2025", value=100.9),
                             PerformancePoint(label="Sep 2025", value=101.6),
                             PerformancePoint(label="Nov 2025", value=102.4),
@@ -98,7 +98,7 @@ FIXTURE_WORKSPACES: dict[str, CompanyWorkspaceSnapshot] = {
                         daily_change="+2.33 (+1.53%)",
                         line_color="#C48A2C",
                         points=[
-                            PerformancePoint(label="May 2025", value=100.0),
+                            PerformancePoint(label="Apr 2025", value=100.0),
                             PerformancePoint(label="Jul 2025", value=102.7),
                             PerformancePoint(label="Sep 2025", value=103.3),
                             PerformancePoint(label="Nov 2025", value=105.6),
@@ -220,7 +220,7 @@ FIXTURE_WORKSPACES: dict[str, CompanyWorkspaceSnapshot] = {
                         daily_change="+0.54 (+0.88%)",
                         line_color="#21409A",
                         points=[
-                            PerformancePoint(label="May 2025", value=100.0),
+                            PerformancePoint(label="Apr 2025", value=100.0),
                             PerformancePoint(label="Jul 2025", value=100.8),
                             PerformancePoint(label="Sep 2025", value=101.5),
                             PerformancePoint(label="Nov 2025", value=102.7),
@@ -235,7 +235,7 @@ FIXTURE_WORKSPACES: dict[str, CompanyWorkspaceSnapshot] = {
                         daily_change="+84.78 (+1.20%)",
                         line_color="#0F766E",
                         points=[
-                            PerformancePoint(label="May 2025", value=100.0),
+                            PerformancePoint(label="Apr 2025", value=100.0),
                             PerformancePoint(label="Jul 2025", value=100.9),
                             PerformancePoint(label="Sep 2025", value=101.6),
                             PerformancePoint(label="Nov 2025", value=102.4),
@@ -250,7 +250,7 @@ FIXTURE_WORKSPACES: dict[str, CompanyWorkspaceSnapshot] = {
                         daily_change="+1.03 (+1.26%)",
                         line_color="#C48A2C",
                         points=[
-                            PerformancePoint(label="May 2025", value=100.0),
+                            PerformancePoint(label="Apr 2025", value=100.0),
                             PerformancePoint(label="Jul 2025", value=99.6),
                             PerformancePoint(label="Sep 2025", value=99.1),
                             PerformancePoint(label="Nov 2025", value=98.8),
@@ -372,7 +372,7 @@ FIXTURE_WORKSPACES: dict[str, CompanyWorkspaceSnapshot] = {
                         daily_change="+3.12 (+0.93%)",
                         line_color="#21409A",
                         points=[
-                            PerformancePoint(label="May 2025", value=100.0),
+                            PerformancePoint(label="Apr 2025", value=100.0),
                             PerformancePoint(label="Jul 2025", value=102.3),
                             PerformancePoint(label="Sep 2025", value=104.8),
                             PerformancePoint(label="Nov 2025", value=106.1),
@@ -387,7 +387,7 @@ FIXTURE_WORKSPACES: dict[str, CompanyWorkspaceSnapshot] = {
                         daily_change="+84.78 (+1.20%)",
                         line_color="#0F766E",
                         points=[
-                            PerformancePoint(label="May 2025", value=100.0),
+                            PerformancePoint(label="Apr 2025", value=100.0),
                             PerformancePoint(label="Jul 2025", value=100.9),
                             PerformancePoint(label="Sep 2025", value=101.6),
                             PerformancePoint(label="Nov 2025", value=102.4),
@@ -402,7 +402,7 @@ FIXTURE_WORKSPACES: dict[str, CompanyWorkspaceSnapshot] = {
                         daily_change="+2.33 (+1.53%)",
                         line_color="#C48A2C",
                         points=[
-                            PerformancePoint(label="May 2025", value=100.0),
+                            PerformancePoint(label="Apr 2025", value=100.0),
                             PerformancePoint(label="Jul 2025", value=102.7),
                             PerformancePoint(label="Sep 2025", value=103.3),
                             PerformancePoint(label="Nov 2025", value=105.6),
