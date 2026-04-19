@@ -6,7 +6,7 @@
 - Standard startup path: `./init.sh`
 - Standard verification path: `./init.sh` for baseline health plus `feature_list.json -> features[*].verification.command` for feature passing
 - Current highest-priority unfinished feature: `dash-005`
-- Current blocker: none recorded. `dash-005` remains the next roadmap item, and the latest user-requested `dash-004` refinement removes the zero baseline line entirely while keeping `0` on the left axis.
+- Current blocker: none recorded. `dash-005` remains the next roadmap item, and the latest user-requested `dash-004` refinement keeps `0` on the left axis while dropping cramped extra ticks on the smaller side of the scale.
 
 ## Session Log
 
@@ -440,4 +440,16 @@
 - Commits: `82b05b6 Remove dash-004 zero baseline line`
 - Files or artifacts updated: `frontend/src/app/_components/income-statement-waterfall-chart.tsx`, `frontend/src/app/globals.css`, `frontend/e2e/dash-004.spec.ts`, `artifacts/verification/dash-004-playwright.log`, `feature_list.json`, `progress.md`, `session-handoff.md`
 - Known risk or unresolved issue: The y-axis now uses a fixed five-tick layout that guarantees a zero label. If the chart’s vertical scale treatment changes substantially later, the tick-spacing strategy may need another pass to keep the labels feeling balanced.
+- Next best step: Resume the roadmap at `dash-005` unless the user asks for another narrow `dash-004` refinement.
+
+### Session 037
+
+- Date: 2026-04-19
+- Goal: Reduce left-axis crowding on skewed `dash-004` charts while still keeping the `0` label.
+- Completed: Refined the y-axis label builder so it now compresses the smaller side of the scale when one side is much shallower than the other. The chart still guarantees a `$0` label, but it now skips the extra midpoint tick on the smaller side in skewed cases, which avoids cramped labels like `$0`, `-$25B`, and `-$49.9B` sitting too close together.
+- Verification run: `cd frontend && npm run lint`; `cd frontend && npm run typecheck`; `cd frontend && npx playwright test e2e/dash-004.spec.ts`
+- Evidence captured: Frontend `npm run lint` passed; frontend `npm run typecheck` passed; the first Playwright attempt was blocked by a stale local `next dev` process on PID `94576`, then `cd frontend && npx playwright test e2e/dash-004.spec.ts` passed after stopping that stray process; log refreshed at `artifacts/verification/dash-004-playwright.log`; implementation commit is `7648b29`.
+- Commits: `7648b29 Relax dash-004 crowded axis ticks`
+- Files or artifacts updated: `frontend/src/app/_components/income-statement-waterfall-chart.tsx`, `artifacts/verification/dash-004-playwright.log`, `feature_list.json`, `progress.md`, `session-handoff.md`
+- Known risk or unresolved issue: The axis now uses a skew-aware tick strategy rather than a rigid five-tick layout. If later chart requirements demand fixed tick counts regardless of scale skew, this helper may need another pass.
 - Next best step: Resume the roadmap at `dash-005` unless the user asks for another narrow `dash-004` refinement.

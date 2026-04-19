@@ -2,14 +2,14 @@
 
 ## Verified Now
 
-- What is currently working: The repo boots with `./init.sh`, the landing page accepts a ticker, `/dashboard/[ticker]` loads company identity plus key stats, the valuation-focused Yahoo snapshot remains intact, the market-context section still renders normalized `1Y` / `5Y` comparison ranges, and the dashboard still shows the dedicated `dash-004` waterfall section. That waterfall still follows the requested statement order: `Revenue`, `Cost of Revenue`, `Gross Profit`, `Operating Expenses`, `Operating Profit`, `Other Income / Cost`, `Taxes`, and `Net Profits`; the longer x-axis labels still wrap onto two lines; the dotted bridge still connects every adjacent bar using the correct entry and exit edge; `Other Income / Cost` is still the residual balancing bucket; and the dedicated zero baseline line is now gone while the left axis still explicitly labels `$0`. Backend workspace tests pass, and `dash-001` through `dash-004` remain recorded as passing.
+- What is currently working: The repo boots with `./init.sh`, the landing page accepts a ticker, `/dashboard/[ticker]` loads company identity plus key stats, the valuation-focused Yahoo snapshot remains intact, the market-context section still renders normalized `1Y` / `5Y` comparison ranges, and the dashboard still shows the dedicated `dash-004` waterfall section. That waterfall still follows the requested statement order: `Revenue`, `Cost of Revenue`, `Gross Profit`, `Operating Expenses`, `Operating Profit`, `Other Income / Cost`, `Taxes`, and `Net Profits`; the longer x-axis labels still wrap onto two lines; the dotted bridge still connects every adjacent bar using the correct entry and exit edge; `Other Income / Cost` is still the residual balancing bucket; the dedicated zero baseline line is still gone; and the y-axis still guarantees `$0` while now dropping cramped extra ticks on the smaller side of a skewed scale. Backend workspace tests pass, and `dash-001` through `dash-004` remain recorded as passing.
 - What verification actually ran: `./init.sh`; `cd frontend && npm run lint`; `cd frontend && npm run typecheck`; `cd frontend && npx playwright test e2e/dash-004.spec.ts`
 
 ## Changed This Session
 
-- Code or behavior added: Removed the dedicated `dash-004` zero baseline line entirely, guaranteed that the y-axis tick set includes `$0`, and suppressed the zero-value gridline so the chart no longer draws any horizontal line at zero. Tightened the Playwright contract to assert both conditions.
-- Infrastructure or harness changes: Refreshed the passing Playwright log at `artifacts/verification/dash-004-playwright.log`; the first test attempt was blocked by a stale local `next dev` process on PID `83540`, and the rerun passed after that process was terminated.
-- Documentation changes: `feature_list.json`, `progress.md`, and this handoff now point `dash-004` evidence at the zero-baseline removal commit while keeping `dash-005` as the next roadmap slice.
+- Code or behavior added: Refined the `dash-004` y-axis builder so it now keeps the `$0` label but omits the extra midpoint tick on whichever side of the scale is much smaller, which reduces crowding on skewed charts without reintroducing the zero baseline line.
+- Infrastructure or harness changes: Refreshed the passing Playwright log at `artifacts/verification/dash-004-playwright.log`; the first test attempt was blocked by a stale local `next dev` process on PID `94576`, and the rerun passed after that process was terminated.
+- Documentation changes: `feature_list.json`, `progress.md`, and this handoff now point `dash-004` evidence at the axis-spacing commit while keeping `dash-005` as the next roadmap slice.
 
 ## Broken Or Unverified
 
