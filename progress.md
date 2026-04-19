@@ -6,7 +6,7 @@
 - Standard startup path: `./init.sh`
 - Standard verification path: `./init.sh` for baseline health plus `feature_list.json -> features[*].verification.command` for feature passing
 - Current highest-priority unfinished feature: `dash-005`
-- Current blocker: none recorded. `dash-005` remains the next roadmap item, and the latest user-requested `dash-004` refinement restores the dotted zero baseline, drops the forced `$0` y-axis label, and keeps the smaller-side tick compression for skewed scales.
+- Current blocker: none recorded. `dash-005` remains the next roadmap item, and the latest user-requested `dash-004` refinement keeps the dotted zero baseline visible by rendering it above the bars while preserving the existing label and skewed-axis behavior.
 
 ## Session Log
 
