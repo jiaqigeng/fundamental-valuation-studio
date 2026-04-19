@@ -113,7 +113,7 @@
 - Completed: Removed the hero tagline (`yfinance-backed market snapshot...`), moved `Search another ticker` into the hero header where the ticker pill previously sat, and simplified the overview accordion title so it no longer repeats the company name.
 - Verification run: `cd frontend && npm run lint`; `cd frontend && npm run typecheck`; `cd frontend && npx playwright test e2e/dash-002b.spec.ts e2e/dash-003.spec.ts`
 - Evidence captured: Frontend `npm run lint` passed; frontend `npm run typecheck` passed; `cd frontend && npx playwright test e2e/dash-002b.spec.ts e2e/dash-003.spec.ts` passed after clearing a stale local `next dev` process that blocked Playwright from starting its test server.
-- Commits: pending
+- Commits: `9c9c0e6 Polish dashboard overview title and hero scale`
 - Files or artifacts updated: `frontend/src/app/dashboard/[ticker]/page.tsx`, `frontend/src/app/globals.css`, `progress.md`, `session-handoff.md`
 - Known risk or unresolved issue: This dashboard UX/copy exception is still in progress and should be treated as the current continuation point even though `dash-004` remains the highest-priority unfinished roadmap feature.
 - Next best step: Continue the current dashboard polish pass from the latest safe stopping point, then return to `dash-004` once the user is satisfied with the existing dashboard experience.
@@ -125,7 +125,7 @@
 - Completed: Removed the `At a glance` wording from the company overview accordion by renaming that section title to `Overview`, and reduced the dashboard hero company-name scale with a dedicated `dashboard-company-title` style so the page title reads more professional and less like the landing-page hero.
 - Verification run: `./init.sh`; `cd frontend && npm run lint`; `cd frontend && npm run typecheck`; `cd frontend && npx playwright test e2e/dash-002b.spec.ts e2e/dash-003.spec.ts`
 - Evidence captured: `./init.sh` completed successfully before the UI change; frontend `npm run lint` passed; frontend `npm run typecheck` passed; `cd frontend && npx playwright test e2e/dash-002b.spec.ts e2e/dash-003.spec.ts` passed after rerunning Playwright outside the sandbox to avoid the local `spawn EPERM`.
-- Commits: pending
+- Commits: `2715886 Add selectable dashboard comparison ranges`
 - Files or artifacts updated: `frontend/src/app/dashboard/[ticker]/page.tsx`, `frontend/src/app/globals.css`, `progress.md`, `session-handoff.md`
 - Known risk or unresolved issue: No new blocker was introduced; this remains a dashboard-polish exception on top of the passing slices, so `dash-004` is still unstarted and its spec file is still missing.
 - Next best step: Resume roadmap work at `dash-004` unless the user requests another narrow dashboard polish change first.
