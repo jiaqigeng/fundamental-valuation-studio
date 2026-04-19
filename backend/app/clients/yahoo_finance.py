@@ -456,7 +456,7 @@ def _build_income_statement_waterfall_from_values(
         _build_waterfall_step("Gross Profit", float(gross_profit_value), "total"),
         _build_waterfall_step("Operating Expenses", operating_expense_delta, "delta"),
         _build_waterfall_step("Operating Profit", float(operating_profit_value), "total"),
-        _build_waterfall_step("Other Income / Cost", other_income_or_cost_delta, "delta"),
+        _build_waterfall_step("Others", other_income_or_cost_delta, "delta"),
         _build_waterfall_step("Taxes", taxes_delta, "delta"),
         _build_waterfall_step("Net Profits", float(net_income), "total"),
     ]

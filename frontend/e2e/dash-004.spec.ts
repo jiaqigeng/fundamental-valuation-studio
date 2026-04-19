@@ -20,7 +20,7 @@ test("dash-004 shows a revenue-to-net-income waterfall that updates by company",
   await expectWaterfallMetric(waterfall, "Gross Profit", "$167.5B");
   await expectWaterfallMetric(waterfall, "Operating Expenses", "-$57.5B");
   await expectWaterfallMetric(waterfall, "Operating Profit", "$110.0B");
-  await expectWaterfallMetric(waterfall, "Other Income / Cost", "-$5.3B");
+  await expectWaterfallMetric(waterfall, "Others", "-$5.3B");
   await expectWaterfallMetric(waterfall, "Taxes", "-$17.2B");
   await expectWaterfallMetric(waterfall, "Net Profits", "$87.5B");
 
@@ -41,7 +41,7 @@ test("dash-004 shows a revenue-to-net-income waterfall that updates by company",
   await expectWaterfallMetric(consumerWaterfall, "Cost of Revenue", "-$18.5B");
   await expectWaterfallMetric(consumerWaterfall, "Gross Profit", "$28.6B");
   await expectWaterfallMetric(consumerWaterfall, "Operating Profit", "$14.6B");
-  await expectWaterfallMetric(consumerWaterfall, "Other Income / Cost", "-$1.1B");
+  await expectWaterfallMetric(consumerWaterfall, "Others", "-$1.1B");
   await expectWaterfallMetric(consumerWaterfall, "Net Profits", "$11.0B");
 });
 

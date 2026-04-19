@@ -56,7 +56,7 @@ FIXTURE_WORKSPACES: dict[str, CompanyWorkspaceSnapshot] = {
                 step_type="total",
             ),
             IncomeStatementWaterfallStep(
-                label="Other Income / Cost",
+                label="Others",
                 value=-5_300_000_000,
                 display_value="-$5.3B",
                 step_type="delta",
@@ -258,7 +258,7 @@ FIXTURE_WORKSPACES: dict[str, CompanyWorkspaceSnapshot] = {
                 step_type="total",
             ),
             IncomeStatementWaterfallStep(
-                label="Other Income / Cost",
+                label="Others",
                 value=-1_100_000_000,
                 display_value="-$1.1B",
                 step_type="delta",
@@ -460,7 +460,7 @@ FIXTURE_WORKSPACES: dict[str, CompanyWorkspaceSnapshot] = {
                 step_type="total",
             ),
             IncomeStatementWaterfallStep(
-                label="Other Income / Cost",
+                label="Others",
                 value=-200_000_000,
                 display_value="-$200.0M",
                 step_type="delta",

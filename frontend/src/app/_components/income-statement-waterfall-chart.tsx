@@ -290,10 +290,6 @@ function roundAxisValue(value: number) {
 }
 
 function getAxisLabelLines(label: string): readonly string[] {
-  if (label === "Other Income / Cost") {
-    return ["Other Income /", "Cost"];
-  }
-
   if (label === "Cost of Revenue") {
     return ["Cost of", "Revenue"];
   }

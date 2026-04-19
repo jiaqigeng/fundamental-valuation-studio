@@ -57,7 +57,7 @@ def test_company_workspace_fixture_response(monkeypatch) -> None:
             "step_type": "total",
         },
         {
-            "label": "Other Income / Cost",
+            "label": "Others",
             "value": -200000000.0,
             "display_value": "-$200.0M",
             "step_type": "delta",
@@ -208,7 +208,7 @@ def test_build_income_statement_waterfall_balances_to_net_income() -> None:
             "step_type": "total",
         },
         {
-            "label": "Other Income / Cost",
+            "label": "Others",
             "value": -200000000.0,
             "display_value": "-$200.0M",
             "step_type": "delta",
@@ -276,7 +276,7 @@ def test_build_income_statement_waterfall_computes_other_as_residual_bucket() ->
             "step_type": "total",
         },
         {
-            "label": "Other Income / Cost",
+            "label": "Others",
             "value": -50300000.0,
             "display_value": "-$50.3M",
             "step_type": "delta",
