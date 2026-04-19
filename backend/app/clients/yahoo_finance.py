@@ -289,6 +289,14 @@ def _build_quote_details(
             _format_optional_number(_first_number(info.get("pegRatio"))),
         ),
         _optional_quote_detail(
+            "Debt to Equity",
+            _format_optional_number(_first_number(info.get("debtToEquity"))),
+        ),
+        _optional_quote_detail(
+            "Beta (5Y Monthly)",
+            _format_optional_number(_first_number(info.get("beta"))),
+        ),
+        _optional_quote_detail(
             "Return on Equity (ROE)",
             _format_optional_percent(_first_number(info.get("returnOnEquity"))),
         ),
@@ -308,16 +316,10 @@ def _build_quote_details(
             _format_optional_integer(_first_number(info.get("averageVolume"))),
         ),
         _optional_quote_detail(
-            "Debt to Equity",
-            _format_optional_number(_first_number(info.get("debtToEquity"))),
-        ),
-        _optional_quote_detail(
-            "Beta (5Y Monthly)",
-            _format_optional_number(_first_number(info.get("beta"))),
-        ),
-        _optional_quote_detail(
-            "Free Cash Flow",
-            _format_optional_compact_currency(_first_number(info.get("freeCashflow"))),
+            "Trailing Dividend",
+            _format_optional_number(
+                _first_number(info.get("trailingAnnualDividendRate"))
+            ),
         ),
         _optional_quote_detail(
             "Earnings Date",
@@ -721,12 +723,6 @@ def _format_optional_percent(value: float | int | None) -> str | None:
         Decimal("0.01"), rounding=ROUND_HALF_UP
     )
     return f"{percent_value}%"
-
-
-def _format_optional_compact_currency(value: float | int | None) -> str | None:
-    if value is None:
-        return None
-    return _format_compact_currency(value)
 
 
 def _format_optional_integer(value: float | int | None) -> str | None:

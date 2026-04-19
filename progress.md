@@ -6,7 +6,7 @@
 - Standard startup path: `./init.sh`
 - Standard verification path: `./init.sh` for baseline health plus `feature_list.json -> features[*].verification.command` for feature passing
 - Current highest-priority unfinished feature: `dash-004`
-- Current blocker: none recorded. The latest requested Yahoo snapshot field refinement is verified, including keeping `Forward Dividend & Yield`, `Avg. Volume`, and only `Ex-Dividend Date`, so the roadmap can return to `dash-004` unless the user asks for more narrow dashboard refinements first.
+- Current blocker: none recorded. The latest requested Yahoo snapshot field refinement is verified, including `Forward Dividend & Yield`, `Trailing Dividend`, `Avg. Volume`, and only `Ex-Dividend Date`, so the roadmap can return to `dash-004` unless the user asks for more narrow dashboard refinements first.
 
 ## Session Log
 
@@ -233,6 +233,18 @@
 - Completed: Replaced `Profit Margin` and `Operating Margin` in the snapshot contract with `Forward Dividend & Yield` and `Avg. Volume` in the live builder, fixture payloads, backend tests, and `dash-002b` Playwright coverage, while preserving the earlier `Ex-Dividend Date`-only dividend-date decision.
 - Verification run: `cd backend && .venv/Scripts/python.exe -m pytest tests/test_company_workspace.py -q`; `cd frontend && npm run lint`; `cd frontend && npm run typecheck`; `cd frontend && npx playwright test e2e/dash-002b.spec.ts`
 - Evidence captured: Backend `cd backend && .venv/Scripts/python.exe -m pytest tests/test_company_workspace.py -q` passed with `6 passed`; frontend `npm run lint` passed; frontend `npm run typecheck` passed; `cd frontend && npx playwright test e2e/dash-002b.spec.ts` passed after stopping a stale local `next dev` process that blocked Playwright from starting its own server.
+- Commits: none yet
+- Files or artifacts updated: `backend/app/clients/yahoo_finance.py`, `backend/app/clients/market_data_fixtures.py`, `backend/tests/test_company_workspace.py`, `frontend/e2e/dash-002b.spec.ts`, `feature_list.json`, `progress.md`, `session-handoff.md`
+- Known risk or unresolved issue: The live snapshot still depends on `yfinance` field availability and naming; when Yahoo omits a field, the workspace now hides it instead of showing a placeholder, so the live card count can vary by ticker.
+- Next best step: Resume roadmap work at `dash-004` and add the dedicated key-financial-metrics slice without regressing the Yahoo snapshot contract.
+
+### Session 020
+
+- Date: 2026-04-19
+- Goal: Apply the next Yahoo snapshot follow-up by removing `Free Cash Flow`, adding `Trailing Dividend` when Yahoo exposes it, and reordering the card fields for a cleaner valuation-first scan.
+- Completed: Removed the snapshot's `Free Cash Flow` row, added `Trailing Dividend` from Yahoo's trailing annual dividend rate when available, and reordered the field list so valuation multiples lead, followed by leverage/risk, return metrics, dividend and volume context, then dates. Updated the fixture payloads, backend assertions, and `dash-002b` Playwright coverage to match the new contract.
+- Verification run: `cd backend && .venv/Scripts/python.exe -m pytest tests/test_company_workspace.py -q`; `cd frontend && npm run lint`; `cd frontend && npm run typecheck`; `cd frontend && npx playwright test e2e/dash-002b.spec.ts`
+- Evidence captured: Backend `cd backend && .venv/Scripts/python.exe -m pytest tests/test_company_workspace.py -q` passed with `6 passed`; frontend `npm run lint` passed; frontend `npm run typecheck` passed; `cd frontend && npx playwright test e2e/dash-002b.spec.ts` passed.
 - Commits: none yet
 - Files or artifacts updated: `backend/app/clients/yahoo_finance.py`, `backend/app/clients/market_data_fixtures.py`, `backend/tests/test_company_workspace.py`, `frontend/e2e/dash-002b.spec.ts`, `feature_list.json`, `progress.md`, `session-handoff.md`
 - Known risk or unresolved issue: The live snapshot still depends on `yfinance` field availability and naming; when Yahoo omits a field, the workspace now hides it instead of showing a placeholder, so the live card count can vary by ticker.

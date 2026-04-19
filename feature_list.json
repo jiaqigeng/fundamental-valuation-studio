@@ -115,7 +115,7 @@
       },
       "depends_on": ["dash-001", "dash-002"],
       "status": "passing",
-      "notes": "Implemented with a FastAPI backend-for-frontend route that now uses `yfinance` for runtime market data and fixture mode for deterministic Playwright and pytest coverage. The Yahoo snapshot is now intentionally limited to valuation-relevant fields such as trailing and forward P/E, price-to-book, EV multiples, PEG, return metrics, forward dividend and yield, average volume, debt to equity, beta, free cash flow, earnings date, and ex-dividend date; fields are omitted when Yahoo does not provide a direct value or a straightforward ratio calculation."
+      "notes": "Implemented with a FastAPI backend-for-frontend route that now uses `yfinance` for runtime market data and fixture mode for deterministic Playwright and pytest coverage. The Yahoo snapshot is now intentionally limited to valuation-relevant fields such as trailing and forward P/E, price-to-book, EV multiples, PEG, return metrics, forward dividend and yield, trailing dividend, average volume, debt to equity, beta, earnings date, and ex-dividend date; fields are omitted when Yahoo does not provide a direct value or a straightforward ratio calculation."
     },
     {
       "id": "dash-003",

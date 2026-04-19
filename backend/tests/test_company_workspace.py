@@ -30,13 +30,13 @@ def test_company_workspace_fixture_response(monkeypatch) -> None:
         {"label": "EV / EBITDA", "value": "20.45"},
         {"label": "EV / Revenue", "value": "12.88"},
         {"label": "PEG Ratio", "value": "2.21"},
+        {"label": "Debt to Equity", "value": "32.11"},
+        {"label": "Beta (5Y Monthly)", "value": "1.13"},
         {"label": "Return on Equity (ROE)", "value": "33.74%"},
         {"label": "Return on Assets (ROA)", "value": "14.95%"},
         {"label": "Forward Dividend & Yield", "value": "3.64 (0.86%)"},
         {"label": "Avg. Volume", "value": "32,964,050"},
-        {"label": "Debt to Equity", "value": "32.11"},
-        {"label": "Beta (5Y Monthly)", "value": "1.13"},
-        {"label": "Free Cash Flow", "value": "$71.9B"},
+        {"label": "Trailing Dividend", "value": "3.32"},
         {"label": "Earnings Date", "value": "Apr 29, 2026"},
         {"label": "Ex-Dividend Date", "value": "Mar 9, 2026"},
     ]
@@ -85,11 +85,13 @@ def test_build_quote_details_skips_missing_metrics() -> None:
     details = _build_quote_details(
         {
             "trailingPE": 22.345,
+            "debtToEquity": 32.11,
+            "beta": 1.13,
             "returnOnEquity": 0.1876,
             "dividendRate": 1.04,
             "dividendYield": 0.38,
             "averageVolume": 57_391_204,
-            "freeCashflow": 1_250_000_000,
+            "trailingAnnualDividendRate": 0.96,
             "earningsTimestampStart": 1_777_687_200,
         },
         current_price=150.0,
@@ -97,10 +99,12 @@ def test_build_quote_details_skips_missing_metrics() -> None:
 
     assert [detail.model_dump() for detail in details] == [
         {"label": "Trailing P/E", "value": "22.35"},
+        {"label": "Debt to Equity", "value": "32.11"},
+        {"label": "Beta (5Y Monthly)", "value": "1.13"},
         {"label": "Return on Equity (ROE)", "value": "18.76%"},
         {"label": "Forward Dividend & Yield", "value": "1.04 (0.38%)"},
         {"label": "Avg. Volume", "value": "57,391,204"},
-        {"label": "Free Cash Flow", "value": "$1.3B"},
+        {"label": "Trailing Dividend", "value": "0.96"},
         {"label": "Earnings Date", "value": "May 2, 2026"},
     ]
 
