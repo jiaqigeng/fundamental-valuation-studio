@@ -6,7 +6,7 @@
 - Standard startup path: `./init.sh`
 - Standard verification path: `./init.sh` for baseline health plus `feature_list.json -> features[*].verification.command` for feature passing
 - Current highest-priority unfinished feature: `dash-005`
-- Current blocker: none recorded. `dash-005` remains the next roadmap item, and a user-requested `dash-004` exception refinement now keeps the dotted waterfall connector attached to each bar's true entry and exit edge.
+- Current blocker: none recorded. `dash-005` remains the next roadmap item, and the latest user-requested `dash-004` change reversal restores the connector-only waterfall state.
 
 ## Session Log
 
@@ -367,5 +367,17 @@
 - Evidence captured: `./init.sh` completed successfully before the refinement; frontend `npm run lint` passed; frontend `npm run typecheck` passed; the initial Playwright attempt hit the local sandbox `spawn EPERM`, then `cd frontend && npx playwright test e2e/dash-004.spec.ts` passed when rerun outside the sandbox; log refreshed at `artifacts/verification/dash-004-playwright.log`; implementation commit is `5a270e2`.
 - Commits: `5a270e2 Connect dash-004 waterfall bars`
 - Files or artifacts updated: `frontend/src/app/_components/income-statement-waterfall-chart.tsx`, `frontend/e2e/dash-004.spec.ts`, `artifacts/verification/dash-004-playwright.log`, `feature_list.json`, `progress.md`, `session-handoff.md`
+- Known risk or unresolved issue: The live waterfall still depends on `yfinance` income-statement row availability and naming. When Yahoo omits gross-profit, operating-income, pretax, or tax rows, the builder fills the missing bridge points with derived values or zeros, so live subtotals may be less precise than the deterministic fixture path.
+- Next best step: Resume the roadmap at `dash-005` unless the user asks for another narrow `dash-004` refinement.
+
+### Session 031
+
+- Date: 2026-04-19
+- Goal: Reverse the most recent `dash-004` negative-profit styling change at the user's request.
+- Completed: Reverted the negative-total styling helper logic, the fixture-only `LOSS` workspace, the negative-net-income backend unit test, and the extra loss-case Playwright assertions, returning `dash-004` to the earlier connector-only version while preserving the dotted inter-bar connector behavior from Session 030.
+- Verification run: `./init.sh`; `cd frontend && npx playwright test e2e/dash-004.spec.ts`
+- Evidence captured: `./init.sh` completed successfully after the reverts and ran backend pytest (`9 passed`), frontend lint, and frontend typecheck; `cd frontend && npx playwright test e2e/dash-004.spec.ts` passed on the first run; log refreshed at `artifacts/verification/dash-004-playwright.log`; revert implementation commit is `d9c8f90`.
+- Commits: `c078c6a Revert "Record dash-004 negative-profit verification evidence"`; `d9c8f90 Revert "Handle dash-004 negative profit totals"`
+- Files or artifacts updated: `frontend/src/app/_components/income-statement-waterfall-chart.tsx`, `frontend/src/app/globals.css`, `frontend/e2e/dash-004.spec.ts`, `backend/app/clients/market_data_fixtures.py`, `backend/tests/test_company_workspace.py`, `artifacts/verification/dash-004-playwright.log`, `feature_list.json`, `progress.md`, `session-handoff.md`
 - Known risk or unresolved issue: The live waterfall still depends on `yfinance` income-statement row availability and naming. When Yahoo omits gross-profit, operating-income, pretax, or tax rows, the builder fills the missing bridge points with derived values or zeros, so live subtotals may be less precise than the deterministic fixture path.
 - Next best step: Resume the roadmap at `dash-005` unless the user asks for another narrow `dash-004` refinement.
