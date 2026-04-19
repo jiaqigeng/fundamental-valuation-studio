@@ -14,7 +14,7 @@ test("dash-004 shows a revenue-to-net-income waterfall that updates by company",
   await expect(waterfallChart).toBeVisible();
   await expect(waterfallChart.locator("path.waterfall-chart-connector")).toHaveCount(7);
   await expect(waterfallChart.locator("line.waterfall-chart-baseline")).toHaveCount(1);
-  await expect(waterfallChart.locator("text").filter({ hasText: /^\$0$/ })).toHaveCount(0);
+  await expect(waterfallChart.locator("text").filter({ hasText: /^\$0$/ })).toHaveCount(1);
   await expectWaterfallMetric(waterfall, "Revenue", "$391.0B");
   await expectWaterfallMetric(waterfall, "Cost of Revenue", "-$223.5B");
   await expectWaterfallMetric(waterfall, "Gross Profit", "$167.5B");

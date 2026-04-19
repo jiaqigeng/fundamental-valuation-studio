@@ -39,9 +39,12 @@ export function IncomeStatementWaterfallChart({
   const chartValues = [0, ...bars.flatMap((bar) => [bar.start, bar.end])];
   const minValue = Math.min(...chartValues);
   const maxValue = Math.max(...chartValues);
-  const range = Math.max(maxValue - minValue, 1);
-  const paddedMin = minValue - range * 0.12;
-  const paddedMax = maxValue + range * 0.12;
+  const yAxisScale = buildYAxisScale({
+    minValue,
+    maxValue,
+  });
+  const paddedMin = yAxisScale.min;
+  const paddedMax = yAxisScale.max;
   const paddedRange = paddedMax - paddedMin;
   const plotWidth = CHART_WIDTH - CHART_PADDING.left - CHART_PADDING.right;
   const plotHeight = CHART_HEIGHT - CHART_PADDING.top - CHART_PADDING.bottom;
@@ -56,8 +59,7 @@ export function IncomeStatementWaterfallChart({
     CHART_PADDING.top + ((paddedMax - value) / paddedRange) * plotHeight;
 
   const yAxisLabels = buildYAxisLabels({
-    paddedMax,
-    paddedMin,
+    yAxisScale,
     yForValue,
   });
 
@@ -244,31 +246,54 @@ function getConnectorExitValue(bar: WaterfallBar) {
   return bar.end;
 }
 
+function buildYAxisScale({
+  minValue,
+  maxValue,
+}: {
+  readonly minValue: number;
+  readonly maxValue: number;
+}) {
+  const totalSpan = Math.max(maxValue - minValue, 1);
+  const step = totalSpan / 5;
+  const positiveSteps = Math.max(Math.ceil(Math.max(maxValue, 0) / step), 1);
+  const negativeSteps = Math.max(Math.ceil(Math.max(-minValue, 0) / step), 1);
+
+  return {
+    min: -negativeSteps * step,
+    max: positiveSteps * step,
+    step,
+  };
+}
+
 function buildYAxisLabels({
-  paddedMax,
-  paddedMin,
+  yAxisScale,
   yForValue,
 }: {
-  readonly paddedMax: number;
-  readonly paddedMin: number;
+  readonly yAxisScale: {
+    readonly min: number;
+    readonly max: number;
+    readonly step: number;
+  };
   readonly yForValue: (value: number) => number;
 }) {
-  const positiveSpan = Math.max(paddedMax, 0);
-  const negativeSpan = Math.max(-paddedMin, 0);
-  const dominantSpan = Math.max(positiveSpan, negativeSpan, 1);
-  const smallerSpan = Math.min(positiveSpan, negativeSpan);
-  const shouldCompressSmallerSide = smallerSpan / dominantSpan < 0.4;
+  const values: number[] = [];
 
-  const values = shouldCompressSmallerSide
-    ? positiveSpan >= negativeSpan
-      ? [paddedMax, paddedMax / 2, paddedMin]
-      : [paddedMax, paddedMin / 2, paddedMin]
-    : [paddedMax, paddedMax / 2, paddedMin / 2, paddedMin];
+  for (
+    let value = yAxisScale.max;
+    value >= yAxisScale.min - yAxisScale.step * 0.1;
+    value -= yAxisScale.step
+  ) {
+    values.push(roundAxisValue(value));
+  }
 
   return values.map((value) => ({
     value,
     y: yForValue(value),
   }));
+}
+
+function roundAxisValue(value: number) {
+  return Number(value.toFixed(4));
 }
 
 function getAxisLabelLines(label: string): readonly string[] {
