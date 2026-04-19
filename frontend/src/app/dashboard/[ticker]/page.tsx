@@ -60,14 +60,15 @@ export default async function DashboardPage({
             <p className="eyebrow">Company Overview</p>
             <h1>{company.name}</h1>
           </div>
-          <p className="ticker-pill">{company.ticker}</p>
+          <Link className="back-link dashboard-back-link" href="/">
+            Search another ticker
+          </Link>
         </div>
-        <p className="hero-copy">{company.workspaceTagline}</p>
       </div>
 
       <ExpandableSection
         label="Company Overview"
-        title={`${company.name} at a glance`}
+        title="At a glance"
         sectionClassName="overview-accordion"
       >
         <section
@@ -151,9 +152,6 @@ export default async function DashboardPage({
         </ExpandableSection>
       ) : null}
 
-      <Link className="back-link" href="/">
-        Search another ticker
-      </Link>
     </main>
   );
 }

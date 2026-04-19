@@ -6,7 +6,7 @@
 - Standard startup path: `./init.sh`
 - Standard verification path: `./init.sh` for baseline health plus `feature_list.json -> features[*].verification.command` for feature passing
 - Current highest-priority unfinished feature: `dash-004`
-- Current blocker: none recorded
+- Current blocker: none recorded for roadmap work, but the current session is intentionally paused during an ongoing user-requested dashboard UX/copy polish exception on the already-passing dashboard slices.
 
 ## Session Log
 
@@ -105,3 +105,15 @@
 - Files or artifacts updated: `backend/app/clients/yahoo_finance.py`, `backend/app/clients/market_data_fixtures.py`, `backend/app/schemas/company_workspace.py`, `backend/tests/test_company_workspace.py`, `frontend/src/app/_lib/company-workspace.ts`, `frontend/src/app/_components/performance-comparison-chart.tsx`, `frontend/src/app/dashboard/[ticker]/page.tsx`, `frontend/src/app/globals.css`, `frontend/src/app/layout.tsx`, `frontend/e2e/dash-002b.spec.ts`, `frontend/e2e/dash-003.spec.ts`, `feature_list.json`, `progress.md`, `session-handoff.md`
 - Known risk or unresolved issue: The chart now depends on recent `yfinance` price history being available for the company and both benchmarks; fixture coverage keeps tests deterministic, but upstream history availability can still drift.
 - Next best step: Resume the roadmap at `dash-004`; this exception update was limited to already-passing dashboard behavior and does not change the next unfinished feature.
+
+### Session 009
+
+- Date: 2026-04-18
+- Goal: Continue the user-requested dashboard copy and layout cleanup on top of the already-passing dashboard slices.
+- Completed: Removed the hero tagline (`yfinance-backed market snapshot...`), moved `Search another ticker` into the hero header where the ticker pill previously sat, and simplified the overview accordion title so it no longer repeats the company name.
+- Verification run: `cd frontend && npm run lint`; `cd frontend && npm run typecheck`; `cd frontend && npx playwright test e2e/dash-002b.spec.ts e2e/dash-003.spec.ts`
+- Evidence captured: Frontend `npm run lint` passed; frontend `npm run typecheck` passed; `cd frontend && npx playwright test e2e/dash-002b.spec.ts e2e/dash-003.spec.ts` passed after clearing a stale local `next dev` process that blocked Playwright from starting its test server.
+- Commits: pending
+- Files or artifacts updated: `frontend/src/app/dashboard/[ticker]/page.tsx`, `frontend/src/app/globals.css`, `progress.md`, `session-handoff.md`
+- Known risk or unresolved issue: This dashboard UX/copy exception is still in progress and should be treated as the current continuation point even though `dash-004` remains the highest-priority unfinished roadmap feature.
+- Next best step: Continue the current dashboard polish pass from the latest safe stopping point, then return to `dash-004` once the user is satisfied with the existing dashboard experience.
