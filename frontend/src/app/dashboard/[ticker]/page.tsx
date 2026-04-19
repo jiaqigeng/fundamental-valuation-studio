@@ -58,7 +58,7 @@ export default async function DashboardPage({
         <div className="dashboard-hero-header">
           <div>
             <p className="eyebrow">Company Overview</p>
-            <h1>{company.name}</h1>
+            <h1 className="dashboard-company-title">{company.name}</h1>
           </div>
           <Link className="back-link dashboard-back-link" href="/">
             Search another ticker
@@ -68,7 +68,7 @@ export default async function DashboardPage({
 
       <ExpandableSection
         label="Company Overview"
-        title="At a glance"
+        title="Overview"
         sectionClassName="overview-accordion"
       >
         <section

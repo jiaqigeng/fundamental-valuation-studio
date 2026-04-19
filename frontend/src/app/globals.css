@@ -108,12 +108,18 @@ a {
   gap: 1rem;
 }
 
-.dashboard-hero h1,
 .landing-hero h1 {
   margin: 0;
   font-size: clamp(2.8rem, 7vw, 4.6rem);
   line-height: 0.98;
   letter-spacing: -0.05em;
+}
+
+.dashboard-company-title {
+  margin: 0;
+  font-size: clamp(2.25rem, 4.8vw, 3.4rem);
+  line-height: 1.02;
+  letter-spacing: -0.045em;
 }
 
 .eyebrow,
