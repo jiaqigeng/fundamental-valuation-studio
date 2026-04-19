@@ -161,7 +161,7 @@
 - Completed: Updated the market-context cards to derive percentage return from the active normalized series so the displayed change now matches the selected `1Y` or `5Y` range, removed the daily absolute-change text from those cards, and refreshed `dash-003` so the regression coverage checks the selected-range percentages instead of the prior one-day moves.
 - Verification run: `./init.sh`; `cd frontend && npm run lint`; `cd frontend && npm run typecheck`; `cd frontend && npx playwright test e2e/dash-002b.spec.ts e2e/dash-003.spec.ts`
 - Evidence captured: `./init.sh` completed successfully before the UI change; frontend `npm run lint` passed; frontend `npm run typecheck` passed; `cd frontend && npx playwright test e2e/dash-002b.spec.ts e2e/dash-003.spec.ts` passed with the updated percentage assertions.
-- Commits: pending
+- Commits: `6c67841 Show range returns in market context cards`
 - Files or artifacts updated: `frontend/src/app/_components/performance-comparison-section.tsx`, `frontend/e2e/dash-003.spec.ts`, `progress.md`, `session-handoff.md`
 - Known risk or unresolved issue: The range percentages are derived from the normalized chart series returned for the selected range, so if a live provider range is unavailable it will still be omitted entirely rather than showing a stale percentage.
 - Next best step: Resume roadmap work at `dash-004` unless the user requests another narrow dashboard exception update first.
