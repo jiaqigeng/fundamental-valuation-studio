@@ -349,11 +349,11 @@
 ### Session 029
 
 - Date: 2026-04-19
-- Goal: Fix the remaining `dash-004` waterfall bar issue where negative subtotal bars and cards still looked like positive totals.
-- Completed: Updated the shared waterfall component so total/subtotal steps now pick their tone from the sign of the value, which means negative `Operating Profit` and `Net Profits` bars/cards now render with the negative styling instead of the earlier blue total styling. The underlying statement values and step order did not change.
+- Goal: Revert the most recent `dash-004` bar-tone change at the user's request, returning the waterfall to the pre-change label-wrap state.
+- Completed: Restored the `dash-004` waterfall component and CSS back to the pre-bar-tone version from the last passing label-wrap commit, leaving the wrapped axis labels and current statement line-item order intact while removing the most recent negative-subtotal styling change.
 - Verification run: `cd frontend && npm run lint`; `cd frontend && npm run typecheck`; `cd frontend && npx playwright test e2e/dash-004.spec.ts`
-- Evidence captured: Frontend `npm run lint` passed; frontend `npm run typecheck` passed; `cd frontend && npx playwright test e2e/dash-004.spec.ts` passed after stopping a stale local `next dev` process that blocked Playwright from starting its own frontend server; log refreshed at `artifacts/verification/dash-004-playwright.log`; implementation commit is `0dd1a80`.
-- Commits: `0dd1a80 Fix dash-004 negative subtotal styling`
+- Evidence captured: Frontend `npm run lint` passed; frontend `npm run typecheck` passed; `cd frontend && npx playwright test e2e/dash-004.spec.ts` passed after stopping a stale local `next dev` process that blocked Playwright from starting its own frontend server; log refreshed at `artifacts/verification/dash-004-playwright.log`; revert commit is `e8c0433`.
+- Commits: `e8c0433 Revert dash-004 bar-tone fix`
 - Files or artifacts updated: `frontend/src/app/_components/income-statement-waterfall-chart.tsx`, `frontend/src/app/globals.css`, `artifacts/verification/dash-004-playwright.log`, `feature_list.json`, `progress.md`, `session-handoff.md`
-- Known risk or unresolved issue: This polish pass only changes the visual tone selection for subtotal bars and cards. If the user wants a different visual language for subtotal bars versus delta bars later, that would be a separate styling pass rather than a data-path change.
-- Next best step: Resume the roadmap at `dash-005` unless the user asks for another narrow waterfall polish tweak first.
+- Known risk or unresolved issue: This revert intentionally undoes only the most recent bar-tone styling change. The wrapped axis labels and the current eight-step statement flow remain in place.
+- Next best step: Resume the roadmap at `dash-005` unless the user asks for another narrow waterfall refinement.

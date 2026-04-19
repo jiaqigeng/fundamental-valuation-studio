@@ -2,14 +2,14 @@
 
 ## Verified Now
 
-- What is currently working: The repo boots with `./init.sh`, the landing page accepts a ticker, `/dashboard/[ticker]` loads company identity plus key stats, the valuation-focused Yahoo snapshot remains intact, the market-context section still renders normalized `1Y` / `5Y` comparison ranges, and the dashboard still shows the dedicated `dash-004` waterfall section. That waterfall still follows the requested statement order: `Revenue`, `Cost of Revenue`, `Gross Profit`, `Operating Expenses`, `Operating Profit`, `Other Income / Cost`, `Taxes`, and `Net Profits`; the longer x-axis labels wrap onto two lines; and negative subtotal bars/cards now render with the negative styling instead of the earlier blue positive-total look. In fixture mode, those values render deterministically for `AAPL`, `MSFT`, and `KO`, and the backend live path derives the same bridge from the latest available `yfinance` income-statement rows. Backend workspace tests pass, and `dash-001` through `dash-004` remain recorded as passing.
+- What is currently working: The repo boots with `./init.sh`, the landing page accepts a ticker, `/dashboard/[ticker]` loads company identity plus key stats, the valuation-focused Yahoo snapshot remains intact, the market-context section still renders normalized `1Y` / `5Y` comparison ranges, and the dashboard still shows the dedicated `dash-004` waterfall section. That waterfall still follows the requested statement order: `Revenue`, `Cost of Revenue`, `Gross Profit`, `Operating Expenses`, `Operating Profit`, `Other Income / Cost`, `Taxes`, and `Net Profits`, and the longer x-axis labels now wrap onto two lines instead of colliding. In fixture mode, those values render deterministically for `AAPL`, `MSFT`, and `KO`, and the backend live path derives the same bridge from the latest available `yfinance` income-statement rows. Backend workspace tests pass, and `dash-001` through `dash-004` remain recorded as passing.
 - What verification actually ran: `cd frontend && npm run lint`; `cd frontend && npm run typecheck`; `cd frontend && npx playwright test e2e/dash-004.spec.ts`
 
 ## Changed This Session
 
-- Code or behavior added: Polished the existing `dash-004` waterfall chart so negative subtotal bars and subtotal cards now use the negative styling instead of the earlier blue total styling.
+- Code or behavior added: Reverted the most recent `dash-004` bar-tone styling change, restoring the waterfall visuals to the prior label-wrap state while keeping the wrapped x-axis labels and current statement line-item order intact.
 - Infrastructure or harness changes: Refreshed the passing Playwright log at `artifacts/verification/dash-004-playwright.log` after stopping a stale local `next dev` process that blocked Playwright from starting its own frontend server.
-- Documentation changes: `feature_list.json`, `progress.md`, and this handoff now note that the passing `dash-004` waterfall includes both wrapped x-axis labels and corrected negative subtotal styling.
+- Documentation changes: `feature_list.json`, `progress.md`, and this handoff now point `dash-004` evidence at the new revert commit while preserving the pre-change waterfall notes.
 
 ## Broken Or Unverified
 
