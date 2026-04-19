@@ -103,7 +103,7 @@ export default async function DashboardPage({
       {company.quoteDetails.length > 0 ? (
         <ExpandableSection
           label="Yahoo Finance Snapshot"
-          title="Live market details"
+          title="Valuation-relevant market details"
           sectionClassName="quote-snapshot-panel"
         >
           <section className="workspace-panel" aria-label="Yahoo Finance snapshot">

@@ -1,7 +1,7 @@
 {
   "project": "fundamental-valuation-studio",
   "schema_version": 2,
-  "last_updated": "2026-04-18",
+  "last_updated": "2026-04-19",
   "rules": {
     "single_active_feature": true,
     "passing_requires_evidence": true,
@@ -115,7 +115,7 @@
       },
       "depends_on": ["dash-001", "dash-002"],
       "status": "passing",
-      "notes": "Implemented with a FastAPI backend-for-frontend route that now uses `yfinance` for runtime market data and fixture mode for deterministic Playwright and pytest coverage. Forward dividend and yield now treat `yfinance`'s `dividendYield` value as percentage points instead of multiplying it again."
+      "notes": "Implemented with a FastAPI backend-for-frontend route that now uses `yfinance` for runtime market data and fixture mode for deterministic Playwright and pytest coverage. The Yahoo snapshot is now intentionally limited to valuation-relevant fields such as trailing and forward P/E, price-to-book, EV multiples, PEG, margins, return metrics, debt to equity, beta, free cash flow, and relevant earnings or dividend dates; fields are omitted when Yahoo does not provide a direct value or a straightforward ratio calculation."
     },
     {
       "id": "dash-003",

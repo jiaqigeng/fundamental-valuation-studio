@@ -5,6 +5,7 @@ from datetime import date
 from datetime import UTC, datetime
 from datetime import timedelta
 from decimal import Decimal, ROUND_HALF_UP
+from numbers import Real
 from pathlib import Path
 from threading import Lock
 
@@ -115,80 +116,7 @@ class YahooFinanceClient:
             ),
             current_price_display=_format_currency(current_price),
             market_cap_display=_format_compact_currency(market_cap),
-            quote_details=[
-                QuoteDetail(
-                    label="Previous Close",
-                    value=_format_number(_first_number(info.get("previousClose"))),
-                ),
-                QuoteDetail(
-                    label="Open",
-                    value=_format_number(_first_number(info.get("open"))),
-                ),
-                QuoteDetail(
-                    label="Bid",
-                    value=_format_bid_ask(info.get("bid"), info.get("bidSize")),
-                ),
-                QuoteDetail(
-                    label="Ask",
-                    value=_format_bid_ask(info.get("ask"), info.get("askSize")),
-                ),
-                QuoteDetail(
-                    label="Day's Range",
-                    value=_format_range(info.get("dayLow"), info.get("dayHigh")),
-                ),
-                QuoteDetail(
-                    label="52 Week Range",
-                    value=_format_range(
-                        info.get("fiftyTwoWeekLow"),
-                        info.get("fiftyTwoWeekHigh"),
-                    ),
-                ),
-                QuoteDetail(
-                    label="Volume",
-                    value=_format_integer(info.get("volume")),
-                ),
-                QuoteDetail(
-                    label="Avg. Volume",
-                    value=_format_integer(_first_number(info.get("averageVolume"))),
-                ),
-                QuoteDetail(
-                    label="Market Cap (intraday)",
-                    value=_format_compact_number(market_cap),
-                ),
-                QuoteDetail(
-                    label="Beta (5Y Monthly)",
-                    value=_format_number(_first_number(info.get("beta"))),
-                ),
-                QuoteDetail(
-                    label="PE Ratio (TTM)",
-                    value=_format_number(_first_number(info.get("trailingPE"))),
-                ),
-                QuoteDetail(
-                    label="EPS (TTM)",
-                    value=_format_number(_first_number(info.get("trailingEps"))),
-                ),
-                QuoteDetail(
-                    label="Earnings Date",
-                    value=_format_date(
-                        _first_number(
-                            info.get("earningsTimestamp"),
-                            info.get("earningsTimestampStart"),
-                            info.get("earningsTimestampEnd"),
-                        ),
-                    ),
-                ),
-                QuoteDetail(
-                    label="Forward Dividend & Yield",
-                    value=_format_forward_dividend(
-                        _first_number(info.get("dividendRate")),
-                        _first_number(info.get("dividendYield")),
-                    ),
-                ),
-                QuoteDetail(
-                    label="Ex-Dividend Date",
-                    value=_format_date(_first_number(info.get("exDividendDate"))),
-                ),
-            ],
+            quote_details=_build_quote_details(info, current_price=current_price),
             market_contexts=payload.market_contexts,
             performance_chart_ranges=payload.performance_chart_ranges,
         )
@@ -317,6 +245,98 @@ def _build_market_context_snapshot(
         ),
         current_value_number=current_value,
     )
+
+
+def _build_quote_details(
+    info: dict,
+    *,
+    current_price: float | int | None,
+) -> list[QuoteDetail]:
+    trailing_pe = _resolve_ratio(
+        direct_value=_first_number(info.get("trailingPE")),
+        numerator=current_price,
+        denominator=_first_number(info.get("trailingEps")),
+    )
+    forward_pe = _resolve_ratio(
+        direct_value=_first_number(info.get("forwardPE")),
+        numerator=current_price,
+        denominator=_first_number(info.get("forwardEps")),
+    )
+    price_to_book = _resolve_ratio(
+        direct_value=_first_number(info.get("priceToBook")),
+        numerator=current_price,
+        denominator=_first_number(info.get("bookValue")),
+    )
+    ev_to_ebitda = _resolve_ratio(
+        direct_value=_first_number(info.get("enterpriseToEbitda")),
+        numerator=_first_number(info.get("enterpriseValue")),
+        denominator=_first_number(info.get("ebitda")),
+    )
+    ev_to_revenue = _resolve_ratio(
+        direct_value=_first_number(info.get("enterpriseToRevenue")),
+        numerator=_first_number(info.get("enterpriseValue")),
+        denominator=_first_number(info.get("totalRevenue")),
+    )
+
+    quote_details = [
+        _optional_quote_detail("Trailing P/E", _format_optional_number(trailing_pe)),
+        _optional_quote_detail("Forward P/E", _format_optional_number(forward_pe)),
+        _optional_quote_detail("Price to Book", _format_optional_number(price_to_book)),
+        _optional_quote_detail("EV / EBITDA", _format_optional_number(ev_to_ebitda)),
+        _optional_quote_detail("EV / Revenue", _format_optional_number(ev_to_revenue)),
+        _optional_quote_detail(
+            "PEG Ratio",
+            _format_optional_number(_first_number(info.get("pegRatio"))),
+        ),
+        _optional_quote_detail(
+            "Return on Equity (ROE)",
+            _format_optional_percent(_first_number(info.get("returnOnEquity"))),
+        ),
+        _optional_quote_detail(
+            "Return on Assets (ROA)",
+            _format_optional_percent(_first_number(info.get("returnOnAssets"))),
+        ),
+        _optional_quote_detail(
+            "Profit Margin",
+            _format_optional_percent(_first_number(info.get("profitMargins"))),
+        ),
+        _optional_quote_detail(
+            "Operating Margin",
+            _format_optional_percent(_first_number(info.get("operatingMargins"))),
+        ),
+        _optional_quote_detail(
+            "Debt to Equity",
+            _format_optional_number(_first_number(info.get("debtToEquity"))),
+        ),
+        _optional_quote_detail(
+            "Beta (5Y Monthly)",
+            _format_optional_number(_first_number(info.get("beta"))),
+        ),
+        _optional_quote_detail(
+            "Free Cash Flow",
+            _format_optional_compact_currency(_first_number(info.get("freeCashflow"))),
+        ),
+        _optional_quote_detail(
+            "Earnings Date",
+            _format_optional_date(
+                _first_number(
+                    info.get("earningsTimestamp"),
+                    info.get("earningsTimestampStart"),
+                    info.get("earningsTimestampEnd"),
+                )
+            ),
+        ),
+        _optional_quote_detail(
+            "Dividend Date",
+            _format_optional_date(_first_number(info.get("dividendDate"))),
+        ),
+        _optional_quote_detail(
+            "Ex-Dividend Date",
+            _format_optional_date(_first_number(info.get("exDividendDate"))),
+        ),
+    ]
+
+    return [detail for detail in quote_details if detail is not None]
 
 
 def _build_performance_chart_ranges(
@@ -470,7 +490,7 @@ def _fetch_history_points(
 
     history_points: dict[date, float] = {}
     for timestamp, close_value in close_history.items():
-        if isinstance(close_value, (int, float)):
+        if _is_number(close_value):
             history_points[timestamp.to_pydatetime().date()] = float(close_value)
 
     if not history_points:
@@ -518,7 +538,7 @@ def _fetch_history_points_for_dates(
 
     history_points: dict[date, float] = {}
     for timestamp, close_value in close_history.items():
-        if isinstance(close_value, (int, float)):
+        if _is_number(close_value):
             history_points[timestamp.to_pydatetime().date()] = float(close_value)
 
     if not history_points:
@@ -571,11 +591,34 @@ def _string_field(payload: dict, key: str) -> str | None:
     return None
 
 
+def _is_number(value: object) -> bool:
+    return isinstance(value, Real) and not isinstance(value, bool)
+
+
 def _first_number(*values: object) -> float | int | None:
     for value in values:
-        if isinstance(value, (int, float)):
+        if _is_number(value):
             return value
     return None
+
+
+def _resolve_ratio(
+    *,
+    direct_value: float | int | None,
+    numerator: float | int | None,
+    denominator: float | int | None,
+) -> float | None:
+    if direct_value is not None:
+        return float(direct_value)
+    if numerator is None or denominator in (None, 0):
+        return None
+    return float(numerator) / float(denominator)
+
+
+def _optional_quote_detail(label: str, value: str | None) -> QuoteDetail | None:
+    if value is None:
+        return None
+    return QuoteDetail(label=label, value=value)
 
 
 def _decimal_text(value: float | int, places: str) -> str:
@@ -608,13 +651,13 @@ def _format_integer(value: float | int | None) -> str:
 
 
 def _format_bid_ask(price: object, size: object) -> str:
-    if not isinstance(price, (int, float)) or not isinstance(size, (int, float)):
+    if not _is_number(price) or not _is_number(size):
         return "N/A"
     return f"{_format_number(price)} x {int(size)}"
 
 
 def _format_range(low: object, high: object) -> str:
-    if not isinstance(low, (int, float)) or not isinstance(high, (int, float)):
+    if not _is_number(low) or not _is_number(high):
         return "N/A"
     return f"{_format_number(low)} - {_format_number(high)}"
 
@@ -664,6 +707,33 @@ def _format_date(value: float | int | None) -> str:
         return "N/A"
     dt = datetime.fromtimestamp(float(value), tz=UTC)
     return f"{dt.strftime('%b')} {dt.day}, {dt.year}"
+
+
+def _format_optional_number(value: float | int | None) -> str | None:
+    if value is None:
+        return None
+    return _format_number(value)
+
+
+def _format_optional_percent(value: float | int | None) -> str | None:
+    if value is None:
+        return None
+    percent_value = Decimal(str(float(value) * 100)).quantize(
+        Decimal("0.01"), rounding=ROUND_HALF_UP
+    )
+    return f"{percent_value}%"
+
+
+def _format_optional_compact_currency(value: float | int | None) -> str | None:
+    if value is None:
+        return None
+    return _format_compact_currency(value)
+
+
+def _format_optional_date(value: float | int | None) -> str | None:
+    if value is None:
+        return None
+    return _format_date(value)
 
 
 def _looks_like_missing_ticker(info: dict) -> bool:

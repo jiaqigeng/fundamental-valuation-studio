@@ -6,7 +6,7 @@
 - Standard startup path: `./init.sh`
 - Standard verification path: `./init.sh` for baseline health plus `feature_list.json -> features[*].verification.command` for feature passing
 - Current highest-priority unfinished feature: `dash-004`
-- Current blocker: none recorded. The latest requested dashboard market-context exact-anchor fix is verified, so the roadmap can return to `dash-004` unless the user asks for more dashboard refinements first.
+- Current blocker: none recorded. The latest requested Yahoo snapshot field refinement is verified, so the roadmap can return to `dash-004` unless the user asks for more narrow dashboard refinements first.
 
 ## Session Log
 
@@ -201,3 +201,15 @@
 - Files or artifacts updated: `backend/app/clients/yahoo_finance.py`, `backend/tests/test_company_workspace.py`, `backend/app/clients/market_data_fixtures.py`, `frontend/e2e/dash-003.spec.ts`, `artifacts/verification/dash-003-playwright.log`, `progress.md`, `session-handoff.md`, `feature_list.json`
 - Known risk or unresolved issue: The exact anchor still depends on the nearest available trading close returned around the target date, so weekends and holidays will use the closest usable market session rather than a non-trading calendar date.
 - Next best step: Resume roadmap work at `dash-004` unless the user requests another narrow dashboard exception update first.
+
+### Session 017
+
+- Date: 2026-04-19
+- Goal: Apply a user-requested refinement to the passing Yahoo snapshot before resuming `dash-004`, keeping only valuation-relevant fields that Yahoo Finance provides directly or that can be calculated straightforwardly from Yahoo-provided values.
+- Completed: Replaced the hard-coded trading-screen snapshot fields with a valuation-focused list that now includes trailing and forward P/E, price to book, EV / EBITDA, EV / Revenue, PEG, ROE, ROA, profit and operating margins, debt to equity, beta, free cash flow, and relevant earnings or dividend dates. The backend now omits any snapshot field when Yahoo does not provide the needed value directly and there is no straightforward ratio calculation, the fixture snapshots were updated to match the new contract, and the dashboard copy now labels the section as valuation-relevant market details.
+- Verification run: `./init.sh`; `cd backend && .venv/Scripts/python.exe -m pytest tests/test_company_workspace.py -q`; `cd frontend && npm run lint`; `cd frontend && npm run typecheck`; `cd frontend && npx playwright test e2e/dash-002b.spec.ts`
+- Evidence captured: `./init.sh` completed successfully both before and after the change; backend `cd backend && .venv/Scripts/python.exe -m pytest tests/test_company_workspace.py -q` passed with `6 passed`; frontend `npm run lint` passed; frontend `npm run typecheck` passed; `cd frontend && npx playwright test e2e/dash-002b.spec.ts` passed after rerunning Playwright outside the sandbox to avoid the local `spawn EPERM`.
+- Commits: none yet
+- Files or artifacts updated: `backend/app/clients/yahoo_finance.py`, `backend/app/clients/market_data_fixtures.py`, `backend/tests/test_company_workspace.py`, `frontend/src/app/dashboard/[ticker]/page.tsx`, `frontend/e2e/dash-002b.spec.ts`, `feature_list.json`, `progress.md`, `session-handoff.md`
+- Known risk or unresolved issue: The live snapshot still depends on `yfinance` field availability and naming; when Yahoo omits a field, the workspace now hides it instead of showing a placeholder, so the live card count can vary by ticker.
+- Next best step: Resume roadmap work at `dash-004` and add the dedicated key-financial-metrics slice without regressing the newly-trimmed Yahoo snapshot contract.
