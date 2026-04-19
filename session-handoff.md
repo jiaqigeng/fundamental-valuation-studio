@@ -2,14 +2,14 @@
 
 ## Verified Now
 
-- What is currently working: The repo boots with `./init.sh`, the landing page accepts a ticker, `/dashboard/[ticker]` loads company identity plus key stats, the valuation-focused Yahoo snapshot remains intact, the market-context section still renders normalized `1Y` / `5Y` comparison ranges, and the dashboard still shows the dedicated `dash-004` waterfall section. That waterfall still follows the requested statement order: `Revenue`, `Cost of Revenue`, `Gross Profit`, `Operating Expenses`, `Operating Profit`, `Other Income / Cost`, `Taxes`, and `Net Profits`, and the longer x-axis labels now wrap onto two lines instead of colliding. In fixture mode, those values render deterministically for `AAPL`, `MSFT`, and `KO`, and the backend live path derives the same bridge from the latest available `yfinance` income-statement rows. Backend workspace tests pass, and `dash-001` through `dash-004` remain recorded as passing.
-- What verification actually ran: `cd frontend && npm run lint`; `cd frontend && npm run typecheck`; `cd frontend && npx playwright test e2e/dash-004.spec.ts`
+- What is currently working: The repo boots with `./init.sh`, the landing page accepts a ticker, `/dashboard/[ticker]` loads company identity plus key stats, the valuation-focused Yahoo snapshot remains intact, the market-context section still renders normalized `1Y` / `5Y` comparison ranges, and the dashboard still shows the dedicated `dash-004` waterfall section. That waterfall still follows the requested statement order: `Revenue`, `Cost of Revenue`, `Gross Profit`, `Operating Expenses`, `Operating Profit`, `Other Income / Cost`, `Taxes`, and `Net Profits`; the longer x-axis labels still wrap onto two lines; and the dotted bridge now connects every adjacent bar using the correct entry and exit edge, so increases enter low and exit high while decreases do the reverse. In fixture mode, those values render deterministically for `AAPL`, `MSFT`, and `KO`, and the backend live path derives the same bridge from the latest available `yfinance` income-statement rows. Backend workspace tests pass, and `dash-001` through `dash-004` remain recorded as passing.
+- What verification actually ran: `./init.sh`; `cd frontend && npm run lint`; `cd frontend && npm run typecheck`; `cd frontend && npx playwright test e2e/dash-004.spec.ts`
 
 ## Changed This Session
 
-- Code or behavior added: Reverted the most recent `dash-004` bar-tone styling change, restoring the waterfall visuals to the prior label-wrap state while keeping the wrapped x-axis labels and current statement line-item order intact.
-- Infrastructure or harness changes: Refreshed the passing Playwright log at `artifacts/verification/dash-004-playwright.log` after stopping a stale local `next dev` process that blocked Playwright from starting its own frontend server.
-- Documentation changes: `feature_list.json`, `progress.md`, and this handoff now point `dash-004` evidence at the new revert commit while preserving the pre-change waterfall notes.
+- Code or behavior added: Reworked the `dash-004` SVG connector logic so every neighboring waterfall bar pair now shares a dotted bridge built from each bar's true entry and exit edge, which makes positive deltas connect bottom-to-top and negative deltas connect top-to-bottom as requested. Tightened the Playwright spec to assert all seven inter-bar connectors render for the fixture companies used in the chart contract.
+- Infrastructure or harness changes: Refreshed the passing Playwright log at `artifacts/verification/dash-004-playwright.log`; the first sandboxed run hit the known local `spawn EPERM`, and the passing rerun completed outside the sandbox.
+- Documentation changes: `feature_list.json`, `progress.md`, and this handoff now point `dash-004` evidence at the connector-fix commit while keeping `dash-005` as the next roadmap slice.
 
 ## Broken Or Unverified
 

@@ -6,7 +6,7 @@
 - Standard startup path: `./init.sh`
 - Standard verification path: `./init.sh` for baseline health plus `feature_list.json -> features[*].verification.command` for feature passing
 - Current highest-priority unfinished feature: `dash-005`
-- Current blocker: none recorded. `dash-004` now passes with a backend-backed income-statement waterfall section on `/dashboard/[ticker]`, so the next roadmap item is the revenue segment breakdown at `dash-005`.
+- Current blocker: none recorded. `dash-005` remains the next roadmap item, and a user-requested `dash-004` exception refinement now keeps the dotted waterfall connector attached to each bar's true entry and exit edge.
 
 ## Session Log
 
@@ -357,3 +357,15 @@
 - Files or artifacts updated: `frontend/src/app/_components/income-statement-waterfall-chart.tsx`, `frontend/src/app/globals.css`, `artifacts/verification/dash-004-playwright.log`, `feature_list.json`, `progress.md`, `session-handoff.md`
 - Known risk or unresolved issue: This revert intentionally undoes only the most recent bar-tone styling change. The wrapped axis labels and the current eight-step statement flow remain in place.
 - Next best step: Resume the roadmap at `dash-005` unless the user asks for another narrow waterfall refinement.
+
+### Session 030
+
+- Date: 2026-04-19
+- Goal: Apply a user-requested `dash-004` refinement so the dotted waterfall line connects each bar through the correct edge.
+- Completed: Reworked the frontend waterfall SVG so it now draws dotted connector paths between every adjacent pair of bars using each bar's real entry and exit edge. Positive delta bars now receive the connector at the lower edge and hand it off from the upper edge, while negative deltas do the reverse. Tightened the `dash-004` Playwright contract so it now asserts all seven inter-bar connectors render for both `AAPL` and `KO`.
+- Verification run: `./init.sh`; `cd frontend && npm run lint`; `cd frontend && npm run typecheck`; `cd frontend && npx playwright test e2e/dash-004.spec.ts`
+- Evidence captured: `./init.sh` completed successfully before the refinement; frontend `npm run lint` passed; frontend `npm run typecheck` passed; the initial Playwright attempt hit the local sandbox `spawn EPERM`, then `cd frontend && npx playwright test e2e/dash-004.spec.ts` passed when rerun outside the sandbox; log refreshed at `artifacts/verification/dash-004-playwright.log`; implementation commit is `5a270e2`.
+- Commits: `5a270e2 Connect dash-004 waterfall bars`
+- Files or artifacts updated: `frontend/src/app/_components/income-statement-waterfall-chart.tsx`, `frontend/e2e/dash-004.spec.ts`, `artifacts/verification/dash-004-playwright.log`, `feature_list.json`, `progress.md`, `session-handoff.md`
+- Known risk or unresolved issue: The live waterfall still depends on `yfinance` income-statement row availability and naming. When Yahoo omits gross-profit, operating-income, pretax, or tax rows, the builder fills the missing bridge points with derived values or zeros, so live subtotals may be less precise than the deterministic fixture path.
+- Next best step: Resume the roadmap at `dash-005` unless the user asks for another narrow `dash-004` refinement.
