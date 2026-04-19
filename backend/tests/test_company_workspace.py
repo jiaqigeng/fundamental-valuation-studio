@@ -25,7 +25,7 @@ def test_company_workspace_fixture_response(monkeypatch) -> None:
     assert body["current_price_display"] == "$338.12"
     assert body["market_cap_display"] == "$4.1T"
     assert body["quote_details"] == [
-        {"label": "Trailing P/E", "value": "31.64"},
+        {"label": "Trailing P/E (TTM)", "value": "31.64"},
         {"label": "Forward P/E", "value": "28.10"},
         {"label": "Price to Book", "value": "10.78"},
         {"label": "EV / EBITDA", "value": "20.45"},
@@ -36,7 +36,7 @@ def test_company_workspace_fixture_response(monkeypatch) -> None:
         {"label": "Return on Equity (ROE)", "value": "33.74%"},
         {"label": "Return on Assets (ROA)", "value": "14.95%"},
         {"label": "Forward Dividend & Yield", "value": "3.64 (0.86%)"},
-        {"label": "Trailing Dividend", "value": "3.32"},
+        {"label": "Trailing Dividend (TTM)", "value": "3.32"},
         {"label": "Avg. Volume (3M)", "value": "32,964,050"},
         {"label": "Earnings Date", "value": "Apr 29, 2026"},
         {"label": "Ex-Dividend Date", "value": "Mar 9, 2026"},
@@ -99,12 +99,12 @@ def test_build_quote_details_skips_missing_metrics() -> None:
     )
 
     assert [detail.model_dump() for detail in details] == [
-        {"label": "Trailing P/E", "value": "22.35"},
+        {"label": "Trailing P/E (TTM)", "value": "22.35"},
         {"label": "Debt to Equity", "value": "32.11%"},
         {"label": "Beta (5Y Monthly)", "value": "1.13"},
         {"label": "Return on Equity (ROE)", "value": "18.76%"},
         {"label": "Forward Dividend & Yield", "value": "1.04 (0.38%)"},
-        {"label": "Trailing Dividend", "value": "0.96"},
+        {"label": "Trailing Dividend (TTM)", "value": "0.96"},
         {"label": "Avg. Volume (3M)", "value": "57,391,204"},
         {"label": "Earnings Date", "value": "May 2, 2026"},
     ]

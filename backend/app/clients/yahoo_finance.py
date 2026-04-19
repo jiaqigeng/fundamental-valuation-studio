@@ -285,7 +285,7 @@ def _build_quote_details(
     )
 
     quote_details = [
-        _optional_quote_detail("Trailing P/E", _format_optional_number(trailing_pe)),
+        _optional_quote_detail("Trailing P/E (TTM)", _format_optional_number(trailing_pe)),
         _optional_quote_detail("Forward P/E", _format_optional_number(forward_pe)),
         _optional_quote_detail("Price to Book", _format_optional_number(price_to_book)),
         _optional_quote_detail("EV / EBITDA", _format_optional_number(ev_to_ebitda)),
@@ -318,7 +318,7 @@ def _build_quote_details(
             ),
         ),
         _optional_quote_detail(
-            "Trailing Dividend",
+            "Trailing Dividend (TTM)",
             _format_optional_number(trailing_ttm_dividend),
         ),
         _optional_quote_detail(

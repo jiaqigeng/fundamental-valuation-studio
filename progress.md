@@ -6,7 +6,7 @@
 - Standard startup path: `./init.sh`
 - Standard verification path: `./init.sh` for baseline health plus `feature_list.json -> features[*].verification.command` for feature passing
 - Current highest-priority unfinished feature: `dash-004`
-- Current blocker: none recorded. The latest requested Yahoo snapshot field refinement is verified, including `Forward Dividend & Yield`, a true TTM `Trailing Dividend`, `Avg. Volume (3M)`, debt-to-equity with a `%` suffix, and only `Ex-Dividend Date`, so the roadmap can return to `dash-004` unless the user asks for more narrow dashboard refinements first.
+- Current blocker: none recorded. The latest requested Yahoo snapshot field refinement is verified, including `Trailing P/E (TTM)`, `Forward Dividend & Yield`, a true `Trailing Dividend (TTM)`, `Avg. Volume (3M)`, debt-to-equity with a `%` suffix, and only `Ex-Dividend Date`, so the roadmap can return to `dash-004` unless the user asks for more narrow dashboard refinements first.
 
 ## Session Log
 
@@ -281,6 +281,18 @@
 - Completed: Updated the Yahoo snapshot so debt to equity now shows Yahoo's reported numeric value with a trailing percent sign instead of a bare number, and renamed the volume row to `Avg. Volume (3M)`. Updated fixture payloads, backend assertions, and `dash-002b` Playwright coverage to match the new display contract.
 - Verification run: `cd backend && .venv/Scripts/python.exe -m pytest tests/test_company_workspace.py -q`; `cd frontend && npm run lint`; `cd frontend && npm run typecheck`; `cd frontend && npx playwright test e2e/dash-002b.spec.ts`
 - Evidence captured: Backend `cd backend && .venv/Scripts/python.exe -m pytest tests/test_company_workspace.py -q` passed with `7 passed`; frontend `npm run lint` passed; frontend `npm run typecheck` passed; `cd frontend && npx playwright test e2e/dash-002b.spec.ts` passed after stopping a stale local `next dev` process that blocked Playwright from starting its own server.
+- Commits: none yet
+- Files or artifacts updated: `backend/app/clients/yahoo_finance.py`, `backend/app/clients/market_data_fixtures.py`, `backend/tests/test_company_workspace.py`, `frontend/e2e/dash-002b.spec.ts`, `feature_list.json`, `progress.md`, `session-handoff.md`
+- Known risk or unresolved issue: The live snapshot still depends on `yfinance` field availability and naming; when Yahoo omits a field, the workspace now hides it instead of showing a placeholder, so the live card count can vary by ticker.
+- Next best step: Resume roadmap work at `dash-004` and add the dedicated key-financial-metrics slice without regressing the Yahoo snapshot contract.
+
+### Session 024
+
+- Date: 2026-04-19
+- Goal: Apply the next Yahoo snapshot follow-up by labeling the trailing valuation rows more explicitly and confirm which snapshot fields come directly from Yahoo info versus fallback math.
+- Completed: Renamed the snapshot labels to `Trailing P/E (TTM)` and `Trailing Dividend (TTM)` across the live builder, fixture payloads, backend assertions, and `dash-002b` Playwright coverage. Also confirmed the current sourcing logic for all 15 snapshot fields so the direct-versus-fallback behavior is now easy to explain from code.
+- Verification run: `cd backend && .venv/Scripts/python.exe -m pytest tests/test_company_workspace.py -q`; `cd frontend && npm run lint`; `cd frontend && npm run typecheck`; `cd frontend && npx playwright test e2e/dash-002b.spec.ts`
+- Evidence captured: Backend `cd backend && .venv/Scripts/python.exe -m pytest tests/test_company_workspace.py -q` passed with `7 passed`; frontend `npm run lint` passed; frontend `npm run typecheck` passed; `cd frontend && npx playwright test e2e/dash-002b.spec.ts` passed.
 - Commits: none yet
 - Files or artifacts updated: `backend/app/clients/yahoo_finance.py`, `backend/app/clients/market_data_fixtures.py`, `backend/tests/test_company_workspace.py`, `frontend/e2e/dash-002b.spec.ts`, `feature_list.json`, `progress.md`, `session-handoff.md`
 - Known risk or unresolved issue: The live snapshot still depends on `yfinance` field availability and naming; when Yahoo omits a field, the workspace now hides it instead of showing a placeholder, so the live card count can vary by ticker.
