@@ -6,7 +6,7 @@
 - Standard startup path: `./init.sh`
 - Standard verification path: `./init.sh` for baseline health plus `feature_list.json -> features[*].verification.command` for feature passing
 - Current highest-priority unfinished feature: `dash-005`
-- Current blocker: none recorded. `dash-005` remains the next roadmap item, and the latest user-requested `dash-004` refinement now keeps the zero baseline distinct from the bars while softening it back toward the other dotted guides.
+- Current blocker: none recorded. `dash-005` remains the next roadmap item, and the latest user-requested `dash-004` refinement removes the zero baseline line entirely while keeping `0` on the left axis.
 
 ## Session Log
 
@@ -428,4 +428,16 @@
 - Commits: `e640c0c Soften dash-004 zero baseline color`
 - Files or artifacts updated: `frontend/src/app/globals.css`, `artifacts/verification/dash-004-playwright.log`, `feature_list.json`, `progress.md`, `session-handoff.md`
 - Known risk or unresolved issue: This remains a styling-only tweak on the current chart dimensions. If the waterfall palette changes substantially later, the neutral baseline accent may need another pass to stay balanced.
+- Next best step: Resume the roadmap at `dash-005` unless the user asks for another narrow `dash-004` refinement.
+
+### Session 036
+
+- Date: 2026-04-19
+- Goal: Remove the `dash-004` zero baseline line while keeping a `0` label on the left axis.
+- Completed: Removed the dedicated zero baseline SVG line, changed the y-axis labeling logic so it always emits five labels with `0` in the middle, and suppressed the standard gridline at the zero tick so the chart has no horizontal zero line at all. Tightened the `dash-004` Playwright coverage so it now asserts the zero baseline line is absent and the chart still shows a `$0` axis label.
+- Verification run: `./init.sh`; `cd frontend && npm run lint`; `cd frontend && npm run typecheck`; `cd frontend && npx playwright test e2e/dash-004.spec.ts`
+- Evidence captured: `./init.sh` completed successfully before the refinement; frontend `npm run lint` passed; frontend `npm run typecheck` passed; the first Playwright attempt failed because a stale local `next dev` server on PID `83540` was already running, then `cd frontend && npx playwright test e2e/dash-004.spec.ts` passed after stopping that stray process; log refreshed at `artifacts/verification/dash-004-playwright.log`; implementation commit is `82b05b6`.
+- Commits: `82b05b6 Remove dash-004 zero baseline line`
+- Files or artifacts updated: `frontend/src/app/_components/income-statement-waterfall-chart.tsx`, `frontend/src/app/globals.css`, `frontend/e2e/dash-004.spec.ts`, `artifacts/verification/dash-004-playwright.log`, `feature_list.json`, `progress.md`, `session-handoff.md`
+- Known risk or unresolved issue: The y-axis now uses a fixed five-tick layout that guarantees a zero label. If the chart’s vertical scale treatment changes substantially later, the tick-spacing strategy may need another pass to keep the labels feeling balanced.
 - Next best step: Resume the roadmap at `dash-005` unless the user asks for another narrow `dash-004` refinement.
