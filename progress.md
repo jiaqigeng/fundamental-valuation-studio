@@ -6,7 +6,7 @@
 - Standard startup path: `./init.sh`
 - Standard verification path: `./init.sh` for baseline health plus `feature_list.json -> features[*].verification.command` for feature passing
 - Current highest-priority unfinished feature: `dash-005`
-- Current blocker: none recorded. `dash-005` remains the next roadmap item, and the latest user-requested `dash-004` refinement keeps the zero-anchored one-fifth axis labels on the left while removing the separate dotted zero baseline.
+- Current blocker: none recorded. `dash-005` remains the next roadmap item, and the latest user-requested `dash-004` refinement renames the residual waterfall bucket from `Other Income / Cost` to `Others` while preserving the current zero-anchored axis labeling and no-baseline layout.
 
 ## Session Log
 

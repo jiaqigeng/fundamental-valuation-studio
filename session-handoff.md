@@ -2,14 +2,14 @@
 
 ## Verified Now
 
-- What is currently working: The repo boots with `./init.sh`, the landing page accepts a ticker, `/dashboard/[ticker]` loads company identity plus key stats, the valuation-focused Yahoo snapshot remains intact, the market-context section still renders normalized `1Y` / `5Y` comparison ranges, and the dashboard still shows the dedicated `dash-004` waterfall section. That waterfall still follows the requested statement order: `Revenue`, `Cost of Revenue`, `Gross Profit`, `Operating Expenses`, `Operating Profit`, `Other Income / Cost`, `Taxes`, and `Net Profits`; the longer x-axis labels still wrap onto two lines; the dotted bridge still connects every adjacent bar using the correct entry and exit edge; `Other Income / Cost` is still the residual balancing bucket; the dedicated zero baseline line is now gone again; and the y-axis still uses a zero-anchored step size equal to one-fifth of the full chart span, labeling each step on the left until both the positive and negative ranges are covered, including `0`. Backend workspace tests pass, and `dash-001` through `dash-004` remain recorded as passing.
+- What is currently working: The repo boots with `./init.sh`, the landing page accepts a ticker, `/dashboard/[ticker]` loads company identity plus key stats, the valuation-focused Yahoo snapshot remains intact, the market-context section still renders normalized `1Y` / `5Y` comparison ranges, and the dashboard still shows the dedicated `dash-004` waterfall section. That waterfall still follows the requested statement order: `Revenue`, `Cost of Revenue`, `Gross Profit`, `Operating Expenses`, `Operating Profit`, `Others`, `Taxes`, and `Net Profits`; the longer x-axis labels still wrap onto two lines when needed; the dotted bridge still connects every adjacent bar using the correct entry and exit edge; `Others` is still the residual balancing bucket; the dedicated zero baseline line is still absent; and the y-axis still uses a zero-anchored step size equal to one-fifth of the full chart span, labeling each step on the left until both the positive and negative ranges are covered, including `0`. Backend workspace tests pass, and `dash-001` through `dash-004` remain recorded as passing.
 - What verification actually ran: `./init.sh`; `cd frontend && npm run lint`; `cd frontend && npm run typecheck`; `cd frontend && npx playwright test e2e/dash-004.spec.ts`
 
 ## Changed This Session
 
-- Code or behavior added: Refined the `dash-004` chart so it keeps the zero-anchored one-fifth y-axis labels, including `0`, but no longer draws a separate dotted zero baseline line.
-- Infrastructure or harness changes: Refreshed the passing Playwright log at `artifacts/verification/dash-004-playwright.log`; the first test attempt was blocked by a stale local `next dev` process on PID `93652`, and the rerun passed after that process was terminated.
-- Documentation changes: `feature_list.json`, `progress.md`, and this handoff now point `dash-004` evidence at the zero-baseline removal refinement while keeping `dash-005` as the next roadmap slice.
+- Code or behavior added: Refined the `dash-004` waterfall so the residual bucket is now labeled `Others` in the backend payload, metric cards, and chart axis instead of `Other Income / Cost`.
+- Infrastructure or harness changes: Refreshed the passing Playwright log at `artifacts/verification/dash-004-playwright.log`; this rerun passed without needing any manual server cleanup.
+- Documentation changes: `feature_list.json`, `progress.md`, and this handoff now point `dash-004` evidence at the `Others` label refinement while keeping `dash-005` as the next roadmap slice.
 
 ## Broken Or Unverified
 
