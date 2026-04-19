@@ -6,7 +6,7 @@
 - Standard startup path: `./init.sh`
 - Standard verification path: `./init.sh` for baseline health plus `feature_list.json -> features[*].verification.command` for feature passing
 - Current highest-priority unfinished feature: `dash-004`
-- Current blocker: none recorded. The latest requested dashboard market-context percentage and negative-color exception update is verified, so the roadmap can return to `dash-004` unless the user asks for more dashboard refinements first.
+- Current blocker: none recorded. The latest requested dashboard market-context endpoint fix is verified, so the roadmap can return to `dash-004` unless the user asks for more dashboard refinements first.
 
 ## Session Log
 
@@ -176,4 +176,16 @@
 - Commits: none yet
 - Files or artifacts updated: `frontend/src/app/_components/performance-comparison-section.tsx`, `frontend/src/app/globals.css`, `backend/app/clients/market_data_fixtures.py`, `frontend/e2e/dash-003.spec.ts`, `artifacts/verification/dash-003-playwright.log`, `progress.md`, `session-handoff.md`, `feature_list.json`
 - Known risk or unresolved issue: The displayed return remains only as accurate as the normalized comparison series returned for the selected range; live provider history gaps will still remove the affected range entirely rather than displaying a misleading percentage.
+- Next best step: Resume roadmap work at `dash-004` unless the user requests another narrow dashboard exception update first.
+
+### Session 015
+
+- Date: 2026-04-18
+- Goal: Fix the market-context range returns so the selected-range percentage ends at the same current quote shown on the card.
+- Completed: Refactored the live `yfinance` chart builder to carry both the current display value and the numeric current quote for each comparison series, replaced the final sampled history point with a normalized point derived from the current quote, added a backend unit test for the new endpoint behavior, updated the MSFT fixture to reflect a `+15.0%` one-year return, and refreshed `dash-003` Playwright coverage to assert that MSFT's market-context card shows the corrected one-year gain.
+- Verification run: `./init.sh`; `cd backend && .venv/Scripts/python.exe -m pytest tests/test_company_workspace.py -q`; `cd frontend && npm run lint`; `cd frontend && npm run typecheck`; `cd frontend && npx playwright test e2e/dash-003.spec.ts`
+- Evidence captured: `./init.sh` completed successfully before the fix; backend `cd backend && .venv/Scripts/python.exe -m pytest tests/test_company_workspace.py -q` passed with `4 passed`; frontend `npm run lint` passed; frontend `npm run typecheck` passed; `cd frontend && npx playwright test e2e/dash-003.spec.ts` passed after rerunning Playwright outside the sandbox to avoid the local `spawn EPERM`; log saved at `artifacts/verification/dash-003-playwright.log`.
+- Commits: none yet
+- Files or artifacts updated: `backend/app/clients/yahoo_finance.py`, `backend/tests/test_company_workspace.py`, `backend/app/clients/market_data_fixtures.py`, `frontend/e2e/dash-003.spec.ts`, `artifacts/verification/dash-003-playwright.log`, `progress.md`, `session-handoff.md`, `feature_list.json`
+- Known risk or unresolved issue: The live chart now ends on the current quote instead of the last sampled history bar, but the first point is still the earliest available sampled bar in the requested period, so upstream `yfinance` history availability still governs the exact anchor date.
 - Next best step: Resume roadmap work at `dash-004` unless the user requests another narrow dashboard exception update first.

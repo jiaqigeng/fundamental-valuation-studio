@@ -377,7 +377,7 @@ FIXTURE_WORKSPACES: dict[str, CompanyWorkspaceSnapshot] = {
                             PerformancePoint(label="Sep 2025", value=104.8),
                             PerformancePoint(label="Nov 2025", value=106.1),
                             PerformancePoint(label="Jan 2026", value=108.7),
-                            PerformancePoint(label="Apr 2026", value=110.5),
+                            PerformancePoint(label="Apr 2026", value=115.0),
                         ],
                     ),
                     PerformanceSeries(

@@ -58,6 +58,22 @@ class YahooWorkspacePayload:
     performance_chart_ranges: list[PerformanceChartRange]
 
 
+@dataclass(frozen=True)
+class MarketContextSnapshot:
+    card: MarketContextCard
+    current_value_number: float | int | None
+
+
+@dataclass(frozen=True)
+class ComparisonSeriesSeed:
+    label: str
+    symbol: str
+    current_value_display: str
+    current_value_number: float | int | None
+    daily_change: str
+    line_color: str
+
+
 class YahooFinanceClient:
     def __init__(self, timeout: float = 10.0) -> None:
         self._timeout = timeout
@@ -202,16 +218,43 @@ class YahooFinanceClient:
             sector,
             ("XLK", "Sector benchmark"),
         )
-        market_contexts = [
-            _build_market_context_card(
+        market_context_snapshots = [
+            _build_market_context_snapshot(
                 label="S&P 500",
                 symbol="^GSPC",
                 description="Broad-market baseline for the current U.S. session.",
             ),
-            _build_market_context_card(
+            _build_market_context_snapshot(
                 label=benchmark_label,
                 symbol=benchmark_symbol,
                 description="Sector proxy chosen from the company's reported sector.",
+            ),
+        ]
+        market_contexts = [snapshot.card for snapshot in market_context_snapshots]
+        comparison_series = [
+            ComparisonSeriesSeed(
+                label=_string_field(company_info, "shortName") or ticker,
+                symbol=ticker,
+                current_value_display=_format_currency(current_price),
+                current_value_number=current_price,
+                daily_change=company_daily_change,
+                line_color="#21409A",
+            ),
+            ComparisonSeriesSeed(
+                label=market_context_snapshots[0].card.label,
+                symbol=market_context_snapshots[0].card.symbol,
+                current_value_display=market_context_snapshots[0].card.value,
+                current_value_number=market_context_snapshots[0].current_value_number,
+                daily_change=market_context_snapshots[0].card.daily_change,
+                line_color="#0F766E",
+            ),
+            ComparisonSeriesSeed(
+                label=market_context_snapshots[1].card.label,
+                symbol=market_context_snapshots[1].card.symbol,
+                current_value_display=market_context_snapshots[1].card.value,
+                current_value_number=market_context_snapshots[1].current_value_number,
+                daily_change=market_context_snapshots[1].card.daily_change,
+                line_color="#C48A2C",
             ),
         ]
 
@@ -220,10 +263,7 @@ class YahooFinanceClient:
             market_contexts=market_contexts,
             performance_chart_ranges=_build_performance_chart_ranges(
                 ticker=ticker,
-                company_name=_string_field(company_info, "shortName") or ticker,
-                company_current_value=_format_currency(current_price),
-                company_daily_change=company_daily_change,
-                market_contexts=market_contexts,
+                comparison_series=comparison_series,
             ),
         )
 
@@ -241,12 +281,12 @@ def _configure_yfinance_cache() -> None:
         _CACHE_CONFIGURED = True
 
 
-def _build_market_context_card(
+def _build_market_context_snapshot(
     *,
     label: str,
     symbol: str,
     description: str,
-) -> MarketContextCard:
+) -> MarketContextSnapshot:
     try:
         info = dict(yf.Ticker(symbol).info)
     except Exception as exc:  # pragma: no cover - upstream library errors vary.
@@ -259,30 +299,29 @@ def _build_market_context_card(
             f"Yahoo Finance returned no result for symbol {symbol}."
         )
 
-    return MarketContextCard(
-        label=label,
-        symbol=symbol,
-        value=_format_metric_value(
-            _first_number(
-                info.get("regularMarketPrice"),
-                info.get("currentPrice"),
+    current_value = _first_number(
+        info.get("regularMarketPrice"),
+        info.get("currentPrice"),
+    )
+    return MarketContextSnapshot(
+        card=MarketContextCard(
+            label=label,
+            symbol=symbol,
+            value=_format_metric_value(current_value),
+            daily_change=_format_daily_change(
+                _first_number(info.get("regularMarketChange")),
+                _first_number(info.get("regularMarketChangePercent")),
             ),
+            description=description,
         ),
-        daily_change=_format_daily_change(
-            _first_number(info.get("regularMarketChange")),
-            _first_number(info.get("regularMarketChangePercent")),
-        ),
-        description=description,
+        current_value_number=current_value,
     )
 
 
 def _build_performance_chart_ranges(
     *,
     ticker: str,
-    company_name: str,
-    company_current_value: str,
-    company_daily_change: str,
-    market_contexts: list[MarketContextCard],
+    comparison_series: list[ComparisonSeriesSeed],
 ) -> list[PerformanceChartRange]:
     chart_ranges: list[PerformanceChartRange] = []
     last_error: YahooFinanceLookupError | None = None
@@ -295,10 +334,7 @@ def _build_performance_chart_ranges(
                     label=label,
                     series=_build_performance_chart(
                         ticker=ticker,
-                        company_name=company_name,
-                        company_current_value=company_current_value,
-                        company_daily_change=company_daily_change,
-                        market_contexts=market_contexts,
+                        comparison_series=comparison_series,
                         period=period,
                         interval=interval,
                     ),
@@ -321,40 +357,13 @@ def _build_performance_chart_ranges(
 def _build_performance_chart(
     *,
     ticker: str,
-    company_name: str,
-    company_current_value: str,
-    company_daily_change: str,
-    market_contexts: list[MarketContextCard],
+    comparison_series: list[ComparisonSeriesSeed],
     period: str,
     interval: str,
 ) -> list[PerformanceSeries]:
-    comparison_series = [
-        (
-            company_name,
-            ticker,
-            company_current_value,
-            company_daily_change,
-            "#21409A",
-        ),
-        (
-            market_contexts[0].label,
-            market_contexts[0].symbol,
-            market_contexts[0].value,
-            market_contexts[0].daily_change,
-            "#0F766E",
-        ),
-        (
-            market_contexts[1].label,
-            market_contexts[1].symbol,
-            market_contexts[1].value,
-            market_contexts[1].daily_change,
-            "#C48A2C",
-        ),
-    ]
-
     history_by_symbol = {
         symbol: _fetch_history_points(symbol, period=period, interval=interval)
-        for _, symbol, _, _, _ in comparison_series
+        for symbol in {series.symbol for series in comparison_series}
     }
     common_dates = sorted(
         set.intersection(*(set(history.keys()) for history in history_by_symbol.values()))
@@ -366,27 +375,50 @@ def _build_performance_chart(
         )
 
     chart_series: list[PerformanceSeries] = []
-    for label, symbol, current_value, daily_change, line_color in comparison_series:
-        history = history_by_symbol[symbol]
-        baseline = history[common_dates[0]]
+    for series in comparison_series:
         chart_series.append(
             PerformanceSeries(
-                label=label,
-                symbol=symbol,
-                current_value=current_value,
-                daily_change=daily_change,
-                line_color=line_color,
-                points=[
-                    PerformancePoint(
-                        label=_format_history_label(point_date),
-                        value=_normalize_history_value(history[point_date], baseline),
-                    )
-                    for point_date in common_dates
-                ],
+                label=series.label,
+                symbol=series.symbol,
+                current_value=series.current_value_display,
+                daily_change=series.daily_change,
+                line_color=series.line_color,
+                points=_build_normalized_points(
+                    history=history_by_symbol[series.symbol],
+                    ordered_dates=common_dates,
+                    current_value=series.current_value_number,
+                ),
             )
         )
 
     return chart_series
+
+
+def _build_normalized_points(
+    *,
+    history: dict[date, float],
+    ordered_dates: list[date],
+    current_value: float | int | None,
+) -> list[PerformancePoint]:
+    baseline = history[ordered_dates[0]]
+    historical_dates = ordered_dates[:-1] if current_value is not None else ordered_dates
+    points = [
+        PerformancePoint(
+            label=_format_history_label(point_date),
+            value=_normalize_history_value(history[point_date], baseline),
+        )
+        for point_date in historical_dates
+    ]
+
+    if current_value is not None:
+        points.append(
+            PerformancePoint(
+                label=_format_history_label(datetime.now(UTC).date()),
+                value=_normalize_history_value(float(current_value), baseline),
+            )
+        )
+
+    return points
 
 
 def _fetch_history_points(

@@ -50,6 +50,17 @@ test("dash-003 shows broad-market and sector-relevant context that updates by co
   await expect(marketContext.getByText("+46.0%")).toBeVisible();
   await expect(marketContext.getByText("+68.8%")).toBeVisible();
 
+  await page.goto("/dashboard/MSFT");
+
+  const microsoftContext = page.getByRole("region", {
+    name: /market context/i,
+  });
+
+  await expect(microsoftContext).toBeVisible();
+  await expect(microsoftContext.getByText("MSFT", { exact: true })).toBeVisible();
+  await expect(microsoftContext.getByText("$338.12")).toBeVisible();
+  await expect(microsoftContext.getByText("+15.0%")).toBeVisible();
+
   await page.goto("/dashboard/KO");
 
   const consumerContext = page.getByRole("region", {

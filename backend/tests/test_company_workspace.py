@@ -1,5 +1,8 @@
+from datetime import date
+
 from fastapi.testclient import TestClient
 
+from app.clients.yahoo_finance import _build_normalized_points
 from app.clients.yahoo_finance import _format_forward_dividend
 from app.main import app
 
@@ -71,3 +74,19 @@ def test_company_workspace_fixture_404(monkeypatch) -> None:
 
 def test_format_forward_dividend_uses_yfinance_percent_points() -> None:
     assert _format_forward_dividend(1.04, 0.38) == "1.04 (0.38%)"
+
+
+def test_build_normalized_points_ends_series_at_current_quote() -> None:
+    history = {
+        date(2025, 5, 1): 100.0,
+        date(2025, 7, 1): 92.0,
+    }
+
+    points = _build_normalized_points(
+        history=history,
+        ordered_dates=sorted(history.keys()),
+        current_value=115.0,
+    )
+
+    assert points[0].value == 100.0
+    assert points[-1].value == 115.0
