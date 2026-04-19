@@ -2,6 +2,7 @@ from datetime import date
 
 from fastapi.testclient import TestClient
 
+from app.clients.financial_modeling_prep import _build_revenue_segment_breakdown_from_fmp_payload
 from app.clients.market_data_fixtures import FIXTURE_WORKSPACES
 from app.clients.yahoo_finance import _build_income_statement_waterfall_from_values
 from app.clients.yahoo_finance import _build_quote_details
@@ -159,6 +160,7 @@ def test_company_workspace_fixture_404(monkeypatch) -> None:
 
 def test_company_workspace_live_path_falls_back_to_fixture_segments(monkeypatch) -> None:
     monkeypatch.delenv("FVS_MARKET_DATA_PROVIDER", raising=False)
+    monkeypatch.delenv("FVS_FMP_API_KEY", raising=False)
 
     fixture = FIXTURE_WORKSPACES["AAPL"]
     yahoo_snapshot = fixture.model_copy(
@@ -185,6 +187,95 @@ def test_company_workspace_live_path_falls_back_to_fixture_segments(monkeypatch)
     assert snapshot.revenue_segment_breakdown.model_dump() == (
         fixture.revenue_segment_breakdown.model_dump()
     )
+
+
+def test_company_workspace_live_path_prefers_fmp_segments_when_available(monkeypatch) -> None:
+    monkeypatch.delenv("FVS_MARKET_DATA_PROVIDER", raising=False)
+
+    fixture = FIXTURE_WORKSPACES["AAPL"]
+    yahoo_snapshot = fixture.model_copy(
+        update={
+            "summary": "Live snapshot",
+            "revenue_segment_breakdown": None,
+        }
+    )
+
+    class StubYahooFinanceClient:
+        def fetch_company_workspace_snapshot(self, ticker: str):
+            assert ticker == "AAPL"
+            return yahoo_snapshot
+
+    class StubFinancialModelingPrepClient:
+        def fetch_revenue_segment_breakdown(self, ticker: str, *, target_revenue):
+            assert ticker == "AAPL"
+            assert target_revenue == fixture.income_statement_waterfall[0].value
+            return fixture.revenue_segment_breakdown
+
+    monkeypatch.setattr(
+        "app.services.company_workspace.YahooFinanceClient",
+        StubYahooFinanceClient,
+    )
+    monkeypatch.setattr(
+        "app.services.company_workspace.FinancialModelingPrepClient",
+        StubFinancialModelingPrepClient,
+    )
+
+    snapshot = get_company_workspace_snapshot("AAPL")
+
+    assert snapshot.summary == "Live snapshot"
+    assert snapshot.revenue_segment_breakdown is not None
+    assert snapshot.revenue_segment_breakdown.model_dump() == (
+        fixture.revenue_segment_breakdown.model_dump()
+    )
+
+
+def test_build_revenue_segment_breakdown_from_fmp_payload_parses_product_segments() -> None:
+    payload = [
+        {
+            "symbol": "AAPL",
+            "fiscalYear": 2025,
+            "period": "FY",
+            "reportedCurrency": "USD",
+            "date": "2025-09-27",
+            "data": {
+                "Mac": 33_708_000_000,
+                "Service": 109_158_000_000,
+                "Wearables, Home and Accessories": 35_686_000_000,
+                "iPad": 28_023_000_000,
+                "iPhone": 209_586_000_000,
+            },
+        },
+        {
+            "symbol": "AAPL",
+            "fiscalYear": 2024,
+            "period": "FY",
+            "reportedCurrency": "USD",
+            "date": "2024-09-28",
+            "data": {
+                "Mac": 29_984_000_000,
+                "Service": 96_169_000_000,
+                "Wearables, Home and Accessories": 37_005_000_000,
+                "iPad": 26_694_000_000,
+                "iPhone": 201_183_000_000,
+            },
+        },
+    ]
+
+    breakdown = _build_revenue_segment_breakdown_from_fmp_payload(
+        payload,
+        target_revenue=391_000_000_000,
+    )
+
+    assert breakdown is not None
+    assert breakdown.total_revenue == 391_035_000_000.0
+    assert [segment.label for segment in breakdown.segments] == [
+        "iPhone",
+        "Services",
+        "Wearables, Home and Accessories",
+        "Mac",
+        "iPad",
+    ]
+    assert sum(segment.value for segment in breakdown.segments) == breakdown.total_revenue
 
 
 def test_build_quote_details_skips_missing_metrics() -> None:

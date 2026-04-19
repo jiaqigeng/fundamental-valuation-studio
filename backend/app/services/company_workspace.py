@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 
+from app.clients.financial_modeling_prep import FinancialModelingPrepClient
 from app.clients.market_data_fixtures import FIXTURE_WORKSPACES
 from app.clients.yahoo_finance import YahooFinanceClient, YahooFinanceLookupError
 from app.schemas.company_workspace import CompanyWorkspaceSnapshot
@@ -39,6 +40,18 @@ def get_company_workspace_snapshot(ticker: str) -> CompanyWorkspaceSnapshot:
             raise CompanyWorkspaceNotFoundError(message) from exc
         raise CompanyWorkspaceUnavailableError(message) from exc
 
+    if snapshot.revenue_segment_breakdown is None:
+        fmp_breakdown = FinancialModelingPrepClient().fetch_revenue_segment_breakdown(
+            normalized_ticker,
+            target_revenue=_get_total_revenue(snapshot),
+        )
+        if fmp_breakdown is not None:
+            return snapshot.model_copy(
+                update={
+                    "revenue_segment_breakdown": fmp_breakdown,
+                }
+            )
+
     fixture = FIXTURE_WORKSPACES.get(normalized_ticker)
     if snapshot.revenue_segment_breakdown is None and fixture is not None:
         return snapshot.model_copy(
@@ -48,3 +61,15 @@ def get_company_workspace_snapshot(ticker: str) -> CompanyWorkspaceSnapshot:
         )
 
     return snapshot
+
+
+def _get_total_revenue(snapshot: CompanyWorkspaceSnapshot) -> float | None:
+    revenue_step = next(
+        (
+            step
+            for step in snapshot.income_statement_waterfall
+            if step.label == "Revenue"
+        ),
+        None,
+    )
+    return None if revenue_step is None else float(revenue_step.value)
