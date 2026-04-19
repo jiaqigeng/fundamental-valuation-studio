@@ -228,6 +228,74 @@ def test_build_income_statement_waterfall_balances_to_net_income() -> None:
     ]
 
 
+def test_build_income_statement_waterfall_computes_other_as_residual_bucket() -> None:
+    steps = _build_income_statement_waterfall_from_values(
+        info={
+            "totalRevenue": 70_900_000,
+            "netIncomeToCommon": -341_900_000,
+        },
+        statement_values={
+            "cost_of_revenue": 35_200_000,
+            "gross_profit": 35_700_000,
+            "operating_expense": 323_400_000,
+            "operating_income": -287_700_000,
+            "pretax_income": -457_100_000,
+            "tax_provision": 3_900_000,
+        },
+    )
+
+    assert [step.model_dump() for step in steps] == [
+        {
+            "label": "Revenue",
+            "value": 70900000.0,
+            "display_value": "$70.9M",
+            "step_type": "total",
+        },
+        {
+            "label": "Cost of Revenue",
+            "value": -35200000.0,
+            "display_value": "-$35.2M",
+            "step_type": "delta",
+        },
+        {
+            "label": "Gross Profit",
+            "value": 35700000.0,
+            "display_value": "$35.7M",
+            "step_type": "total",
+        },
+        {
+            "label": "Operating Expenses",
+            "value": -323400000.0,
+            "display_value": "-$323.4M",
+            "step_type": "delta",
+        },
+        {
+            "label": "Operating Profit",
+            "value": -287700000.0,
+            "display_value": "-$287.7M",
+            "step_type": "total",
+        },
+        {
+            "label": "Other Income / Cost",
+            "value": -50300000.0,
+            "display_value": "-$50.3M",
+            "step_type": "delta",
+        },
+        {
+            "label": "Taxes",
+            "value": -3900000.0,
+            "display_value": "-$3.9M",
+            "step_type": "delta",
+        },
+        {
+            "label": "Net Profits",
+            "value": -341900000.0,
+            "display_value": "-$341.9M",
+            "step_type": "total",
+        },
+    ]
+
+
 def test_sum_ttm_dividends_uses_only_last_365_days() -> None:
     dividends = {
         date(2024, 4, 18): 0.75,

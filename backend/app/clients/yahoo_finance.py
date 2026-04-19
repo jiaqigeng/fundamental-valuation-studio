@@ -442,11 +442,11 @@ def _build_income_statement_waterfall_from_values(
     operating_expense_delta = -_expense_magnitude(operating_expense)
     taxes_delta = -float(tax_provision)
 
-    pretax_value = _first_number(pretax_income)
-    if pretax_value is None:
-        pretax_value = float(net_income) - taxes_delta
-
-    other_income_or_cost_delta = float(pretax_value) - float(operating_profit_value)
+    other_income_or_cost_delta = (
+        float(net_income)
+        - float(operating_profit_value)
+        - float(taxes_delta)
+    )
     if abs(other_income_or_cost_delta) < 0.005:
         other_income_or_cost_delta = 0.0
 
