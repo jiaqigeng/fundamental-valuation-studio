@@ -6,7 +6,7 @@
 - Standard startup path: `./init.sh`
 - Standard verification path: `./init.sh` for baseline health plus `feature_list.json -> features[*].verification.command` for feature passing
 - Current highest-priority unfinished feature: `dash-006`
-- Current blocker: none recorded. `dash-006` is still the next roadmap item. Separately, the shared `Income Statement Bridge` card now exposes quarter only when real quarter data is available; the prior hard-coded quarter fixture fallback has been removed, so fixture-mode verification stays annual-only.
+- Current blocker: none recorded. `dash-006` is still the next roadmap item. Separately, the shared `Income Statement Bridge` card now keeps the segment pie annual-only, lets the waterfall toggle between year and quarter when real Yahoo quarter data exists, and shows explicit period/date-range labels on both subsections; fixture-mode verification stays annual-only because there is still no hard-coded quarter fallback.
 
 ## Session Log
 
@@ -549,3 +549,15 @@
 - Files or artifacts updated: `backend/app/clients/market_data_fixtures.py`, `backend/app/services/company_workspace.py`, `backend/tests/test_company_workspace.py`, `frontend/src/app/_lib/company-workspace.ts`, `frontend/e2e/dash-005.spec.ts`, `artifacts/verification/dash-005-playwright.log`, `feature_list.json`, `progress.md`, `session-handoff.md`
 - Known risk or unresolved issue: Quarter is now intentionally absent in fixture mode and for live tickers that do not return a usable quarter segment mix from FMP. If we later want deterministic quarter-path coverage, we will need a non-hard-coded strategy such as API recording or a contract-level stub rather than fixture data embedded in the app.
 - Next best step: Resume the roadmap at `dash-006` unless the user asks for another focused refinement to the revenue bridge behavior.
+
+### Session 046
+
+- Date: 2026-04-19
+- Goal: Narrow the revenue-bridge period toggle so it applies only to the waterfall, and show explicit period/date labels for both the pie and the waterfall.
+- Completed: Reworked the shared financial-bridge contract so the pie chart stays anchored to the latest annual segment mix while the waterfall alone can switch between yearly and quarterly views, added backend `period_label` and `date_range_label` metadata derived from Yahoo statement columns, kept quarter available for the waterfall without requiring quarter FMP segment data, restored annual-only fixture bridge periods with explicit labels, updated the frontend bridge layout/copy to show period metadata on both subsections, and tightened backend plus Playwright coverage around the new behavior.
+- Verification run: `./init.sh`; `cd backend && .venv/Scripts/python.exe -m pytest tests/test_company_workspace.py -q`; `cd frontend && npm run lint`; `cd frontend && npm run typecheck`; `cd frontend && npx playwright test e2e/dash-005.spec.ts`
+- Evidence captured: `./init.sh` completed successfully before the refinement; backend `cd backend && .venv/Scripts/python.exe -m pytest tests/test_company_workspace.py -q` passed with `14 passed` plus one existing pytest cache warning; frontend `npm run lint` passed; frontend `npm run typecheck` passed; `cd frontend && npx playwright test e2e/dash-005.spec.ts` passed and refreshed `artifacts/verification/dash-005-playwright.log`; implementation commit is `375dad7`.
+- Commits: `375dad7 Split revenue bridge pie and waterfall periods`
+- Files or artifacts updated: `backend/app/clients/market_data_fixtures.py`, `backend/app/clients/yahoo_finance.py`, `backend/app/schemas/company_workspace.py`, `backend/app/services/company_workspace.py`, `backend/tests/test_company_workspace.py`, `frontend/src/app/_components/financial-bridge-section.tsx`, `frontend/src/app/_lib/company-workspace.ts`, `frontend/src/app/dashboard/[ticker]/page.tsx`, `frontend/src/app/globals.css`, `frontend/e2e/dash-005.spec.ts`, `artifacts/verification/dash-005-playwright.log`, `feature_list.json`, `progress.md`, `session-handoff.md`
+- Known risk or unresolved issue: Quarter labels now come from Yahoo statement end dates and inferred period windows, so if Yahoo changes statement column ordering or date semantics, the displayed labels could need another pass. The annual pie still depends on FMP availability, while the quarter waterfall now depends only on Yahoo quarter statement data.
+- Next best step: Resume the roadmap at `dash-006` unless the user asks for another focused refinement to the financial-bridge card.

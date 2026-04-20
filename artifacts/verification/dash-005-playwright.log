@@ -1,9 +1,5 @@
-Running 1 test using 1 worker
+﻿Running 1 test using 1 worker
 
-  ok 1 [chromium] > e2e\dash-005.spec.ts:3:5 > dash-005 shows a revenue segment breakdown that reconciles to total revenue (789ms)
+  ok 1 [chromium] › e2e\dash-005.spec.ts:3:5 › dash-005 shows a revenue segment breakdown that reconciles to total revenue (814ms)
 
-  1 passed (5.6s)
-[Backend] INFO:     Started server process [94340]
-[Backend] INFO:     Waiting for application startup.
-[Backend] INFO:     Application startup complete.
-[Backend] INFO:     Uvicorn running on http://127.0.0.1:8100 (Press CTRL+C to quit)
+  1 passed (5.9s)
