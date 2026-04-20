@@ -55,13 +55,21 @@ def get_company_workspace_snapshot(ticker: str) -> CompanyWorkspaceSnapshot:
     enriched_periods = [
         period for period in enriched_periods if _period_has_visible_content(period)
     ]
+    annual_period = next(
+        (period for period in enriched_periods if period.period_key == "year"),
+        None,
+    )
     default_period = _select_default_financial_bridge_period(enriched_periods)
 
     if default_period is not None:
         return snapshot.model_copy(
             update={
                 "income_statement_waterfall": default_period.income_statement_waterfall,
-                "revenue_segment_breakdown": default_period.revenue_segment_breakdown,
+                "revenue_segment_breakdown": (
+                    annual_period.revenue_segment_breakdown
+                    if annual_period is not None
+                    else default_period.revenue_segment_breakdown
+                ),
                 "financial_bridge_periods": enriched_periods,
             }
         )
@@ -91,6 +99,8 @@ def _normalize_financial_bridge_periods(
             FinancialBridgePeriod(
                 period_key="year",
                 label="Year",
+                period_label="Latest annual period",
+                date_range_label="Latest reported period",
                 income_statement_waterfall=snapshot.income_statement_waterfall,
                 revenue_segment_breakdown=snapshot.revenue_segment_breakdown,
             )
@@ -106,6 +116,9 @@ def _enrich_financial_bridge_period(
     fmp_client: FinancialModelingPrepClient,
     fixture: CompanyWorkspaceSnapshot | None,
 ) -> FinancialBridgePeriod:
+    if period.period_key == "quarter":
+        return period
+
     if period.revenue_segment_breakdown is not None:
         return period
 
@@ -118,9 +131,6 @@ def _enrich_financial_bridge_period(
         return period.model_copy(
             update={"revenue_segment_breakdown": fmp_breakdown}
         )
-
-    if period.period_key == "quarter":
-        return period
 
     if fixture is None:
         return period
@@ -153,11 +163,6 @@ def _select_default_financial_bridge_period(
 
 
 def _period_has_visible_content(period: FinancialBridgePeriod) -> bool:
-    if period.period_key == "quarter":
-        return (
-            bool(period.income_statement_waterfall)
-            and period.revenue_segment_breakdown is not None
-        )
     return (
         bool(period.income_statement_waterfall)
         or period.revenue_segment_breakdown is not None

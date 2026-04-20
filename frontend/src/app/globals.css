@@ -561,13 +561,17 @@ a {
 }
 
 .financial-bridge-period-status {
-  margin: -0.2rem 0 0.2rem;
+  margin: 0;
   color: var(--dashboard-blue);
-  font-family: var(--font-fira-code), monospace;
-  font-size: 0.76rem;
+  font-size: 0.86rem;
   font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  letter-spacing: -0.01em;
+}
+
+.financial-bridge-waterfall-header-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
 }
 
 .financial-bridge-subsection + .financial-bridge-subsection {
@@ -996,6 +1000,12 @@ a {
   }
 
   .financial-bridge-copy-row {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+
+  .financial-bridge-waterfall-header-row {
     flex-direction: row;
     align-items: flex-start;
     justify-content: space-between;

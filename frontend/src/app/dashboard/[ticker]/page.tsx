@@ -111,7 +111,10 @@ export default async function DashboardPage({
           title="Revenue breakdown and profit bridge"
           sectionClassName="waterfall-panel financial-bridge-panel"
         >
-          <FinancialBridgeSection periods={company.financialBridgePeriods} />
+          <FinancialBridgeSection
+            annualBreakdown={company.revenueSegmentBreakdown}
+            periods={company.financialBridgePeriods}
+          />
         </ExpandableSection>
       ) : null}
 

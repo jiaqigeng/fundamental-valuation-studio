@@ -28,6 +28,8 @@ export type RevenueSegmentBreakdown = {
 export type FinancialBridgePeriod = {
   readonly periodKey: "year" | "quarter";
   readonly label: string;
+  readonly periodLabel: string;
+  readonly dateRangeLabel: string;
   readonly incomeStatementWaterfall: readonly IncomeStatementWaterfallStep[];
   readonly revenueSegmentBreakdown: RevenueSegmentBreakdown | null;
 };
@@ -139,6 +141,8 @@ export async function getCompanyWorkspaceData(
       financial_bridge_periods?: {
         period_key: "year" | "quarter";
         label: string;
+        period_label: string;
+        date_range_label: string;
         income_statement_waterfall: {
           label: string;
           value: number;
@@ -183,6 +187,8 @@ export async function getCompanyWorkspaceData(
     const payloadFinancialBridgePeriods = payload.financial_bridge_periods?.map((period) => ({
       periodKey: period.period_key,
       label: period.label,
+      periodLabel: period.period_label,
+      dateRangeLabel: period.date_range_label,
       incomeStatementWaterfall: period.income_statement_waterfall.map((step) => ({
         label: step.label,
         value: step.value,
@@ -228,7 +234,6 @@ export async function getCompanyWorkspaceData(
           stepType: step.step_type,
         })),
       revenueSegmentBreakdown:
-        defaultFinancialBridgePeriod?.revenueSegmentBreakdown ??
         (payload.revenue_segment_breakdown
           ? {
               totalRevenue: payload.revenue_segment_breakdown.total_revenue,
@@ -240,7 +245,7 @@ export async function getCompanyWorkspaceData(
                 shareOfTotal: segment.share_of_total,
               })),
             }
-          : null),
+          : defaultFinancialBridgePeriod?.revenueSegmentBreakdown ?? null),
       financialBridgePeriods,
       quoteDetails: payload.quote_details,
       marketContexts: payload.market_contexts.map((context) => ({
@@ -321,6 +326,8 @@ function buildLegacyFinancialBridgePeriods(payload: {
     {
       periodKey: "year",
       label: "Year",
+      periodLabel: "Latest annual period",
+      dateRangeLabel: "Latest reported period",
       incomeStatementWaterfall: payload.income_statement_waterfall.map((step) => ({
         label: step.label,
         value: step.value,

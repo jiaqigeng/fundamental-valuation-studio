@@ -82,6 +82,13 @@ class ComparisonSeriesSeed:
     line_color: str
 
 
+@dataclass(frozen=True)
+class StatementPeriodData:
+    values: dict[str, float]
+    end_date: date | None
+    previous_end_date: date | None
+
+
 class YahooFinanceClient:
     def __init__(self, timeout: float = 10.0) -> None:
         self._timeout = timeout
@@ -389,13 +396,13 @@ def _build_income_statement_waterfall(
     info: dict,
     statement_attribute: str,
 ) -> list[IncomeStatementWaterfallStep]:
-    statement_values = _fetch_income_statement_values(
+    statement_period_data = _fetch_income_statement_period_data(
         ticker,
         statement_attribute=statement_attribute,
     )
     return _build_income_statement_waterfall_from_values(
         info=info,
-        statement_values=statement_values,
+        statement_values=statement_period_data.values,
     )
 
 
@@ -486,21 +493,38 @@ def _build_financial_bridge_periods(
     ticker: str,
     info: dict,
 ) -> list[FinancialBridgePeriod]:
+    annual_period_end_date: date | None = None
     periods: list[FinancialBridgePeriod] = []
 
     for period_key, label, statement_attribute in FINANCIAL_BRIDGE_PERIOD_SPECS:
-        waterfall = _build_income_statement_waterfall(
-            ticker=ticker,
-            info=info,
+        statement_period_data = _fetch_income_statement_period_data(
+            ticker,
             statement_attribute=statement_attribute,
+        )
+        waterfall = _build_income_statement_waterfall_from_values(
+            info=info,
+            statement_values=statement_period_data.values,
         )
         if not waterfall:
             continue
+
+        if period_key == "year":
+            annual_period_end_date = statement_period_data.end_date
 
         periods.append(
             FinancialBridgePeriod(
                 period_key=period_key,
                 label=label,
+                period_label=_build_period_label(
+                    period_key=period_key,
+                    end_date=statement_period_data.end_date,
+                    annual_period_end_date=annual_period_end_date,
+                ),
+                date_range_label=_build_date_range_label(
+                    period_key=period_key,
+                    end_date=statement_period_data.end_date,
+                    previous_end_date=statement_period_data.previous_end_date,
+                ),
                 income_statement_waterfall=waterfall,
                 revenue_segment_breakdown=None,
             )
@@ -518,43 +542,127 @@ def _select_default_financial_bridge_period(
     return periods[0] if periods else None
 
 
-def _fetch_income_statement_values(
+def _fetch_income_statement_period_data(
     ticker: str,
     *,
     statement_attribute: str,
-) -> dict[str, float]:
+) -> StatementPeriodData:
     try:
         statement = getattr(yf.Ticker(ticker), statement_attribute)
     except Exception:
-        return {}
+        return StatementPeriodData(values={}, end_date=None, previous_end_date=None)
 
     if statement is None or getattr(statement, "empty", True):
-        return {}
+        return StatementPeriodData(values={}, end_date=None, previous_end_date=None)
+
+    columns = list(getattr(statement, "columns", []))
+    current_column = columns[0] if columns else None
+    previous_column = columns[1] if len(columns) > 1 else None
+
+    if current_column is None:
+        return StatementPeriodData(values={}, end_date=None, previous_end_date=None)
 
     values: dict[str, float] = {}
     for field_name, aliases in INCOME_STATEMENT_ROW_ALIASES.items():
-        value = _lookup_statement_value(statement, aliases)
+        value = _lookup_statement_value(
+            statement,
+            aliases,
+            column=current_column,
+        )
         if value is not None:
             values[field_name] = value
 
-    return values
+    return StatementPeriodData(
+        values=values,
+        end_date=_coerce_statement_date(current_column),
+        previous_end_date=_coerce_statement_date(previous_column),
+    )
 
 
-def _lookup_statement_value(statement: object, aliases: tuple[str, ...]) -> float | None:
+def _lookup_statement_value(
+    statement: object,
+    aliases: tuple[str, ...],
+    *,
+    column: object,
+) -> float | None:
     index = getattr(statement, "index", [])
-    columns = getattr(statement, "columns", [])
 
     for alias in aliases:
         if alias not in index:
             continue
 
         row = statement.loc[alias]
-        for column in columns:
-            value = row[column]
-            if _is_number(value):
-                return float(value)
+        value = row[column]
+        if _is_number(value):
+            return float(value)
 
     return None
+
+
+def _coerce_statement_date(value: object) -> date | None:
+    if value is None:
+        return None
+    if isinstance(value, datetime):
+        return value.date()
+    if isinstance(value, date):
+        return value
+    to_pydatetime = getattr(value, "to_pydatetime", None)
+    if callable(to_pydatetime):
+        converted = to_pydatetime()
+        if isinstance(converted, datetime):
+            return converted.date()
+    return None
+
+
+def _build_period_label(
+    *,
+    period_key: str,
+    end_date: date | None,
+    annual_period_end_date: date | None,
+) -> str:
+    if end_date is None:
+        return "Latest reported period"
+
+    if period_key == "year":
+        return f"FY {end_date.year}"
+
+    if annual_period_end_date is None:
+        return f"Quarter ended {_format_period_date(end_date)}"
+
+    fiscal_year = end_date.year
+    if (end_date.month, end_date.day) > (
+        annual_period_end_date.month,
+        annual_period_end_date.day,
+    ):
+        fiscal_year += 1
+
+    fiscal_start_month = (annual_period_end_date.month % 12) + 1
+    month_offset = (end_date.month - fiscal_start_month) % 12
+    fiscal_quarter = (month_offset // 3) + 1
+    return f"Q{fiscal_quarter} FY {fiscal_year}"
+
+
+def _build_date_range_label(
+    *,
+    period_key: str,
+    end_date: date | None,
+    previous_end_date: date | None,
+) -> str:
+    if end_date is None:
+        return "Latest reported period"
+
+    if previous_end_date is not None:
+        start_date = previous_end_date + timedelta(days=1)
+    elif period_key == "year":
+        start_date = end_date - timedelta(days=364)
+    else:
+        start_date = end_date - timedelta(days=89)
+
+    return f"{_format_period_date(start_date)} to {_format_period_date(end_date)}"
+
+
+def _format_period_date(value: date) -> str:
+    return f"{value.strftime('%b')} {value.day}, {value.year}"
 
 
 def _expense_magnitude(value: float | int | None) -> float:

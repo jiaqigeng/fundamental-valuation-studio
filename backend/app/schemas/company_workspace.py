@@ -31,6 +31,8 @@ class RevenueSegmentBreakdown(BaseModel):
 class FinancialBridgePeriod(BaseModel):
     period_key: Literal["year", "quarter"]
     label: str
+    period_label: str
+    date_range_label: str
     income_statement_waterfall: list[IncomeStatementWaterfallStep]
     revenue_segment_breakdown: RevenueSegmentBreakdown | None = None
 

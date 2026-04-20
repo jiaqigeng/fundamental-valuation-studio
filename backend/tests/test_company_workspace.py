@@ -104,7 +104,16 @@ def test_company_workspace_fixture_response(monkeypatch) -> None:
             },
         ],
     }
-    assert body["financial_bridge_periods"] == []
+    assert body["financial_bridge_periods"] == [
+        {
+            "period_key": "year",
+            "label": "Year",
+            "period_label": "FY 2024",
+            "date_range_label": "Jul 1, 2023 to Jun 30, 2024",
+            "income_statement_waterfall": body["income_statement_waterfall"],
+            "revenue_segment_breakdown": body["revenue_segment_breakdown"],
+        }
+    ]
     assert body["quote_details"] == [
         {"label": "Trailing P/E (TTM)", "value": "31.64"},
         {"label": "Forward P/E", "value": "28.10"},
@@ -174,12 +183,16 @@ def test_company_workspace_live_path_falls_back_to_fixture_segments(monkeypatch)
                 FinancialBridgePeriod(
                     period_key="year",
                     label="Year",
+                    period_label="FY 2024",
+                    date_range_label="Sep 30, 2023 to Sep 28, 2024",
                     income_statement_waterfall=fixture.income_statement_waterfall,
                     revenue_segment_breakdown=None,
                 ),
                 FinancialBridgePeriod(
                     period_key="quarter",
                     label="Quarter",
+                    period_label="Q1 FY 2025",
+                    date_range_label="Sep 29, 2024 to Dec 31, 2024",
                     income_statement_waterfall=[
                         fixture.income_statement_waterfall[0].model_copy(
                             update={
@@ -211,6 +224,11 @@ def test_company_workspace_live_path_falls_back_to_fixture_segments(monkeypatch)
     assert snapshot.revenue_segment_breakdown.model_dump() == (
         fixture.revenue_segment_breakdown.model_dump()
     )
+    assert [period.period_key for period in snapshot.financial_bridge_periods] == [
+        "year",
+        "quarter",
+    ]
+    assert snapshot.financial_bridge_periods[1].revenue_segment_breakdown is None
 
 
 def test_company_workspace_live_path_prefers_fmp_segments_when_available(monkeypatch) -> None:
@@ -225,12 +243,16 @@ def test_company_workspace_live_path_prefers_fmp_segments_when_available(monkeyp
                 FinancialBridgePeriod(
                     period_key="year",
                     label="Year",
+                    period_label="FY 2024",
+                    date_range_label="Sep 30, 2023 to Sep 28, 2024",
                     income_statement_waterfall=fixture.income_statement_waterfall,
                     revenue_segment_breakdown=None,
                 ),
                 FinancialBridgePeriod(
                     period_key="quarter",
                     label="Quarter",
+                    period_label="Q1 FY 2025",
+                    date_range_label="Sep 29, 2024 to Dec 31, 2024",
                     income_statement_waterfall=[
                         fixture.income_statement_waterfall[0].model_copy(
                             update={
@@ -259,18 +281,9 @@ def test_company_workspace_live_path_prefers_fmp_segments_when_available(monkeyp
             period_key: str = "year",
         ):
             assert ticker == "AAPL"
-            if period_key == "year":
-                assert target_revenue == fixture.income_statement_waterfall[0].value
-                return fixture.revenue_segment_breakdown
-
-            assert period_key == "quarter"
-            assert target_revenue == 124_300_000_000.0
-            return fixture.revenue_segment_breakdown.model_copy(
-                update={
-                    "total_revenue": 124_300_000_000.0,
-                    "total_revenue_display": "$124.3B",
-                }
-            )
+            assert period_key == "year"
+            assert target_revenue == fixture.income_statement_waterfall[0].value
+            return fixture.revenue_segment_breakdown
 
     monkeypatch.setattr(
         "app.services.company_workspace.YahooFinanceClient",
@@ -292,11 +305,7 @@ def test_company_workspace_live_path_prefers_fmp_segments_when_available(monkeyp
         "year",
         "quarter",
     ]
-    assert snapshot.financial_bridge_periods[1].revenue_segment_breakdown is not None
-    assert (
-        snapshot.financial_bridge_periods[1].revenue_segment_breakdown.total_revenue
-        == 124_300_000_000.0
-    )
+    assert snapshot.financial_bridge_periods[1].revenue_segment_breakdown is None
 
 
 def test_build_revenue_segment_breakdown_from_fmp_payload_parses_product_segments() -> None:

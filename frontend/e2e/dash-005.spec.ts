@@ -21,9 +21,10 @@ test("dash-005 shows a revenue segment breakdown that reconciles to total revenu
   await expect(combinedCard).toContainText("Revenue breakdown by segments");
   await expect(combinedCard).toContainText("Revenue to profits waterfall bridge");
   await expect(
-    combinedCard.getByRole("group", { name: /revenue period/i }),
+    combinedCard.getByRole("group", { name: /waterfall period/i }),
   ).toHaveCount(0);
-  await expect(combinedCard.getByText("Showing year figures.")).toBeVisible();
+  await expect(combinedCard).toContainText("FY 2024");
+  await expect(combinedCard).toContainText("Sep 30, 2023 to Sep 28, 2024");
   await expect(breakdown).toContainText("Total revenue");
   await expect(breakdown).toContainText("$391.0B");
   await expect(breakdown.getByLabel("Revenue segment pie chart")).toBeVisible();
@@ -50,5 +51,8 @@ test("dash-005 shows a revenue segment breakdown that reconciles to total revenu
   await expect(singleSegmentBreakdown).toContainText("Single reporting segment");
   await expect(singleSegmentBreakdown).toContainText("100.0%");
   await expect(singleSegmentBreakdown).toContainText("$47.1B");
+  await expect(page.locator(".financial-bridge-card")).toContainText(
+    "Jan 1, 2024 to Dec 31, 2024",
+  );
   await expect(page.getByRole("button", { name: "Quarter" })).toHaveCount(0);
 });

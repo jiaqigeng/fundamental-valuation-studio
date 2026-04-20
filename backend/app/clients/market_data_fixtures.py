@@ -1,5 +1,6 @@
 from app.schemas.company_workspace import (
     CompanyWorkspaceSnapshot,
+    FinancialBridgePeriod,
     IncomeStatementWaterfallStep,
     MarketContextCard,
     PerformanceChartRange,
@@ -691,3 +692,44 @@ FIXTURE_WORKSPACES: dict[str, CompanyWorkspaceSnapshot] = {
         ],
     ),
 }
+
+
+def _with_annual_financial_bridge_period(
+    snapshot: CompanyWorkspaceSnapshot,
+    *,
+    period_label: str,
+    date_range_label: str,
+) -> CompanyWorkspaceSnapshot:
+    return snapshot.model_copy(
+        update={
+            "financial_bridge_periods": [
+                FinancialBridgePeriod(
+                    period_key="year",
+                    label="Year",
+                    period_label=period_label,
+                    date_range_label=date_range_label,
+                    income_statement_waterfall=snapshot.income_statement_waterfall,
+                    revenue_segment_breakdown=snapshot.revenue_segment_breakdown,
+                )
+            ]
+        }
+    )
+
+
+FIXTURE_WORKSPACES["AAPL"] = _with_annual_financial_bridge_period(
+    FIXTURE_WORKSPACES["AAPL"],
+    period_label="FY 2024",
+    date_range_label="Sep 30, 2023 to Sep 28, 2024",
+)
+
+FIXTURE_WORKSPACES["KO"] = _with_annual_financial_bridge_period(
+    FIXTURE_WORKSPACES["KO"],
+    period_label="FY 2024",
+    date_range_label="Jan 1, 2024 to Dec 31, 2024",
+)
+
+FIXTURE_WORKSPACES["MSFT"] = _with_annual_financial_bridge_period(
+    FIXTURE_WORKSPACES["MSFT"],
+    period_label="FY 2024",
+    date_range_label="Jul 1, 2023 to Jun 30, 2024",
+)
