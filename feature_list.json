@@ -190,14 +190,14 @@
         ]
       },
       "evidence": {
-        "commit": "375dad7",
+        "commit": "d493902",
         "verification_run": "cd frontend && npx playwright test e2e/dash-005.spec.ts",
         "output_log": "artifacts/verification/dash-005-playwright.log",
-        "timestamp": "2026-04-19T21:01:19.5583762-04:00"
+        "timestamp": "2026-04-19T21:12:54.7893606-04:00"
       },
       "depends_on": ["dash-002b"],
       "status": "passing",
-      "notes": "Implemented with a backend-backed `revenue_segment_breakdown` payload and a dashboard financial-bridge card that shows `Revenue breakdown by segments` first and the revenue-to-profits waterfall second inside the same accordion/card. The segment view renders as a pie/donut chart with a matching legend and now stays anchored to the latest annual segment mix, while the waterfall alone can switch between `Year` and `Quarter` when Yahoo exposes real quarterly statement data. Both subsections now show explicit period labels and exact date ranges to avoid ambiguity. The live runtime sources annual and quarterly waterfalls from Yahoo income statements, while the annual segment mix comes from Financial Modeling Prep using `FVS_FMP_API_KEY`, preferring product segmentation when it is meaningfully detailed and automatically falling back to geographic segmentation when the product view is trivial. Quarter no longer uses any hard-coded fixture fallback or quarter FMP dependency; when live quarter waterfall data is unavailable, the UI simply omits the quarter option. Annual supported-ticker fixture data remains in place for deterministic dashboard verification."
+      "notes": "Implemented with a backend-backed `revenue_segment_breakdown` payload and a dashboard financial-bridge card that shows `Revenue breakdown by segments` first and the revenue-to-profits waterfall second inside the same accordion/card. The segment view renders as a pie/donut chart with a matching legend and now stays anchored to the latest annual segment mix, while the waterfall alone can switch between `Year` and `Quarter` when Yahoo exposes real quarterly statement data. Both subsections show explicit period labels and exact date ranges to avoid ambiguity, and the waterfall toggle is now anchored in the waterfall subsection's top-right header corner rather than reading like a card-wide control. The live runtime sources annual and quarterly waterfalls from Yahoo income statements, while the annual segment mix comes from Financial Modeling Prep using `FVS_FMP_API_KEY`, preferring product segmentation when it is meaningfully detailed and automatically falling back to geographic segmentation when the product view is trivial. Quarter no longer uses any hard-coded fixture fallback or quarter FMP dependency; when live quarter waterfall data is unavailable, the UI simply omits the quarter option. Annual supported-ticker fixture data remains in place for deterministic dashboard verification."
     },
     {
       "id": "dash-006",

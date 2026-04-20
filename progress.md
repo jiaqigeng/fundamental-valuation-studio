@@ -561,3 +561,15 @@
 - Files or artifacts updated: `backend/app/clients/market_data_fixtures.py`, `backend/app/clients/yahoo_finance.py`, `backend/app/schemas/company_workspace.py`, `backend/app/services/company_workspace.py`, `backend/tests/test_company_workspace.py`, `frontend/src/app/_components/financial-bridge-section.tsx`, `frontend/src/app/_lib/company-workspace.ts`, `frontend/src/app/dashboard/[ticker]/page.tsx`, `frontend/src/app/globals.css`, `frontend/e2e/dash-005.spec.ts`, `artifacts/verification/dash-005-playwright.log`, `feature_list.json`, `progress.md`, `session-handoff.md`
 - Known risk or unresolved issue: Quarter labels now come from Yahoo statement end dates and inferred period windows, so if Yahoo changes statement column ordering or date semantics, the displayed labels could need another pass. The annual pie still depends on FMP availability, while the quarter waterfall now depends only on Yahoo quarter statement data.
 - Next best step: Resume the roadmap at `dash-006` unless the user asks for another focused refinement to the financial-bridge card.
+
+### Session 047
+
+- Date: 2026-04-19
+- Goal: Move the waterfall period toggle into the waterfall subsection's top-right corner.
+- Completed: Tightened the waterfall subsection header layout so the `Year` / `Quarter` toggle stays anchored to the top-right of the waterfall header rather than stacking like a broader revenue-card control, while keeping the pie chart section untouched.
+- Verification run: `cd frontend && npm run lint`; `cd frontend && npm run typecheck`; `cd frontend && npx playwright test e2e/dash-005.spec.ts`
+- Evidence captured: Frontend `npm run typecheck` passed; the first lint attempt hit a transient `ENOENT` while ESLint scanned a disappearing `frontend/test-results` path, then `cd frontend && npm run lint` passed on immediate rerun; `cd frontend && npx playwright test e2e/dash-005.spec.ts` passed with the updated layout; implementation commit is `d493902`.
+- Commits: `d493902 Anchor waterfall toggle to header corner`
+- Files or artifacts updated: `frontend/src/app/_components/financial-bridge-section.tsx`, `frontend/src/app/globals.css`, `artifacts/verification/dash-005-playwright.log`, `feature_list.json`, `progress.md`, `session-handoff.md`
+- Known risk or unresolved issue: The placement change is purely presentational, so existing coverage still relies on the `dash-005` semantic contract rather than pixel-specific layout assertions.
+- Next best step: Resume the roadmap at `dash-006` unless the user asks for another focused refinement to the financial-bridge card.
