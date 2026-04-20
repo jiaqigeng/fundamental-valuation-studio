@@ -34,10 +34,16 @@ Thumbs.db
 .vscode/
 .idea/
 .codex/
+.claude/
 
 # Local databases and generated artifacts
 *.sqlite
 *.sqlite3
 *.db
+*.pem
+*.key
 tmp/
 temp/
+playwright-report/
+test-results/
+pytest-cache-files-*/
