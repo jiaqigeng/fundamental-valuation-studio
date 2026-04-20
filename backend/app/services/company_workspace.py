@@ -40,7 +40,6 @@ def get_company_workspace_snapshot(ticker: str) -> CompanyWorkspaceSnapshot:
             raise CompanyWorkspaceNotFoundError(message) from exc
         raise CompanyWorkspaceUnavailableError(message) from exc
 
-    fixture = FIXTURE_WORKSPACES.get(normalized_ticker)
     financial_bridge_periods = _normalize_financial_bridge_periods(snapshot)
     fmp_client = FinancialModelingPrepClient()
     enriched_periods = [
@@ -48,7 +47,6 @@ def get_company_workspace_snapshot(ticker: str) -> CompanyWorkspaceSnapshot:
             ticker=normalized_ticker,
             period=period,
             fmp_client=fmp_client,
-            fixture=fixture,
         )
         for period in financial_bridge_periods
     ]
@@ -71,14 +69,6 @@ def get_company_workspace_snapshot(ticker: str) -> CompanyWorkspaceSnapshot:
                     else default_period.revenue_segment_breakdown
                 ),
                 "financial_bridge_periods": enriched_periods,
-            }
-        )
-
-    if snapshot.revenue_segment_breakdown is None and fixture is not None:
-        return snapshot.model_copy(
-            update={
-                "revenue_segment_breakdown": fixture.revenue_segment_breakdown,
-                "financial_bridge_periods": _normalize_financial_bridge_periods(fixture),
             }
         )
 
@@ -114,7 +104,6 @@ def _enrich_financial_bridge_period(
     ticker: str,
     period: FinancialBridgePeriod,
     fmp_client: FinancialModelingPrepClient,
-    fixture: CompanyWorkspaceSnapshot | None,
 ) -> FinancialBridgePeriod:
     if period.period_key == "quarter":
         return period
@@ -132,25 +121,7 @@ def _enrich_financial_bridge_period(
             update={"revenue_segment_breakdown": fmp_breakdown}
         )
 
-    if fixture is None:
-        return period
-
-    fixture_period = next(
-        (
-            candidate
-            for candidate in _normalize_financial_bridge_periods(fixture)
-            if candidate.period_key == period.period_key
-        ),
-        None,
-    )
-    if fixture_period is None or fixture_period.revenue_segment_breakdown is None:
-        return period
-
-    return period.model_copy(
-        update={
-            "revenue_segment_breakdown": fixture_period.revenue_segment_breakdown,
-        }
-    )
+    return period
 
 
 def _select_default_financial_bridge_period(

@@ -148,6 +148,14 @@ a {
   margin-top: 1.75rem;
 }
 
+.ticker-search-error {
+  margin: 0.85rem 0 0;
+  color: var(--dashboard-red);
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.6;
+}
+
 .ticker-search-label {
   display: inline-block;
   margin-bottom: 0.75rem;
@@ -218,6 +226,47 @@ a {
 .supported-companies,
 .workspace-panel {
   padding: 1.35rem 1.5rem;
+}
+
+.project-overview {
+  display: grid;
+  gap: 1.2rem;
+}
+
+.project-overview-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.project-overview-card {
+  border: 1px solid rgba(33, 64, 154, 0.1);
+  border-radius: 1.2rem;
+  background:
+    radial-gradient(circle at top right, rgba(15, 118, 110, 0.08), transparent 36%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(241, 247, 252, 0.94));
+  padding: 1.2rem 1.25rem;
+}
+
+.project-overview-card h2,
+.project-overview-card p,
+.project-overview-footnote {
+  margin: 0;
+}
+
+.project-overview-card h2 {
+  font-size: clamp(1.2rem, 2.6vw, 1.55rem);
+  letter-spacing: -0.03em;
+}
+
+.project-overview-card p,
+.project-overview-footnote {
+  color: var(--muted);
+  font-size: 0.97rem;
+  line-height: 1.7;
+}
+
+.project-overview-card p {
+  margin-top: 0.7rem;
 }
 
 .workspace-accordion {
@@ -1031,6 +1080,10 @@ a {
   }
 
   .quote-detail-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .project-overview-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 

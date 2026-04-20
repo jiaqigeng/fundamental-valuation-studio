@@ -14,7 +14,7 @@ It should avoid repeating routine commands, test-running instructions, and edit-
 
 ## What the frontend does
 
-The frontend is the user's entry point into Fundamental Valuation Studio. A user lands on a ticker-search page, submits a ticker, and is routed to a per-company dashboard workspace. The dashboard route now prefers backend-backed workspace data and falls back to seed data only when the backend is unavailable for known demo tickers.
+The frontend is the user's entry point into Fundamental Valuation Studio. A user lands on a ticker-search page, submits a ticker, and is routed to a per-company dashboard workspace. The dashboard route now depends on backend-backed workspace data, while the landing-page search form validates tickers through a small local route handler before navigation so invalid input can be handled inline.
 
 ## Top-level shape
 
@@ -23,12 +23,13 @@ frontend/
 |- src/app/                         App Router tree
 |  |- layout.tsx                   Root HTML shell, fonts, global CSS
 |  |- page.tsx                     Landing page (server component)
+|  |- api/companies/[ticker]/validate/
+|  |  `- route.ts                  Server route: validate ticker before navigation
 |  |- globals.css                  Hand-written + Tailwind v4 styles
 |  |- _components/                 Shared UI (underscore = off-route)
-|  |  |- ticker-search-form.tsx    Client component: form + router.push
+|  |  |- ticker-search-form.tsx    Client component: form + inline validation + router.push
 |  |- _lib/                        Non-UI helpers (off-route)
-|  |  |- company-directory.ts      Seed company fallback lookup (AAPL/MSFT/KO)
-|  |  |- company-workspace.ts      Backend-backed workspace fetcher + seed fallback
+|  |  `- company-workspace.ts      Backend-backed workspace fetcher
 |  |- dashboard/[ticker]/
 |     |- page.tsx                  Server component: renders workspace shell
 |- e2e/                            Playwright specs, one per feature id
@@ -43,7 +44,7 @@ Three layers, each allowed to depend only on the layer below it:
 
 1. **Routes** (`src/app/**/page.tsx`, `layout.tsx`) - Server components by default. Own the page shell, read route params, call into the lib layer, and render components.
 2. **Components** (`src/app/_components/**`) - Reusable UI. Client components opt in with `"use client"`. They receive data via props and trigger navigation through `next/navigation` hooks.
-3. **Lib** (`src/app/_lib/**`) - Pure data and helpers. No React imports, no `"use client"`. Today this includes `company-directory.ts` for seed fallback data and `company-workspace.ts` for backend-backed dashboard fetches.
+3. **Lib** (`src/app/_lib/**`) - Pure data and helpers. No React imports, no `"use client"`. Today this includes `company-workspace.ts` for backend-backed dashboard fetches.
 
 The underscore prefix on `_components/` and `_lib/` keeps them out of the Next.js route tree so URLs stay dedicated to real pages.
 
@@ -52,20 +53,21 @@ The underscore prefix on `_components/` and `_lib/` keeps them out of the Next.j
 ```text
 User -> / (page.tsx)
      -> <TickerSearchForm> client component
-        -> router.push(`/dashboard/${TICKER}`)
+        -> /api/companies/[ticker]/validate route handler
+        -> inline error when ticker is invalid
+        -> router.push(`/dashboard/${TICKER}`) when valid
      -> /dashboard/[ticker] (page.tsx)
         -> getCompanyWorkspaceData(ticker)  // from _lib
-        -> backend workspace route when available
-        -> seed fallback for known demo tickers if backend is unavailable
+        -> backend workspace route
         -> notFound() if no workspace data exists
         -> renders workspace shell
 ```
 
-Server components handle data lookup and 404s. The only client-side JavaScript on the landing page is the search form. The dashboard route still exports `generateStaticParams` for the seeded tickers, but runtime tickers can resolve through the backend path.
+Server components handle data lookup and 404s. The only client-side JavaScript on the landing page is the search form and its inline validation flow.
 
 ## Data sources today
 
-`_lib/company-directory.ts` is still the seed fallback for `AAPL`, `MSFT`, and `KO`, but `company-workspace.ts` is now the primary frontend data entrypoint for the dashboard route. It calls the FastAPI backend for workspace data and falls back to the seed directory only when the backend is unavailable. This keeps the dashboard usable while features transition away from demo-only data.
+`_lib/company-workspace.ts` is the primary frontend data entrypoint for the dashboard route. It calls the FastAPI backend for workspace data and returns `null` when the company cannot be loaded, leaving the dashboard route responsible for its not-found behavior. The landing page handles invalid-input UX earlier through the validation route handler.
 
 ## Verification boundary
 

@@ -3,7 +3,6 @@ import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 import { FinancialBridgeSection } from "@/app/_components/financial-bridge-section";
 import { PerformanceComparisonSection } from "@/app/_components/performance-comparison-section";
-import { SUPPORTED_TICKERS } from "@/app/_lib/company-directory";
 import { getCompanyWorkspaceData } from "@/app/_lib/company-workspace";
 
 type DashboardPageProps = {
@@ -11,10 +10,6 @@ type DashboardPageProps = {
     ticker: string;
   }>;
 };
-
-export function generateStaticParams() {
-  return SUPPORTED_TICKERS.map((ticker) => ({ ticker }));
-}
 
 type ExpandableSectionProps = {
   readonly label: string;

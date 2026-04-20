@@ -170,7 +170,9 @@ def test_company_workspace_fixture_404(monkeypatch) -> None:
     assert response.status_code == 404
 
 
-def test_company_workspace_live_path_falls_back_to_fixture_segments(monkeypatch) -> None:
+def test_company_workspace_live_path_skips_segments_when_fmp_is_unavailable(
+    monkeypatch,
+) -> None:
     monkeypatch.delenv("FVS_MARKET_DATA_PROVIDER", raising=False)
     monkeypatch.delenv("FVS_FMP_API_KEY", raising=False)
 
@@ -220,14 +222,12 @@ def test_company_workspace_live_path_falls_back_to_fixture_segments(monkeypatch)
     snapshot = get_company_workspace_snapshot("AAPL")
 
     assert snapshot.summary == "Live snapshot"
-    assert snapshot.revenue_segment_breakdown is not None
-    assert snapshot.revenue_segment_breakdown.model_dump() == (
-        fixture.revenue_segment_breakdown.model_dump()
-    )
+    assert snapshot.revenue_segment_breakdown is None
     assert [period.period_key for period in snapshot.financial_bridge_periods] == [
         "year",
         "quarter",
     ]
+    assert snapshot.financial_bridge_periods[0].revenue_segment_breakdown is None
     assert snapshot.financial_bridge_periods[1].revenue_segment_breakdown is None
 
 

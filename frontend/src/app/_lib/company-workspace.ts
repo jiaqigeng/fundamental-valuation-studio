@@ -1,5 +1,3 @@
-import { getCompanyProfile } from "@/app/_lib/company-directory";
-
 export type QuoteDetail = {
   readonly label: string;
   readonly value: string;
@@ -81,20 +79,6 @@ export type CompanyWorkspaceData = {
 const BACKEND_BASE_URL =
   process.env.BACKEND_BASE_URL ?? "http://127.0.0.1:8000";
 
-const priceFormatter = new Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
-  minimumFractionDigits: 2,
-  maximumFractionDigits: 2,
-});
-
-const marketCapFormatter = new Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
-  notation: "compact",
-  maximumFractionDigits: 1,
-});
-
 export async function getCompanyWorkspaceData(
   ticker: string,
 ): Promise<CompanyWorkspaceData | null> {
@@ -107,7 +91,7 @@ export async function getCompanyWorkspaceData(
     );
 
     if (response.status === 404) {
-      return buildFallbackWorkspace(normalizedTicker);
+      return null;
     }
 
     if (!response.ok) {
@@ -269,32 +253,8 @@ export async function getCompanyWorkspaceData(
       })),
     };
   } catch {
-    return buildFallbackWorkspace(normalizedTicker);
-  }
-}
-
-function buildFallbackWorkspace(ticker: string): CompanyWorkspaceData | null {
-  const company = getCompanyProfile(ticker);
-
-  if (!company) {
     return null;
   }
-
-  return {
-    ticker: company.ticker,
-    name: company.name,
-    sector: company.sector,
-    summary: company.summary,
-    workspaceTagline: company.workspaceTagline,
-    currentPriceDisplay: priceFormatter.format(company.currentPrice),
-    marketCapDisplay: marketCapFormatter.format(company.marketCap),
-    incomeStatementWaterfall: [],
-    revenueSegmentBreakdown: null,
-    financialBridgePeriods: [],
-    quoteDetails: [],
-    marketContexts: [],
-    performanceChartRanges: [],
-  };
 }
 
 function buildLegacyFinancialBridgePeriods(payload: {

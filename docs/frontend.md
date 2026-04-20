@@ -41,8 +41,8 @@ It should not be the source of truth for folder ownership or long-lived code str
 
 ## Current implementation notes
 
-- The dashboard now prefers backend-backed workspace data through `frontend/src/app/_lib/company-workspace.ts`.
-- `frontend/src/app/_lib/company-directory.ts` remains the seed fallback for `AAPL`, `MSFT`, and `KO`; do not expand it casually without a feature ticket driving the change.
+- The dashboard now relies on backend-backed workspace data through `frontend/src/app/_lib/company-workspace.ts`; the old frontend seed fallback path has been removed.
+- The landing-page search form now validates tickers through the local route handler at `frontend/src/app/api/companies/[ticker]/validate/route.ts` before routing, so invalid tickers stay on `/` with an inline error instead of navigating to a 404 page.
 - `frontend/playwright.config.ts` declares multiple `webServer` entries so Playwright can auto-start both the frontend and backend during e2e runs.
 
 ## Commands

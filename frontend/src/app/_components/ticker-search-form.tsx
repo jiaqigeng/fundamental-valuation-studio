@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState, useTransition } from "react";
+import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 
 type TickerSearchFormProps = {
@@ -12,19 +12,46 @@ export function TickerSearchForm({
 }: TickerSearchFormProps) {
   const router = useRouter();
   const [ticker, setTicker] = useState(initialTicker);
-  const [isPending, startTransition] = useTransition();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     const normalizedTicker = ticker.trim().toUpperCase();
     if (!normalizedTicker) {
+      setErrorMessage("Enter a ticker to open a company workspace.");
       return;
     }
 
-    startTransition(() => {
-      router.push(`/dashboard/${normalizedTicker}`);
-    });
+    setIsSubmitting(true);
+    setErrorMessage(null);
+
+    try {
+      const response = await fetch(
+        `/api/companies/${encodeURIComponent(normalizedTicker)}/validate`,
+        {
+          method: "GET",
+          cache: "no-store",
+        },
+      );
+      const payload = (await response.json()) as
+        | { valid: true }
+        | { valid: false; message: string };
+
+      if (payload.valid) {
+        router.push(`/dashboard/${normalizedTicker}`);
+        return;
+      }
+
+      setErrorMessage(payload.message);
+    } catch {
+      setErrorMessage(
+        "We couldn't verify that ticker right now. Please try again in a moment.",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -39,24 +66,39 @@ export function TickerSearchForm({
           name="ticker"
           type="text"
           value={ticker}
-          onChange={(event) => setTicker(event.target.value)}
-          placeholder="AAPL"
+          onChange={(event) => {
+            setTicker(event.target.value);
+            if (errorMessage) {
+              setErrorMessage(null);
+            }
+          }}
+          placeholder="Ticker symbol"
           autoComplete="off"
           spellCheck={false}
           maxLength={10}
-          aria-describedby="ticker-search-help"
+          aria-describedby={
+            errorMessage
+              ? "ticker-search-help ticker-search-error"
+              : "ticker-search-help"
+          }
+          aria-invalid={errorMessage ? "true" : "false"}
         />
         <button
           className="ticker-search-button"
           type="submit"
-          disabled={isPending}
+          disabled={isSubmitting}
         >
-          {isPending ? "Loading..." : "Load dashboard"}
+          {isSubmitting ? "Checking ticker..." : "Open workspace"}
         </button>
       </div>
       <p className="ticker-search-help" id="ticker-search-help">
-        Search by ticker to open the company workspace.
+        Search by a public-company ticker to open the company workspace.
       </p>
+      {errorMessage ? (
+        <p className="ticker-search-error" id="ticker-search-error" role="alert">
+          {errorMessage}
+        </p>
+      ) : null}
     </form>
   );
 }
