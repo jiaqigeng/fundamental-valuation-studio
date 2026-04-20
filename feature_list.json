@@ -190,10 +190,10 @@
         ]
       },
       "evidence": {
-        "commit": "477f9f8",
+        "commit": "3111f93",
         "verification_run": "cd frontend && npx playwright test e2e/dash-005.spec.ts",
         "output_log": "artifacts/verification/dash-005-playwright.log",
-        "timestamp": "2026-04-19T20:24:44.5729843-04:00"
+        "timestamp": "2026-04-19T20:37:53.1219775-04:00"
       },
       "depends_on": ["dash-002b"],
       "status": "passing",

@@ -8,7 +8,7 @@
 ## Changed This Session
 
 - Code or behavior added: Removed the hard-coded quarter fixture path. Quarter now shows only when live Yahoo and FMP data are both available for that period; otherwise the revenue bridge stays annual-only.
-- Infrastructure or harness changes: Refreshed `artifacts/verification/dash-005-playwright.log` and updated backend tests plus the `dash-005` Playwright gate so fixture-mode verification explicitly expects no quarter option.
+- Infrastructure or harness changes: Refreshed `artifacts/verification/dash-005-playwright.log` and updated backend tests plus the `dash-005` Playwright gate so fixture-mode verification explicitly expects no quarter option via implementation commit `3111f93`.
 - Documentation changes: Updated `feature_list.json`, `progress.md`, and this handoff to reflect the no-quarter-fixture rule while leaving `dash-006` as the next roadmap slice.
 
 ## Broken Or Unverified
