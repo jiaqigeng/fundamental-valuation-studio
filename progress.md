@@ -6,7 +6,7 @@
 - Standard startup path: `./init.sh`
 - Standard verification path: `./init.sh` for baseline health plus `feature_list.json -> features[*].verification.command` for feature passing
 - Current highest-priority unfinished feature: `dash-006`
-- Current blocker: none recorded. `dash-006` is still the next roadmap item. Separately, the live FMP segment-data client now chooses between product and geographic segmentation, so one-bucket product disclosures like Netflix can still render a more informative live revenue mix.
+- Current blocker: none recorded. `dash-006` is still the next roadmap item. Separately, the shared `Income Statement Bridge` card now supports a synchronized `Year` / `Quarter` toggle so both the revenue pie and the waterfall respect the same reporting period, with fixture-backed quarter data for the supported dashboard tickers and live quarterly waterfalls sourced from Yahoo.
 
 ## Session Log
 
@@ -525,3 +525,15 @@
 - Files or artifacts updated: `backend/app/clients/financial_modeling_prep.py`, `backend/tests/test_company_workspace.py`, `artifacts/verification/dash-005-playwright.log`, `feature_list.json`, `progress.md`, `session-handoff.md`
 - Known risk or unresolved issue: The chooser is heuristic-based. It currently treats a single-segment or overwhelmingly dominant product view as too trivial and then prefers geographic segmentation when that result is richer. If we later want industry-specific rules, this selection logic may need another pass.
 - Next best step: Resume the roadmap at `dash-006`, or keep hardening the live data path if you want more Yahoo-dependent sections reduced.
+
+### Session 044
+
+- Date: 2026-04-19
+- Goal: Add a shared `Year` / `Quarter` toggle to the revenue section before resuming `dash-006`, ensuring the pie chart and waterfall stay synchronized.
+- Completed: Extended the backend workspace schema with period-aware `financial_bridge_periods`, taught the Yahoo client to build both annual and quarterly waterfalls, taught the FMP client and company-workspace service to request period-specific segment mixes, added quarterly fixture data for `AAPL`, `MSFT`, and `KO`, created a client-side `FinancialBridgeSection` toggle component, and updated the `dash-005` Playwright gate so it now verifies that both the segment pie and waterfall switch between yearly and quarterly views together.
+- Verification run: `./init.sh`; `cd backend && .venv/Scripts/python.exe -m pytest tests/test_company_workspace.py -q`; `cd frontend && npm run lint`; `cd frontend && npm run typecheck`; `cd frontend && npx playwright test e2e/dash-004.spec.ts`; `cd frontend && npx playwright test e2e/dash-005.spec.ts`
+- Evidence captured: `./init.sh` completed successfully before the change; backend `cd backend && .venv/Scripts/python.exe -m pytest tests/test_company_workspace.py -q` passed with `14 passed` plus one existing pytest cache warning; frontend `npm run lint` passed; frontend `npm run typecheck` passed; both Playwright specs initially hit the local sandbox `spawn EPERM`, then `cd frontend && npx playwright test e2e/dash-004.spec.ts` passed outside the sandbox and refreshed `artifacts/verification/dash-004-playwright.log`, and `cd frontend && npx playwright test e2e/dash-005.spec.ts` passed outside the sandbox and refreshed `artifacts/verification/dash-005-playwright.log`; implementation commit is `477f9f8`.
+- Commits: `477f9f8 Add year quarter toggle to revenue bridge`
+- Files or artifacts updated: `backend/app/clients/financial_modeling_prep.py`, `backend/app/clients/market_data_fixtures.py`, `backend/app/clients/yahoo_finance.py`, `backend/app/schemas/company_workspace.py`, `backend/app/services/company_workspace.py`, `backend/tests/test_company_workspace.py`, `frontend/src/app/_components/financial-bridge-section.tsx`, `frontend/src/app/_lib/company-workspace.ts`, `frontend/src/app/dashboard/[ticker]/page.tsx`, `frontend/src/app/globals.css`, `frontend/e2e/dash-005.spec.ts`, `artifacts/verification/dash-004-playwright.log`, `artifacts/verification/dash-005-playwright.log`, `feature_list.json`, `progress.md`, `session-handoff.md`
+- Known risk or unresolved issue: Quarterly segment detail now depends on FMP's quarter response shape and availability. Supported fixture tickers always have a quarter view, but unsupported live tickers can still end up with a quarter waterfall and no quarter segment mix if FMP does not return usable quarterly segmentation.
+- Next best step: Resume the roadmap at `dash-006` unless the user asks for another narrow refinement to the shared financial-bridge card.

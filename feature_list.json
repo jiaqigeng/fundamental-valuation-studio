@@ -190,14 +190,14 @@
         ]
       },
       "evidence": {
-        "commit": "d94f7e5",
+        "commit": "477f9f8",
         "verification_run": "cd frontend && npx playwright test e2e/dash-005.spec.ts",
         "output_log": "artifacts/verification/dash-005-playwright.log",
-        "timestamp": "2026-04-19T19:57:35.7568427-04:00"
+        "timestamp": "2026-04-19T20:24:44.5729843-04:00"
       },
       "depends_on": ["dash-002b"],
       "status": "passing",
-      "notes": "Implemented with a backend-backed `revenue_segment_breakdown` payload and a dashboard financial-bridge card that now shows `Revenue breakdown by segments` first and the revenue-to-profits waterfall second inside the same accordion/card. The segment view renders as a pie/donut chart with a matching legend. The live runtime now calls Financial Modeling Prep's stable product and geographic segmentation endpoints using `FVS_FMP_API_KEY`, prefers product segmentation when it is meaningfully detailed, and automatically falls back to geographic segmentation when the product view is trivial, such as a single dominant bucket. For supported fixture tickers, the service still falls back to curated fixture segment data when live segment detail is unavailable."
+      "notes": "Implemented with a backend-backed `revenue_segment_breakdown` payload and a dashboard financial-bridge card that now shows `Revenue breakdown by segments` first and the revenue-to-profits waterfall second inside the same accordion/card. The segment view renders as a pie/donut chart with a matching legend. The card now exposes a shared `Year` / `Quarter` toggle so both the segment pie and the waterfall switch together to the same reporting period. The live runtime now sources annual and quarterly waterfalls from Yahoo income statements and requests both annual and quarterly product plus geographic segment mixes from Financial Modeling Prep using `FVS_FMP_API_KEY`, preferring product segmentation when it is meaningfully detailed and automatically falling back to geographic segmentation when the product view is trivial. For supported fixture tickers, the service still falls back to curated fixture segment data when live segment detail is unavailable."
     },
     {
       "id": "dash-006",
