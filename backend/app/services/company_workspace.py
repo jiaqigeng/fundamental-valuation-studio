@@ -52,6 +52,9 @@ def get_company_workspace_snapshot(ticker: str) -> CompanyWorkspaceSnapshot:
         )
         for period in financial_bridge_periods
     ]
+    enriched_periods = [
+        period for period in enriched_periods if _period_has_visible_content(period)
+    ]
     default_period = _select_default_financial_bridge_period(enriched_periods)
 
     if default_period is not None:
@@ -116,6 +119,9 @@ def _enrich_financial_bridge_period(
             update={"revenue_segment_breakdown": fmp_breakdown}
         )
 
+    if period.period_key == "quarter":
+        return period
+
     if fixture is None:
         return period
 
@@ -144,6 +150,18 @@ def _select_default_financial_bridge_period(
         if period.period_key == "year":
             return period
     return periods[0] if periods else None
+
+
+def _period_has_visible_content(period: FinancialBridgePeriod) -> bool:
+    if period.period_key == "quarter":
+        return (
+            bool(period.income_statement_waterfall)
+            and period.revenue_segment_breakdown is not None
+        )
+    return (
+        bool(period.income_statement_waterfall)
+        or period.revenue_segment_breakdown is not None
+    )
 
 
 def _get_total_revenue(period: FinancialBridgePeriod) -> float | None:

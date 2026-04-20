@@ -12,6 +12,7 @@ from app.clients.yahoo_finance import _select_anchor_value
 from app.clients.yahoo_finance import _subtract_years
 from app.clients.yahoo_finance import _sum_ttm_dividends
 from app.main import app
+from app.schemas.company_workspace import FinancialBridgePeriod
 from app.services.company_workspace import get_company_workspace_snapshot
 
 
@@ -103,43 +104,7 @@ def test_company_workspace_fixture_response(monkeypatch) -> None:
             },
         ],
     }
-    assert [period["period_key"] for period in body["financial_bridge_periods"]] == [
-        "year",
-        "quarter",
-    ]
-    assert body["financial_bridge_periods"][0]["revenue_segment_breakdown"] == (
-        body["revenue_segment_breakdown"]
-    )
-    assert body["financial_bridge_periods"][1]["income_statement_waterfall"][0] == {
-        "label": "Revenue",
-        "value": 62000000000.0,
-        "display_value": "$62.0B",
-        "step_type": "total",
-    }
-    assert body["financial_bridge_periods"][1]["revenue_segment_breakdown"] == {
-        "total_revenue": 62000000000.0,
-        "total_revenue_display": "$62.0B",
-        "segments": [
-            {
-                "label": "Intelligent Cloud",
-                "value": 27500000000.0,
-                "display_value": "$27.5B",
-                "share_of_total": 27500000000.0 / 62000000000.0,
-            },
-            {
-                "label": "Productivity and Business Processes",
-                "value": 19200000000.0,
-                "display_value": "$19.2B",
-                "share_of_total": 19200000000.0 / 62000000000.0,
-            },
-            {
-                "label": "More Personal Computing",
-                "value": 15300000000.0,
-                "display_value": "$15.3B",
-                "share_of_total": 15300000000.0 / 62000000000.0,
-            },
-        ],
-    }
+    assert body["financial_bridge_periods"] == []
     assert body["quote_details"] == [
         {"label": "Trailing P/E (TTM)", "value": "31.64"},
         {"label": "Forward P/E", "value": "28.10"},
@@ -205,6 +170,27 @@ def test_company_workspace_live_path_falls_back_to_fixture_segments(monkeypatch)
         update={
             "summary": "Live snapshot",
             "revenue_segment_breakdown": None,
+            "financial_bridge_periods": [
+                FinancialBridgePeriod(
+                    period_key="year",
+                    label="Year",
+                    income_statement_waterfall=fixture.income_statement_waterfall,
+                    revenue_segment_breakdown=None,
+                ),
+                FinancialBridgePeriod(
+                    period_key="quarter",
+                    label="Quarter",
+                    income_statement_waterfall=[
+                        fixture.income_statement_waterfall[0].model_copy(
+                            update={
+                                "value": 124_300_000_000.0,
+                                "display_value": "$124.3B",
+                            }
+                        )
+                    ],
+                    revenue_segment_breakdown=None,
+                ),
+            ],
         }
     )
 
@@ -235,6 +221,27 @@ def test_company_workspace_live_path_prefers_fmp_segments_when_available(monkeyp
         update={
             "summary": "Live snapshot",
             "revenue_segment_breakdown": None,
+            "financial_bridge_periods": [
+                FinancialBridgePeriod(
+                    period_key="year",
+                    label="Year",
+                    income_statement_waterfall=fixture.income_statement_waterfall,
+                    revenue_segment_breakdown=None,
+                ),
+                FinancialBridgePeriod(
+                    period_key="quarter",
+                    label="Quarter",
+                    income_statement_waterfall=[
+                        fixture.income_statement_waterfall[0].model_copy(
+                            update={
+                                "value": 124_300_000_000.0,
+                                "display_value": "$124.3B",
+                            }
+                        )
+                    ],
+                    revenue_segment_breakdown=None,
+                ),
+            ],
         }
     )
 
@@ -257,8 +264,13 @@ def test_company_workspace_live_path_prefers_fmp_segments_when_available(monkeyp
                 return fixture.revenue_segment_breakdown
 
             assert period_key == "quarter"
-            assert target_revenue == 124_300_000_000
-            return fixture.financial_bridge_periods[1].revenue_segment_breakdown
+            assert target_revenue == 124_300_000_000.0
+            return fixture.revenue_segment_breakdown.model_copy(
+                update={
+                    "total_revenue": 124_300_000_000.0,
+                    "total_revenue_display": "$124.3B",
+                }
+            )
 
     monkeypatch.setattr(
         "app.services.company_workspace.YahooFinanceClient",
@@ -280,9 +292,10 @@ def test_company_workspace_live_path_prefers_fmp_segments_when_available(monkeyp
         "year",
         "quarter",
     ]
+    assert snapshot.financial_bridge_periods[1].revenue_segment_breakdown is not None
     assert (
-        snapshot.financial_bridge_periods[1].revenue_segment_breakdown.model_dump()
-        == fixture.financial_bridge_periods[1].revenue_segment_breakdown.model_dump()
+        snapshot.financial_bridge_periods[1].revenue_segment_breakdown.total_revenue
+        == 124_300_000_000.0
     )
 
 

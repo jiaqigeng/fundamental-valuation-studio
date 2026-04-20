@@ -180,30 +180,33 @@ export async function getCompanyWorkspaceData(
         }[];
       }[];
     };
+    const payloadFinancialBridgePeriods = payload.financial_bridge_periods?.map((period) => ({
+      periodKey: period.period_key,
+      label: period.label,
+      incomeStatementWaterfall: period.income_statement_waterfall.map((step) => ({
+        label: step.label,
+        value: step.value,
+        displayValue: step.display_value,
+        stepType: step.step_type,
+      })),
+      revenueSegmentBreakdown: period.revenue_segment_breakdown
+        ? {
+            totalRevenue: period.revenue_segment_breakdown.total_revenue,
+            totalRevenueDisplay:
+              period.revenue_segment_breakdown.total_revenue_display,
+            segments: period.revenue_segment_breakdown.segments.map((segment) => ({
+              label: segment.label,
+              value: segment.value,
+              displayValue: segment.display_value,
+              shareOfTotal: segment.share_of_total,
+            })),
+          }
+        : null,
+    }));
     const financialBridgePeriods =
-      payload.financial_bridge_periods?.map((period) => ({
-        periodKey: period.period_key,
-        label: period.label,
-        incomeStatementWaterfall: period.income_statement_waterfall.map((step) => ({
-          label: step.label,
-          value: step.value,
-          displayValue: step.display_value,
-          stepType: step.step_type,
-        })),
-        revenueSegmentBreakdown: period.revenue_segment_breakdown
-          ? {
-              totalRevenue: period.revenue_segment_breakdown.total_revenue,
-              totalRevenueDisplay:
-                period.revenue_segment_breakdown.total_revenue_display,
-              segments: period.revenue_segment_breakdown.segments.map((segment) => ({
-                label: segment.label,
-                value: segment.value,
-                displayValue: segment.display_value,
-                shareOfTotal: segment.share_of_total,
-              })),
-            }
-          : null,
-      })) ?? buildLegacyFinancialBridgePeriods(payload);
+      payloadFinancialBridgePeriods && payloadFinancialBridgePeriods.length > 0
+        ? payloadFinancialBridgePeriods
+        : buildLegacyFinancialBridgePeriods(payload);
     const defaultFinancialBridgePeriod =
       financialBridgePeriods.find((period) => period.periodKey === "year") ??
       financialBridgePeriods[0];
