@@ -103,6 +103,43 @@ def test_company_workspace_fixture_response(monkeypatch) -> None:
             },
         ],
     }
+    assert [period["period_key"] for period in body["financial_bridge_periods"]] == [
+        "year",
+        "quarter",
+    ]
+    assert body["financial_bridge_periods"][0]["revenue_segment_breakdown"] == (
+        body["revenue_segment_breakdown"]
+    )
+    assert body["financial_bridge_periods"][1]["income_statement_waterfall"][0] == {
+        "label": "Revenue",
+        "value": 62000000000.0,
+        "display_value": "$62.0B",
+        "step_type": "total",
+    }
+    assert body["financial_bridge_periods"][1]["revenue_segment_breakdown"] == {
+        "total_revenue": 62000000000.0,
+        "total_revenue_display": "$62.0B",
+        "segments": [
+            {
+                "label": "Intelligent Cloud",
+                "value": 27500000000.0,
+                "display_value": "$27.5B",
+                "share_of_total": 27500000000.0 / 62000000000.0,
+            },
+            {
+                "label": "Productivity and Business Processes",
+                "value": 19200000000.0,
+                "display_value": "$19.2B",
+                "share_of_total": 19200000000.0 / 62000000000.0,
+            },
+            {
+                "label": "More Personal Computing",
+                "value": 15300000000.0,
+                "display_value": "$15.3B",
+                "share_of_total": 15300000000.0 / 62000000000.0,
+            },
+        ],
+    }
     assert body["quote_details"] == [
         {"label": "Trailing P/E (TTM)", "value": "31.64"},
         {"label": "Forward P/E", "value": "28.10"},
@@ -207,10 +244,21 @@ def test_company_workspace_live_path_prefers_fmp_segments_when_available(monkeyp
             return yahoo_snapshot
 
     class StubFinancialModelingPrepClient:
-        def fetch_revenue_segment_breakdown(self, ticker: str, *, target_revenue):
+        def fetch_revenue_segment_breakdown(
+            self,
+            ticker: str,
+            *,
+            target_revenue,
+            period_key: str = "year",
+        ):
             assert ticker == "AAPL"
-            assert target_revenue == fixture.income_statement_waterfall[0].value
-            return fixture.revenue_segment_breakdown
+            if period_key == "year":
+                assert target_revenue == fixture.income_statement_waterfall[0].value
+                return fixture.revenue_segment_breakdown
+
+            assert period_key == "quarter"
+            assert target_revenue == 124_300_000_000
+            return fixture.financial_bridge_periods[1].revenue_segment_breakdown
 
     monkeypatch.setattr(
         "app.services.company_workspace.YahooFinanceClient",
@@ -227,6 +275,14 @@ def test_company_workspace_live_path_prefers_fmp_segments_when_available(monkeyp
     assert snapshot.revenue_segment_breakdown is not None
     assert snapshot.revenue_segment_breakdown.model_dump() == (
         fixture.revenue_segment_breakdown.model_dump()
+    )
+    assert [period.period_key for period in snapshot.financial_bridge_periods] == [
+        "year",
+        "quarter",
+    ]
+    assert (
+        snapshot.financial_bridge_periods[1].revenue_segment_breakdown.model_dump()
+        == fixture.financial_bridge_periods[1].revenue_segment_breakdown.model_dump()
     )
 
 

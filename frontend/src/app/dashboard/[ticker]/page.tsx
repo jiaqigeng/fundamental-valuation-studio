@@ -1,9 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
-import { IncomeStatementWaterfallChart } from "@/app/_components/income-statement-waterfall-chart";
+import { FinancialBridgeSection } from "@/app/_components/financial-bridge-section";
 import { PerformanceComparisonSection } from "@/app/_components/performance-comparison-section";
-import { RevenueSegmentBreakdownSection } from "@/app/_components/revenue-segment-breakdown";
 import { SUPPORTED_TICKERS } from "@/app/_lib/company-directory";
 import { getCompanyWorkspaceData } from "@/app/_lib/company-workspace";
 
@@ -102,46 +101,17 @@ export default async function DashboardPage({
         </section>
       </ExpandableSection>
 
-      {company.revenueSegmentBreakdown || company.incomeStatementWaterfall.length > 0 ? (
+      {company.financialBridgePeriods.some(
+        (period) =>
+          period.revenueSegmentBreakdown !== null ||
+          period.incomeStatementWaterfall.length > 0,
+      ) ? (
         <ExpandableSection
           label="Income Statement Bridge"
           title="Revenue breakdown and profit bridge"
           sectionClassName="waterfall-panel financial-bridge-panel"
         >
-          <section
-            className="workspace-panel financial-bridge-card"
-            aria-label="Revenue breakdown and profit bridge"
-          >
-            {company.revenueSegmentBreakdown ? (
-              <section
-                className="financial-bridge-subsection"
-                aria-label="Revenue segment breakdown"
-              >
-                <div className="financial-bridge-subsection-header">
-                  <p className="panel-label">Revenue Breakdown By Segments</p>
-                  <h3>Revenue breakdown by segments</h3>
-                </div>
-                <RevenueSegmentBreakdownSection
-                  breakdown={company.revenueSegmentBreakdown}
-                />
-              </section>
-            ) : null}
-
-            {company.incomeStatementWaterfall.length > 0 ? (
-              <section
-                className="financial-bridge-subsection"
-                aria-label="Revenue to net income waterfall"
-              >
-                <div className="financial-bridge-subsection-header">
-                  <p className="panel-label">Revenue To Profits Waterfall Bridge</p>
-                  <h3>Revenue to profits waterfall bridge</h3>
-                </div>
-                <IncomeStatementWaterfallChart
-                  steps={company.incomeStatementWaterfall}
-                />
-              </section>
-            ) : null}
-          </section>
+          <FinancialBridgeSection periods={company.financialBridgePeriods} />
         </ExpandableSection>
       ) : null}
 

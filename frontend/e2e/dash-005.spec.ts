@@ -20,6 +20,12 @@ test("dash-005 shows a revenue segment breakdown that reconciles to total revenu
   await expect(waterfall).toBeVisible();
   await expect(combinedCard).toContainText("Revenue breakdown by segments");
   await expect(combinedCard).toContainText("Revenue to profits waterfall bridge");
+  await expect(combinedCard.getByRole("group", { name: /revenue period/i })).toBeVisible();
+  await expect(combinedCard.getByRole("button", { name: "Year" })).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
+  await expect(combinedCard.getByText("Showing year figures.")).toBeVisible();
   await expect(breakdown).toContainText("Total revenue");
   await expect(breakdown).toContainText("$391.0B");
   await expect(breakdown.getByLabel("Revenue segment pie chart")).toBeVisible();
@@ -30,6 +36,21 @@ test("dash-005 shows a revenue segment breakdown that reconciles to total revenu
   await expect(breakdown).toContainText("Services");
   await expect(breakdown).toContainText("$91.8B");
   await expect(breakdown).toContainText("Pie slices reconcile to total revenue: $391.0B.");
+  await expect(waterfall).toContainText("$87.5B");
+
+  await combinedCard.getByRole("button", { name: "Quarter" }).click();
+
+  await expect(combinedCard.getByRole("button", { name: "Quarter" })).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
+  await expect(combinedCard.getByText("Showing quarter figures.")).toBeVisible();
+  await expect(breakdown).toContainText("$124.3B");
+  await expect(breakdown).toContainText("iPhone");
+  await expect(breakdown).toContainText("$68.7B");
+  await expect(breakdown).toContainText("Pie slices reconcile to total revenue: $124.3B.");
+  await expect(waterfall).toContainText("$34.8B");
+  await expect(waterfall).toContainText("-$64.8B");
 
   await page.goto("/dashboard/KO");
 
@@ -44,4 +65,7 @@ test("dash-005 shows a revenue segment breakdown that reconciles to total revenu
   await expect(singleSegmentBreakdown).toContainText("Single reporting segment");
   await expect(singleSegmentBreakdown).toContainText("100.0%");
   await expect(singleSegmentBreakdown).toContainText("$47.1B");
+  await page.getByRole("button", { name: "Quarter" }).click();
+  await expect(page.getByText("Showing quarter figures.")).toBeVisible();
+  await expect(singleSegmentBreakdown).toContainText("$11.4B");
 });

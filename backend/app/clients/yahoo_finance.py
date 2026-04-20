@@ -13,6 +13,7 @@ import yfinance as yf
 
 from app.schemas.company_workspace import (
     CompanyWorkspaceSnapshot,
+    FinancialBridgePeriod,
     IncomeStatementWaterfallStep,
     MarketContextCard,
     PerformanceChartRange,
@@ -47,6 +48,10 @@ SECTOR_INDEXES: dict[str, tuple[str, str]] = {
 PERFORMANCE_RANGE_SPECS: tuple[tuple[str, str, int, str, str], ...] = (
     ("1Y", "1 year", 1, "1y", "1mo"),
     ("5Y", "5 year", 5, "5y", "3mo"),
+)
+FINANCIAL_BRIDGE_PERIOD_SPECS: tuple[tuple[str, str, str], ...] = (
+    ("year", "Year", "income_stmt"),
+    ("quarter", "Quarter", "quarterly_income_stmt"),
 )
 
 
@@ -86,6 +91,13 @@ class YahooFinanceClient:
         payload = self._fetch_payload(ticker)
         info = payload.company_info
         trailing_ttm_dividend = _fetch_ttm_dividend(ticker)
+        financial_bridge_periods = _build_financial_bridge_periods(
+            ticker=ticker,
+            info=info,
+        )
+        default_financial_bridge_period = _select_default_financial_bridge_period(
+            financial_bridge_periods
+        )
 
         name = (
             _string_field(info, "longName")
@@ -118,11 +130,13 @@ class YahooFinanceClient:
             ),
             current_price_display=_format_currency(current_price),
             market_cap_display=_format_compact_currency(market_cap),
-            income_statement_waterfall=_build_income_statement_waterfall(
-                ticker=ticker,
-                info=info,
+            income_statement_waterfall=(
+                default_financial_bridge_period.income_statement_waterfall
+                if default_financial_bridge_period is not None
+                else []
             ),
             revenue_segment_breakdown=None,
+            financial_bridge_periods=financial_bridge_periods,
             quote_details=_build_quote_details(
                 info,
                 current_price=current_price,
@@ -373,8 +387,12 @@ def _build_income_statement_waterfall(
     *,
     ticker: str,
     info: dict,
+    statement_attribute: str,
 ) -> list[IncomeStatementWaterfallStep]:
-    statement_values = _fetch_income_statement_values(ticker)
+    statement_values = _fetch_income_statement_values(
+        ticker,
+        statement_attribute=statement_attribute,
+    )
     return _build_income_statement_waterfall_from_values(
         info=info,
         statement_values=statement_values,
@@ -463,9 +481,50 @@ def _build_income_statement_waterfall_from_values(
     ]
 
 
-def _fetch_income_statement_values(ticker: str) -> dict[str, float]:
+def _build_financial_bridge_periods(
+    *,
+    ticker: str,
+    info: dict,
+) -> list[FinancialBridgePeriod]:
+    periods: list[FinancialBridgePeriod] = []
+
+    for period_key, label, statement_attribute in FINANCIAL_BRIDGE_PERIOD_SPECS:
+        waterfall = _build_income_statement_waterfall(
+            ticker=ticker,
+            info=info,
+            statement_attribute=statement_attribute,
+        )
+        if not waterfall:
+            continue
+
+        periods.append(
+            FinancialBridgePeriod(
+                period_key=period_key,
+                label=label,
+                income_statement_waterfall=waterfall,
+                revenue_segment_breakdown=None,
+            )
+        )
+
+    return periods
+
+
+def _select_default_financial_bridge_period(
+    periods: list[FinancialBridgePeriod],
+) -> FinancialBridgePeriod | None:
+    for period in periods:
+        if period.period_key == "year":
+            return period
+    return periods[0] if periods else None
+
+
+def _fetch_income_statement_values(
+    ticker: str,
+    *,
+    statement_attribute: str,
+) -> dict[str, float]:
     try:
-        statement = yf.Ticker(ticker).income_stmt
+        statement = getattr(yf.Ticker(ticker), statement_attribute)
     except Exception:
         return {}
 

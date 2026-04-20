@@ -16,7 +16,10 @@ FMP_API_KEY_ENV = "FVS_FMP_API_KEY"
 FMP_BASE_URL = "https://financialmodelingprep.com"
 FMP_PRODUCT_SEGMENT_ENDPOINT = "/stable/revenue-product-segmentation"
 FMP_GEOGRAPHIC_SEGMENT_ENDPOINT = "/stable/revenue-geographic-segmentation"
-FMP_SEGMENT_PERIOD = "annual"
+FMP_SEGMENT_PERIODS = {
+    "year": "annual",
+    "quarter": "quarter",
+}
 FMP_MAX_REVENUE_DRIFT = 0.15
 TRIVIAL_BREAKDOWN_MAX_SEGMENTS = 1
 DOMINANT_SEGMENT_SHARE_THRESHOLD = 0.9
@@ -45,8 +48,13 @@ class FinancialModelingPrepClient:
         ticker: str,
         *,
         target_revenue: float | int | None,
+        period_key: str = "year",
     ) -> RevenueSegmentBreakdown | None:
         if not self._api_key:
+            return None
+
+        period = FMP_SEGMENT_PERIODS.get(period_key)
+        if period is None:
             return None
 
         with httpx.Client(base_url=FMP_BASE_URL, timeout=self._timeout) as client:
@@ -55,12 +63,14 @@ class FinancialModelingPrepClient:
                 endpoint=FMP_PRODUCT_SEGMENT_ENDPOINT,
                 ticker=ticker,
                 target_revenue=target_revenue,
+                period=period,
             )
             geographic_breakdown = self._fetch_breakdown_for_endpoint(
                 client,
                 endpoint=FMP_GEOGRAPHIC_SEGMENT_ENDPOINT,
                 ticker=ticker,
                 target_revenue=target_revenue,
+                period=period,
             )
 
         return _choose_preferred_breakdown(
@@ -75,13 +85,14 @@ class FinancialModelingPrepClient:
         endpoint: str,
         ticker: str,
         target_revenue: float | int | None,
+        period: str,
     ) -> RevenueSegmentBreakdown | None:
         try:
             response = client.get(
                 endpoint,
                 params={
                     "symbol": ticker,
-                    "period": FMP_SEGMENT_PERIOD,
+                    "period": period,
                     "apikey": self._api_key,
                 },
             )

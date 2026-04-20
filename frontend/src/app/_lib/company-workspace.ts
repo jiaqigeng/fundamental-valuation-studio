@@ -25,6 +25,13 @@ export type RevenueSegmentBreakdown = {
   readonly segments: readonly RevenueSegment[];
 };
 
+export type FinancialBridgePeriod = {
+  readonly periodKey: "year" | "quarter";
+  readonly label: string;
+  readonly incomeStatementWaterfall: readonly IncomeStatementWaterfallStep[];
+  readonly revenueSegmentBreakdown: RevenueSegmentBreakdown | null;
+};
+
 export type PerformancePoint = {
   readonly label: string;
   readonly value: number;
@@ -63,6 +70,7 @@ export type CompanyWorkspaceData = {
   readonly marketCapDisplay: string;
   readonly incomeStatementWaterfall: readonly IncomeStatementWaterfallStep[];
   readonly revenueSegmentBreakdown: RevenueSegmentBreakdown | null;
+  readonly financialBridgePeriods: readonly FinancialBridgePeriod[];
   readonly quoteDetails: readonly QuoteDetail[];
   readonly marketContexts: readonly MarketContextCard[];
   readonly performanceChartRanges: readonly PerformanceChartRange[];
@@ -128,6 +136,26 @@ export async function getCompanyWorkspaceData(
           share_of_total: number;
         }[];
       } | null;
+      financial_bridge_periods?: {
+        period_key: "year" | "quarter";
+        label: string;
+        income_statement_waterfall: {
+          label: string;
+          value: number;
+          display_value: string;
+          step_type: "total" | "delta";
+        }[];
+        revenue_segment_breakdown: {
+          total_revenue: number;
+          total_revenue_display: string;
+          segments: {
+            label: string;
+            value: number;
+            display_value: string;
+            share_of_total: number;
+          }[];
+        } | null;
+      }[];
       quote_details: QuoteDetail[];
       market_contexts: {
         label: string;
@@ -152,6 +180,33 @@ export async function getCompanyWorkspaceData(
         }[];
       }[];
     };
+    const financialBridgePeriods =
+      payload.financial_bridge_periods?.map((period) => ({
+        periodKey: period.period_key,
+        label: period.label,
+        incomeStatementWaterfall: period.income_statement_waterfall.map((step) => ({
+          label: step.label,
+          value: step.value,
+          displayValue: step.display_value,
+          stepType: step.step_type,
+        })),
+        revenueSegmentBreakdown: period.revenue_segment_breakdown
+          ? {
+              totalRevenue: period.revenue_segment_breakdown.total_revenue,
+              totalRevenueDisplay:
+                period.revenue_segment_breakdown.total_revenue_display,
+              segments: period.revenue_segment_breakdown.segments.map((segment) => ({
+                label: segment.label,
+                value: segment.value,
+                displayValue: segment.display_value,
+                shareOfTotal: segment.share_of_total,
+              })),
+            }
+          : null,
+      })) ?? buildLegacyFinancialBridgePeriods(payload);
+    const defaultFinancialBridgePeriod =
+      financialBridgePeriods.find((period) => period.periodKey === "year") ??
+      financialBridgePeriods[0];
 
     return {
       ticker: payload.ticker,
@@ -161,24 +216,29 @@ export async function getCompanyWorkspaceData(
       workspaceTagline: payload.workspace_tagline,
       currentPriceDisplay: payload.current_price_display,
       marketCapDisplay: payload.market_cap_display,
-      incomeStatementWaterfall: payload.income_statement_waterfall.map((step) => ({
-        label: step.label,
-        value: step.value,
-        displayValue: step.display_value,
-        stepType: step.step_type,
-      })),
-      revenueSegmentBreakdown: payload.revenue_segment_breakdown
-        ? {
-            totalRevenue: payload.revenue_segment_breakdown.total_revenue,
-            totalRevenueDisplay: payload.revenue_segment_breakdown.total_revenue_display,
-            segments: payload.revenue_segment_breakdown.segments.map((segment) => ({
-              label: segment.label,
-              value: segment.value,
-              displayValue: segment.display_value,
-              shareOfTotal: segment.share_of_total,
-            })),
-          }
-        : null,
+      incomeStatementWaterfall:
+        defaultFinancialBridgePeriod?.incomeStatementWaterfall ??
+        payload.income_statement_waterfall.map((step) => ({
+          label: step.label,
+          value: step.value,
+          displayValue: step.display_value,
+          stepType: step.step_type,
+        })),
+      revenueSegmentBreakdown:
+        defaultFinancialBridgePeriod?.revenueSegmentBreakdown ??
+        (payload.revenue_segment_breakdown
+          ? {
+              totalRevenue: payload.revenue_segment_breakdown.total_revenue,
+              totalRevenueDisplay: payload.revenue_segment_breakdown.total_revenue_display,
+              segments: payload.revenue_segment_breakdown.segments.map((segment) => ({
+                label: segment.label,
+                value: segment.value,
+                displayValue: segment.display_value,
+                shareOfTotal: segment.share_of_total,
+              })),
+            }
+          : null),
+      financialBridgePeriods,
       quoteDetails: payload.quote_details,
       marketContexts: payload.market_contexts.map((context) => ({
         label: context.label,
@@ -222,8 +282,60 @@ function buildFallbackWorkspace(ticker: string): CompanyWorkspaceData | null {
     marketCapDisplay: marketCapFormatter.format(company.marketCap),
     incomeStatementWaterfall: [],
     revenueSegmentBreakdown: null,
+    financialBridgePeriods: [],
     quoteDetails: [],
     marketContexts: [],
     performanceChartRanges: [],
   };
+}
+
+function buildLegacyFinancialBridgePeriods(payload: {
+  income_statement_waterfall: {
+    label: string;
+    value: number;
+    display_value: string;
+    step_type: "total" | "delta";
+  }[];
+  revenue_segment_breakdown: {
+    total_revenue: number;
+    total_revenue_display: string;
+    segments: {
+      label: string;
+      value: number;
+      display_value: string;
+      share_of_total: number;
+    }[];
+  } | null;
+}): readonly FinancialBridgePeriod[] {
+  if (
+    payload.income_statement_waterfall.length === 0 &&
+    payload.revenue_segment_breakdown === null
+  ) {
+    return [];
+  }
+
+  return [
+    {
+      periodKey: "year",
+      label: "Year",
+      incomeStatementWaterfall: payload.income_statement_waterfall.map((step) => ({
+        label: step.label,
+        value: step.value,
+        displayValue: step.display_value,
+        stepType: step.step_type,
+      })),
+      revenueSegmentBreakdown: payload.revenue_segment_breakdown
+        ? {
+            totalRevenue: payload.revenue_segment_breakdown.total_revenue,
+            totalRevenueDisplay: payload.revenue_segment_breakdown.total_revenue_display,
+            segments: payload.revenue_segment_breakdown.segments.map((segment) => ({
+              label: segment.label,
+              value: segment.value,
+              displayValue: segment.display_value,
+              shareOfTotal: segment.share_of_total,
+            })),
+          }
+        : null,
+    },
+  ];
 }

@@ -28,6 +28,13 @@ class RevenueSegmentBreakdown(BaseModel):
     segments: list[RevenueSegment]
 
 
+class FinancialBridgePeriod(BaseModel):
+    period_key: Literal["year", "quarter"]
+    label: str
+    income_statement_waterfall: list[IncomeStatementWaterfallStep]
+    revenue_segment_breakdown: RevenueSegmentBreakdown | None = None
+
+
 class MarketContextCard(BaseModel):
     label: str
     symbol: str
@@ -66,6 +73,7 @@ class CompanyWorkspaceSnapshot(BaseModel):
     market_cap_display: str
     income_statement_waterfall: list[IncomeStatementWaterfallStep]
     revenue_segment_breakdown: RevenueSegmentBreakdown | None = None
+    financial_bridge_periods: list[FinancialBridgePeriod] = []
     quote_details: list[QuoteDetail]
     market_contexts: list[MarketContextCard]
     performance_chart_ranges: list[PerformanceChartRange]
