@@ -1,6 +1,5 @@
+﻿Running 1 test using 1 worker
 
-Running 1 test using 1 worker
+  ok 1 [chromium] › e2e\dash-001.spec.ts:3:5 › dash-001 search and select a company by ticker (2.0s)
 
-  ok 1 [chromium] › e2e\dash-001.spec.ts:3:5 › dash-001 search and select a company by ticker (264ms)
-
-  1 passed (3.3s)
+  1 passed (6.7s)

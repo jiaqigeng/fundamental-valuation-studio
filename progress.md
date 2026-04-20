@@ -6,7 +6,7 @@
 - Standard startup path: `./init.sh`
 - Standard verification path: `./init.sh` for baseline health plus `feature_list.json -> features[*].verification.command` for feature passing
 - Current highest-priority unfinished feature: `dash-006`
-- Current blocker: none recorded. `dash-006` is still the next roadmap item. Separately, the shared `Income Statement Bridge` card now keeps the segment pie annual-only, lets the waterfall toggle between year and quarter when real Yahoo quarter data exists, and shows explicit period/date-range labels on both subsections; fixture-mode verification stays annual-only because there is still no hard-coded quarter fallback.
+- Current blocker: none recorded. `dash-006` is still the next roadmap item. Separately, the dashboard no longer uses frontend seed fallbacks or demo ticker entry points; the landing-page search now validates tickers inline before navigation, and the shared `Income Statement Bridge` card omits the pie chart whenever live FMP segment data is unavailable instead of falling back to hard-coded live segment values.
 
 ## Session Log
 
@@ -573,3 +573,15 @@
 - Files or artifacts updated: `frontend/src/app/_components/financial-bridge-section.tsx`, `frontend/src/app/globals.css`, `artifacts/verification/dash-005-playwright.log`, `feature_list.json`, `progress.md`, `session-handoff.md`
 - Known risk or unresolved issue: The placement change is purely presentational, so existing coverage still relies on the `dash-005` semantic contract rather than pixel-specific layout assertions.
 - Next best step: Resume the roadmap at `dash-006` unless the user asks for another focused refinement to the financial-bridge card.
+
+### Session 048
+
+- Date: 2026-04-19
+- Goal: Remove the remaining dashboard hardcoded fallbacks, keep the revenue pie hidden when live segment data is unavailable, and replace the landing-page demo entry points with inline ticker validation plus project-overview copy.
+- Completed: Removed the live company-workspace fallback to fixture-backed annual segment data so the revenue pie is omitted when FMP does not return a usable breakdown, removed the frontend seed company directory and dashboard fallback path, added a local validation route plus inline invalid-ticker messaging in the search form so bad input no longer routes to a 404 page, replaced the landing-page demo ticker shortcuts with a project-overview section, and updated the frontend docs/architecture notes to match the new data flow.
+- Verification run: `./init.sh`; `cd frontend && npx playwright test e2e/dash-001.spec.ts`; `cd frontend && npx playwright test e2e/dash-005.spec.ts`
+- Evidence captured: `./init.sh` completed successfully after the cleanup; the full backend pytest suite passed with `15 passed`; frontend `npm run lint` passed; frontend `npm run typecheck` passed; the first `dash-001` Playwright attempt hit the usual sandbox `spawn EPERM`, then two outside-sandbox retries exposed and fixed overly broad assertions before `cd frontend && npx playwright test e2e/dash-001.spec.ts` passed and refreshed `artifacts/verification/dash-001-playwright.log`; `cd frontend && npx playwright test e2e/dash-005.spec.ts` also passed and refreshed `artifacts/verification/dash-005-playwright.log`; implementation commit is `9bd535b`.
+- Commits: `9bd535b Remove dashboard seed fallbacks and validate tickers inline`
+- Files or artifacts updated: `backend/app/services/company_workspace.py`, `backend/tests/test_company_workspace.py`, `frontend/src/app/_components/ticker-search-form.tsx`, `frontend/src/app/_lib/company-workspace.ts`, `frontend/src/app/dashboard/[ticker]/page.tsx`, `frontend/src/app/page.tsx`, `frontend/src/app/api/companies/[ticker]/validate/route.ts`, `frontend/src/app/globals.css`, `frontend/e2e/dash-001.spec.ts`, `docs/frontend.md`, `frontend/ARCHITECTURE.md`, `artifacts/verification/dash-001-playwright.log`, `artifacts/verification/dash-005-playwright.log`, `feature_list.json`, `progress.md`, `session-handoff.md`
+- Known risk or unresolved issue: Direct navigation to an invalid `/dashboard/[ticker]` URL still resolves through the dashboard route and can still end in the framework's not-found path; this session only changed the search-form flow so user-entered invalid tickers stay on `/`. The live workspace still depends on Yahoo for the broader company snapshot and on FMP for annual segment detail, so provider outages will now surface as missing sections instead of fixture-backed substitutes.
+- Next best step: Resume the roadmap at `dash-006` unless the user asks for another focused dashboard UX refinement first.
