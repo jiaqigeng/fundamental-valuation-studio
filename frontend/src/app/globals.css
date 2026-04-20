@@ -569,9 +569,19 @@ a {
 }
 
 .financial-bridge-waterfall-header-row {
-  display: flex;
-  flex-direction: column;
-  gap: 0.9rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 0.9rem 1rem;
+}
+
+.financial-bridge-waterfall-title-block {
+  min-width: 0;
+}
+
+.financial-bridge-waterfall-header-row .financial-bridge-period-picker {
+  justify-self: end;
+  align-self: start;
 }
 
 .financial-bridge-subsection + .financial-bridge-subsection {
@@ -1000,12 +1010,6 @@ a {
   }
 
   .financial-bridge-copy-row {
-    flex-direction: row;
-    align-items: flex-start;
-    justify-content: space-between;
-  }
-
-  .financial-bridge-waterfall-header-row {
     flex-direction: row;
     align-items: flex-start;
     justify-content: space-between;

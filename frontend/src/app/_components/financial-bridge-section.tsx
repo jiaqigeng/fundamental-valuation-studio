@@ -66,7 +66,7 @@ export function FinancialBridgeSection({
         >
           <div className="financial-bridge-subsection-header">
             <div className="financial-bridge-waterfall-header-row">
-              <div>
+              <div className="financial-bridge-waterfall-title-block">
                 <p className="panel-label">Revenue To Profits Waterfall Bridge</p>
                 <h3>Revenue to profits waterfall bridge</h3>
               </div>
