@@ -5,8 +5,8 @@
 - Repository root: `c:\Users\gengj\source\repos\FundamentalValuationStudio`
 - Standard startup path: `./init.sh`
 - Standard verification path: `./init.sh` for baseline health plus `feature_list.json -> features[*].verification.command` for feature passing
-- Current highest-priority unfinished feature: `val-001b`
-- Current blocker: none recorded. `val-001a` now passes through a backend `POST /valuations/dcf` endpoint plus `backend/tests/test_val_001a.py`, and the user explicitly de-prioritized `dash-006` on 2026-04-20 because the current dashboard scope is sufficient for now. The next roadmap step is the auto-fetched DCF baseline in `val-001b`. As a narrow frontend refinement, the landing page now also includes a direct button to a new `/valuation` entry route.
+- Current highest-priority unfinished feature: `val-002`
+- Current blocker: none recorded. `val-001b` now passes with a real `/valuation` DCF calculator UI backed by `GET /valuations/dcf/{ticker}/baseline` plus `POST /valuations/dcf`, and `dash-006` remains intentionally de-prioritized so the roadmap can continue through the valuation stack instead of returning to optional dashboard work.
 
 ## Session Log
 
@@ -609,3 +609,15 @@
 - Files or artifacts updated: `frontend/src/app/page.tsx`, `frontend/src/app/valuation/page.tsx`, `frontend/src/app/globals.css`, `frontend/ARCHITECTURE.md`, `docs/frontend.md`, `progress.md`, `session-handoff.md`
 - Known risk or unresolved issue: This is a navigation and route-shell refinement only. The full valuation calculator UI for `val-001b` still needs to be implemented and verified with its future Playwright gate.
 - Next best step: Continue `val-001b` by turning `/valuation` into the actual DCF calculator entry flow with backend-backed baseline assumptions.
+
+### Session 051
+
+- Date: 2026-04-20
+- Goal: Turn `/valuation` into a real calculator workspace so the valuation area shows actual calculators instead of just roadmap copy.
+- Completed: Ran the repo harness and `./init.sh`; added a new backend baseline contract at `GET /valuations/dcf/{ticker}/baseline`; extended the Yahoo client to derive live DCF starting assumptions from company info plus annual statements; added deterministic fixture-mode baselines for `AAPL`, `MSFT`, and `KO`; added frontend valuation helpers, a local API proxy for DCF recalculation, a full DCF calculator client component, a calculator-lineup UI on `/valuation`, and a new `val-001b` Playwright gate.
+- Verification run: `./init.sh`; `cd backend && .venv/Scripts/python.exe -m pytest -q`; `cd frontend && npm run lint`; `cd frontend && npm run typecheck`; `cd frontend && npx playwright test e2e/val-001b.spec.ts`
+- Evidence captured: `./init.sh` completed successfully before feature work; backend `cd backend && .venv/Scripts/python.exe -m pytest -q` passed with `19 passed` plus one existing pytest cache warning; frontend `npm run lint` and `npm run typecheck` passed through `npm.cmd`; the first Playwright attempt hit PowerShell policy on `npx.ps1`, the next in-sandbox retry hit the local `spawn EPERM`, and the outside-sandbox rerun passed with the cleaned log saved at `artifacts/verification/val-001b-playwright.log`; implementation commit is `f9de54a`.
+- Commits: `f9de54a Implement val-001b DCF calculator workspace`
+- Files or artifacts updated: `backend/app/clients/yahoo_finance.py`, `backend/app/routers/valuations.py`, `backend/app/schemas/valuation.py`, `backend/app/services/valuation.py`, `backend/tests/test_val_001a.py`, `backend/ARCHITECTURE.md`, `docs/backend.md`, `docs/frontend.md`, `frontend/ARCHITECTURE.md`, `frontend/src/app/valuation/page.tsx`, `frontend/src/app/_components/dcf-calculator-panel.tsx`, `frontend/src/app/_lib/valuation.ts`, `frontend/src/app/api/valuations/dcf/route.ts`, `frontend/src/app/globals.css`, `frontend/e2e/val-001b.spec.ts`, `artifacts/verification/val-001b-playwright.log`, `feature_list.json`, `progress.md`, `session-handoff.md`
+- Known risk or unresolved issue: The live baseline derivation is intentionally first-pass. Revenue growth comes from the latest annual comparison when available, WACC uses a beta-based heuristic, and sales-to-capital still uses a sector heuristic until a richer reinvestment history is wired in. The calculator UI is currently DCF-first; the DDM, RIM, and relative valuation cards are visible but not interactive yet.
+- Next best step: Start `val-002` so the visible calculator lineup begins turning into a multi-model valuation workspace.

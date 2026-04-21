@@ -201,7 +201,7 @@
     },
     {
       "id": "dash-006",
-      "priority": 8.5,
+      "priority": 22.5,
       "section": "dashboard",
       "area": "charts",
       "title": "Render historical financial trend charts",
@@ -271,14 +271,14 @@
         ]
       },
       "evidence": {
-        "commit": null,
-        "verification_run": null,
-        "output_log": null,
-        "timestamp": null
+        "commit": "f9de54a",
+        "verification_run": "cd frontend && npx playwright test e2e/val-001b.spec.ts",
+        "output_log": "artifacts/verification/val-001b-playwright.log",
+        "timestamp": "2026-04-20T20:36:41.9324903-04:00"
       },
       "depends_on": ["val-001a", "dash-002b"],
-      "status": "not_started",
-      "notes": "Projection logic ties growth and reinvestment to ROIC so growth only creates value when ROIC exceeds WACC."
+      "status": "passing",
+      "notes": "Implemented on the `/valuation` route as the first real calculator workspace. The page now shows a calculator lineup plus an active DCF panel that preloads featured tickers (`AAPL`, `MSFT`, `KO`) with backend-derived baseline assumptions, displays the live company revenue/share/net-debt context, lets the user override core DCF inputs, proxies recalculation through a local frontend API route, and refreshes intrinsic value plus projected cash flows without leaving the page. The backend now exposes `GET /valuations/dcf/{ticker}/baseline` for fixture-backed deterministic tests and Yahoo-backed live derivation, while the existing `POST /valuations/dcf` route continues to perform the valuation math."
     },
     {
       "id": "val-002",
