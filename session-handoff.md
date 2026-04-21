@@ -17,6 +17,7 @@
 - Latest cleanup: Removed the remaining descriptive copy and featured ticker chips from the DCF workbench header so only the title and the two navigation buttons remain.
 - Latest cleanup commit: `ace0ba8 Trim DCF header copy and ticker chips`
 - Newest cleanup: Reduced the DCF output block to current stock price, estimated intrinsic value, and upside/downside, with upside shown in green and downside shown in red.
+- Newest cleanup commit: `9ed4636 Simplify DCF output section`
 - Infrastructure or harness changes: Refreshed `artifacts/verification/val-001a-pytest.log` and `artifacts/verification/val-001b-playwright.log`, re-ran the targeted backend/frontend verification gates after the redesign and contract simplification, and finished with a clean passing `./init.sh` baseline rerun.
 - Documentation changes: Updated `docs/backend.md`, `docs/frontend.md`, `frontend/ARCHITECTURE.md`, `feature_list.json`, `progress.md`, and this handoff to reflect the streamlined live FCF DCF path and the new user-assumption contract.
 - Implementation commit: `807a100 Simplify DCF valuation workspace`
