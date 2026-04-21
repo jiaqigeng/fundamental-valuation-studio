@@ -753,3 +753,15 @@
 - Files or artifacts updated: `frontend/src/app/globals.css`, `progress.md`, `session-handoff.md`
 - Known risk or unresolved issue: This is still a front-end presentation fix only; the DCF calculation flow and data contract are unchanged underneath.
 - Next best step: Resume the roadmap at `val-002` unless the user wants another valuation-page UI pass.
+
+### Session 063
+
+- Date: 2026-04-20
+- Goal: Modernize the `Project Years` control and tighten the output wording.
+- Completed: Re-ran `./init.sh`, renamed the output label from `Estimated intrinsic value` to `Intrinsic value`, replaced the old two-option `Project Years` dropdown with a dashboard-consistent segmented button control for `5 years` and `10 years`, and added matching button styles so the selector keeps the same height and visual rhythm as the other assumption fields.
+- Verification run: `./init.sh`; `cd frontend && npm.cmd run lint`; `cd frontend && npm.cmd run typecheck`
+- Evidence captured: `./init.sh` passed again before the refinement; frontend `npm.cmd run lint` passed; frontend `npm.cmd run typecheck` passed.
+- Commits: none yet
+- Files or artifacts updated: `frontend/src/app/_components/dcf-calculator-panel.tsx`, `frontend/src/app/globals.css`, `progress.md`, `session-handoff.md`
+- Known risk or unresolved issue: This is still a presentation-only refinement; the DCF calculation flow and data contract are unchanged underneath.
+- Next best step: Resume the roadmap at `val-002` unless the user wants more valuation-page UI cleanup.

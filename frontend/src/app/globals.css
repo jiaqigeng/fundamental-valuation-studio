@@ -1282,6 +1282,57 @@ a {
   outline-offset: 3px;
 }
 
+.valuation-pill-toggle {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 0.45rem;
+  width: 100%;
+}
+
+.valuation-pill-toggle-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 3.15rem;
+  min-height: 3.15rem;
+  margin: 0;
+  border: 1px solid rgba(15, 23, 42, 0.16);
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.82);
+  color: var(--foreground);
+  font-size: 0.98rem;
+  font-weight: 600;
+  line-height: 1.2;
+  cursor: pointer;
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease,
+    border-color 160ms ease,
+    background 160ms ease,
+    color 160ms ease;
+}
+
+.valuation-pill-toggle-button:hover {
+  transform: translateY(-1px);
+  border-color: rgba(33, 64, 154, 0.22);
+  box-shadow: 0 10px 22px rgba(33, 64, 154, 0.08);
+}
+
+.valuation-pill-toggle-button:focus-visible {
+  outline: 2px solid rgba(33, 64, 154, 0.28);
+  outline-offset: 3px;
+}
+
+.valuation-pill-toggle-button-active {
+  border-color: rgba(33, 64, 154, 0.22);
+  background:
+    linear-gradient(135deg, rgba(33, 64, 154, 0.1), rgba(15, 118, 110, 0.1));
+  color: var(--dashboard-blue);
+  box-shadow: 0 10px 22px rgba(33, 64, 154, 0.1);
+}
+
 .valuation-submit-button {
   width: 100%;
   margin-top: 0.2rem;

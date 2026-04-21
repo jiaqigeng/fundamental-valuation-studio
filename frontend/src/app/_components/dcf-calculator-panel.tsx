@@ -257,19 +257,31 @@ export function DcfCalculatorPanel({
                 }
               />
             </label>
-            <label className="valuation-field">
+            <div className="valuation-field">
               <span>Project Years</span>
-              <select
+              <div
+                className="valuation-pill-toggle"
+                role="group"
                 aria-label="Project Years"
-                value={formState.projectionYears}
-                onChange={(event) =>
-                  updateField("projectionYears", event.target.value)
-                }
               >
-                <option value="5">5 years</option>
-                <option value="10">10 years</option>
-              </select>
-            </label>
+                <button
+                  className={`valuation-pill-toggle-button${formState.projectionYears === "5" ? " valuation-pill-toggle-button-active" : ""}`}
+                  type="button"
+                  aria-pressed={formState.projectionYears === "5"}
+                  onClick={() => updateField("projectionYears", "5")}
+                >
+                  5 years
+                </button>
+                <button
+                  className={`valuation-pill-toggle-button${formState.projectionYears === "10" ? " valuation-pill-toggle-button-active" : ""}`}
+                  type="button"
+                  aria-pressed={formState.projectionYears === "10"}
+                  onClick={() => updateField("projectionYears", "10")}
+                >
+                  10 years
+                </button>
+              </div>
+            </div>
           </div>
           <button
             className="ticker-search-button valuation-submit-button"
@@ -294,7 +306,7 @@ export function DcfCalculatorPanel({
           </div>
           <div className="valuation-results-grid valuation-results-grid-compact">
             <article className="valuation-result-card valuation-result-card-primary">
-              <p>Estimated intrinsic value</p>
+              <p>Intrinsic value</p>
               <strong data-testid="intrinsic-value-per-share">
                 {result ? formatCurrency(result.intrinsicValuePerShare) : "-"}
               </strong>
