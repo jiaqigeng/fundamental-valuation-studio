@@ -437,9 +437,5 @@ function getValuationGapClassName(
     return "valuation-trend-up";
   }
 
-  if (valuationGap < 0) {
-    return "valuation-trend-down";
-  }
-
-  return undefined;
+  return "valuation-trend-down";
 }
