@@ -266,10 +266,6 @@ a {
   box-shadow: 0 12px 28px rgba(33, 64, 154, 0.12);
 }
 
-.valuation-ticker-row {
-  margin-top: 1.25rem;
-}
-
 @media (max-width: 720px) {
   .ticker-search-controls {
     align-items: stretch;
@@ -295,16 +291,6 @@ a {
   .valuation-workbench-actions .valuation-workbench-link {
     width: 100%;
   }
-}
-
-.valuation-ticker-chip {
-  min-width: 5.9rem;
-}
-
-.valuation-ticker-chip-active {
-  box-shadow: 0 12px 28px rgba(33, 64, 154, 0.22);
-  outline: 2px solid rgba(15, 118, 110, 0.18);
-  outline-offset: 2px;
 }
 
 .ticker-search-button:disabled {
@@ -1180,14 +1166,6 @@ a {
   font-size: clamp(1.9rem, 4vw, 2.8rem);
   line-height: 1.04;
   letter-spacing: -0.045em;
-}
-
-.valuation-workbench-copy {
-  margin: 0.45rem 0 0;
-  color: var(--muted);
-  font-size: 1rem;
-  line-height: 1.72;
-  max-width: 64ch;
 }
 
 .valuation-fetched-card p,

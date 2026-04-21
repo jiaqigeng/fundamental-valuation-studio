@@ -1,8 +1,6 @@
 import { DcfCalculatorPanel } from "@/app/_components/dcf-calculator-panel";
 import { getDcfBaselineData } from "@/app/_lib/valuation";
 
-const FEATURED_TICKERS = ["AAPL", "MSFT", "KO"] as const;
-
 export default async function ValuationPage({
   searchParams,
 }: {
@@ -19,7 +17,6 @@ export default async function ValuationPage({
         <DcfCalculatorPanel
           activeTicker={activeTicker}
           baseline={baseline}
-          featuredTickers={FEATURED_TICKERS}
         />
       ) : (
         <section className="workspace-panel valuation-empty-state">

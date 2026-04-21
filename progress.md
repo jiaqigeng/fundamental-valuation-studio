@@ -681,3 +681,15 @@
 - Files or artifacts updated: `frontend/src/app/valuation/page.tsx`, `frontend/src/app/_components/dcf-calculator-panel.tsx`, `frontend/src/app/globals.css`, `progress.md`, `session-handoff.md`
 - Known risk or unresolved issue: This is still a presentation-only cleanup on top of the existing DCF flow; no backend or feature-gate behavior changed.
 - Next best step: Resume the roadmap at `val-002` unless the user wants another pass on the valuation-page presentation.
+
+### Session 057
+
+- Date: 2026-04-20
+- Goal: Trim the remaining non-essential copy from the DCF card header.
+- Completed: Re-ran `./init.sh`, removed the descriptive helper sentence from the DCF workbench header, removed the featured ticker chip row, and cleaned up the now-unused prop path and CSS so the valuation page header is reduced to the company title plus the two navigation buttons.
+- Verification run: `./init.sh`; `cd frontend && npm.cmd run lint`; `cd frontend && npm.cmd run typecheck`
+- Evidence captured: `./init.sh` passed again before the refinement; frontend `npm.cmd run lint` passed; frontend `npm.cmd run typecheck` passed.
+- Commits: none yet
+- Files or artifacts updated: `frontend/src/app/_components/dcf-calculator-panel.tsx`, `frontend/src/app/valuation/page.tsx`, `frontend/src/app/globals.css`, `progress.md`, `session-handoff.md`
+- Known risk or unresolved issue: This is another presentation-only cleanup; the DCF calculator flow and its data contract are unchanged.
+- Next best step: Resume the roadmap at `val-002` unless the user wants more valuation-page simplification.

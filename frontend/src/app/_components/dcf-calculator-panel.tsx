@@ -13,7 +13,6 @@ import { mapDcfValuationResponse } from "@/app/_lib/valuation";
 type DcfCalculatorPanelProps = {
   readonly activeTicker: string;
   readonly baseline: DcfBaselineData;
-  readonly featuredTickers: readonly string[];
 };
 
 type DcfFormState = {
@@ -77,7 +76,6 @@ const FETCHED_METRICS: Array<{
 export function DcfCalculatorPanel({
   activeTicker,
   baseline,
-  featuredTickers,
 }: DcfCalculatorPanelProps) {
   const [formState, setFormState] = useState<DcfFormState>({
     shortTermGrowthRate: "",
@@ -184,25 +182,6 @@ export function DcfCalculatorPanel({
           <h2 id="dcf-calculator-heading">
             {baseline.companyName} ({baseline.ticker})
           </h2>
-          <p className="valuation-workbench-copy">
-            A cleaner direct-FCF DCF built from the latest capital structure and
-            trading context, with only the assumptions you actually need to
-            control.
-          </p>
-          <div
-            className="ticker-chip-row valuation-ticker-row"
-            aria-label="Featured valuation tickers"
-          >
-            {featuredTickers.map((ticker) => (
-              <Link
-                key={ticker}
-                className={`ticker-chip valuation-ticker-chip${ticker === activeTicker ? " valuation-ticker-chip-active" : ""}`}
-                href={`/valuation?ticker=${ticker}`}
-              >
-                {ticker}
-              </Link>
-            ))}
-          </div>
         </div>
       </div>
 
