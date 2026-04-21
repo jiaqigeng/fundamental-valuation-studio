@@ -669,3 +669,15 @@
 - Files or artifacts updated: `frontend/src/app/valuation/page.tsx`, `frontend/src/app/_components/dcf-calculator-panel.tsx`, `frontend/src/app/globals.css`, `progress.md`, `session-handoff.md`
 - Known risk or unresolved issue: This is a presentational cleanup only; no new feature-level verification contract changed, and the valuation route still depends on the same live DCF baseline path underneath.
 - Next best step: Resume the roadmap at `val-002` unless the user wants more valuation-page UI trimming.
+
+### Session 056
+
+- Date: 2026-04-20
+- Goal: Remove the separate valuation hero card entirely and fold its useful controls into the DCF workbench card.
+- Completed: Re-ran `./init.sh`, removed the standalone top valuation card, moved `Back to home` and `Open {ticker} dashboard` into the DCF workbench header's top-right corner, and moved the featured ticker chips into that same workbench header so the page now opens directly on the useful calculator card.
+- Verification run: `./init.sh`; `cd frontend && npm.cmd run lint`; `cd frontend && npm.cmd run typecheck`
+- Evidence captured: `./init.sh` passed again before the refinement; frontend `npm.cmd run lint` passed; frontend `npm.cmd run typecheck` passed.
+- Commits: none yet
+- Files or artifacts updated: `frontend/src/app/valuation/page.tsx`, `frontend/src/app/_components/dcf-calculator-panel.tsx`, `frontend/src/app/globals.css`, `progress.md`, `session-handoff.md`
+- Known risk or unresolved issue: This is still a presentation-only cleanup on top of the existing DCF flow; no backend or feature-gate behavior changed.
+- Next best step: Resume the roadmap at `val-002` unless the user wants another pass on the valuation-page presentation.

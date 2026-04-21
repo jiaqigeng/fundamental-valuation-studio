@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useTransition } from "react";
 
 import type {
@@ -10,7 +11,9 @@ import type {
 import { mapDcfValuationResponse } from "@/app/_lib/valuation";
 
 type DcfCalculatorPanelProps = {
+  readonly activeTicker: string;
   readonly baseline: DcfBaselineData;
+  readonly featuredTickers: readonly string[];
 };
 
 type DcfFormState = {
@@ -71,7 +74,11 @@ const FETCHED_METRICS: Array<{
   },
 ];
 
-export function DcfCalculatorPanel({ baseline }: DcfCalculatorPanelProps) {
+export function DcfCalculatorPanel({
+  activeTicker,
+  baseline,
+  featuredTickers,
+}: DcfCalculatorPanelProps) {
   const [formState, setFormState] = useState<DcfFormState>({
     shortTermGrowthRate: "",
     terminalGrowthRate: "",
@@ -161,6 +168,17 @@ export function DcfCalculatorPanel({ baseline }: DcfCalculatorPanelProps) {
       className="workspace-panel valuation-workbench-shell"
     >
       <div className="valuation-workbench-hero">
+        <div className="valuation-workbench-actions">
+          <Link className="back-link valuation-workbench-link" href="/">
+            Back to home
+          </Link>
+          <Link
+            className="valuation-secondary-link valuation-workbench-link"
+            href={`/dashboard/${encodeURIComponent(activeTicker)}`}
+          >
+            Open {activeTicker} dashboard
+          </Link>
+        </div>
         <div className="valuation-workbench-hero-copy">
           <p className="panel-label">DCF Workbench</p>
           <h2 id="dcf-calculator-heading">
@@ -171,6 +189,20 @@ export function DcfCalculatorPanel({ baseline }: DcfCalculatorPanelProps) {
             trading context, with only the assumptions you actually need to
             control.
           </p>
+          <div
+            className="ticker-chip-row valuation-ticker-row"
+            aria-label="Featured valuation tickers"
+          >
+            {featuredTickers.map((ticker) => (
+              <Link
+                key={ticker}
+                className={`ticker-chip valuation-ticker-chip${ticker === activeTicker ? " valuation-ticker-chip-active" : ""}`}
+                href={`/valuation?ticker=${ticker}`}
+              >
+                {ticker}
+              </Link>
+            ))}
+          </div>
         </div>
       </div>
 

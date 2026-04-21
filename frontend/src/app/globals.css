@@ -287,6 +287,14 @@ a {
     width: 100%;
     flex: 1 1 100%;
   }
+
+  .valuation-workbench-actions {
+    justify-content: stretch;
+  }
+
+  .valuation-workbench-actions .valuation-workbench-link {
+    width: 100%;
+  }
 }
 
 .valuation-ticker-chip {
@@ -1135,33 +1143,7 @@ a {
 }
 
 .valuation-page-shell {
-  gap: 1.1rem;
-}
-
-.valuation-hero {
-  display: grid;
-  gap: 0.85rem;
-}
-
-.valuation-hero-topbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-}
-
-.valuation-home-link {
-  min-height: 2.9rem;
-  padding-inline: 1.2rem;
-}
-
-.valuation-hero-copy {
-  max-width: 44rem;
-  margin-top: 0.15rem;
-}
-
-.valuation-dashboard-link {
-  justify-self: flex-start;
+  gap: 0.9rem;
 }
 
 .valuation-workbench-shell {
@@ -1179,6 +1161,18 @@ a {
   gap: 0.7rem;
   padding-bottom: 0.1rem;
   border-bottom: 1px solid rgba(33, 64, 154, 0.1);
+}
+
+.valuation-workbench-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.85rem;
+  align-self: start;
+}
+
+.valuation-workbench-link {
+  min-height: 2.95rem;
 }
 
 .valuation-workbench-hero-copy h2 {
@@ -1440,6 +1434,21 @@ a {
   .segment-breakdown-visual {
     grid-template-columns: minmax(15rem, 19rem) minmax(0, 1fr);
     align-items: center;
+  }
+
+  .valuation-workbench-hero {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+  }
+
+  .valuation-workbench-hero-copy {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .valuation-workbench-actions {
+    grid-column: 2;
+    grid-row: 1;
   }
 
   .valuation-workbench-layout {
