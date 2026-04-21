@@ -172,10 +172,6 @@ export function DcfCalculatorPanel({ baseline }: DcfCalculatorPanelProps) {
             control.
           </p>
         </div>
-        <div className="valuation-status-pill">
-          <span>Sector</span>
-          <strong>{baseline.sector}</strong>
-        </div>
       </div>
 
       <div className="valuation-workbench-layout">

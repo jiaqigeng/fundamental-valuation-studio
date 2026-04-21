@@ -18,8 +18,15 @@ export default async function ValuationPage({
   return (
     <main className="dashboard-shell valuation-page-shell">
       <section className="dashboard-hero valuation-hero">
-        <p className="eyebrow">Valuation</p>
-        <h1 className="dashboard-company-title">Value a company with a cleaner DCF workflow.</h1>
+        <div className="valuation-hero-topbar">
+          <p className="eyebrow">Valuation</p>
+          <Link className="back-link valuation-home-link" href="/">
+            Back to home
+          </Link>
+        </div>
+        <h1 className="dashboard-company-title">
+          Value a company with a cleaner DCF workflow.
+        </h1>
         <p className="hero-copy valuation-hero-copy">
           Start from the latest free cash flow, cash, debt, share count, and
           stock price. Then set only the growth path, terminal growth, discount
@@ -39,17 +46,12 @@ export default async function ValuationPage({
             </Link>
           ))}
         </div>
-        <div className="valuation-hero-actions">
-          <Link className="back-link landing-valuation-link" href="/">
-            Back to home
-          </Link>
-          <Link
-            className="valuation-secondary-link"
-            href={`/dashboard/${encodeURIComponent(activeTicker)}`}
-          >
-            Open {activeTicker} dashboard
-          </Link>
-        </div>
+        <Link
+          className="valuation-secondary-link valuation-dashboard-link"
+          href={`/dashboard/${encodeURIComponent(activeTicker)}`}
+        >
+          Open {activeTicker} dashboard
+        </Link>
       </section>
 
       {baseline !== null ? (

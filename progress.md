@@ -657,3 +657,15 @@
 - Files or artifacts updated: `backend/app/clients/yahoo_finance.py`, `backend/app/schemas/valuation.py`, `backend/app/services/valuation.py`, `backend/tests/test_val_001a.py`, `docs/backend.md`, `docs/frontend.md`, `feature_list.json`, `frontend/ARCHITECTURE.md`, `frontend/e2e/val-001b.spec.ts`, `frontend/src/app/_components/dcf-calculator-panel.tsx`, `frontend/src/app/_lib/valuation.ts`, `frontend/src/app/globals.css`, `frontend/src/app/page.tsx`, `frontend/src/app/_components/ticker-search-form.tsx`, `frontend/src/app/valuation/page.tsx`, `progress.md`, `session-handoff.md`, `artifacts/verification/val-001a-pytest.log`, `artifacts/verification/val-001b-playwright.log`
 - Known risk or unresolved issue: The DCF workbench is intentionally streamlined, but it still depends on live yfinance availability for the baseline fetch and still supports only a single-stage short-term growth path plus a terminal growth rate rather than a richer multi-stage scenario builder.
 - Next best step: Resume the roadmap at `val-002`, keeping the simplified DCF contract stable while the dividend discount model is added beside it.
+
+### Session 055
+
+- Date: 2026-04-20
+- Goal: Trim the valuation-page top overhead after the redesign by simplifying the header chrome.
+- Completed: Re-ran `./init.sh`, moved the `Back to home` control into the valuation hero's top-right corner, removed the extra hero action row, kept the dashboard link as a lighter secondary action beneath the ticker chips, and removed the sector pill from the DCF workbench header so the page starts with less non-essential framing.
+- Verification run: `./init.sh`; `cd frontend && npm.cmd run lint`; `cd frontend && npm.cmd run typecheck`
+- Evidence captured: `./init.sh` passed again before the refinement; frontend `npm.cmd run lint` passed; frontend `npm.cmd run typecheck` passed.
+- Commits: none yet
+- Files or artifacts updated: `frontend/src/app/valuation/page.tsx`, `frontend/src/app/_components/dcf-calculator-panel.tsx`, `frontend/src/app/globals.css`, `progress.md`, `session-handoff.md`
+- Known risk or unresolved issue: This is a presentational cleanup only; no new feature-level verification contract changed, and the valuation route still depends on the same live DCF baseline path underneath.
+- Next best step: Resume the roadmap at `val-002` unless the user wants more valuation-page UI trimming.
