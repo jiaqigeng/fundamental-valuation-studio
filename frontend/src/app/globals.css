@@ -1145,8 +1145,6 @@ a {
 .valuation-workbench-hero {
   display: grid;
   gap: 0.7rem;
-  padding-bottom: 0.1rem;
-  border-bottom: 1px solid rgba(33, 64, 154, 0.1);
 }
 
 .valuation-workbench-actions {

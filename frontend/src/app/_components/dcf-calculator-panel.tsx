@@ -188,7 +188,7 @@ export function DcfCalculatorPanel({
       <div className="valuation-workbench-layout">
         <section className="valuation-fetched-panel" aria-label="Fetched company inputs">
           <div className="financial-bridge-subsection-header">
-            <h3>Fetched company inputs</h3>
+            <h3>Company snapshot</h3>
             <p className="financial-bridge-period-status">
               Live values from yfinance
             </p>
