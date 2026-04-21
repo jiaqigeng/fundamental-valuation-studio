@@ -665,7 +665,7 @@
 - Completed: Re-ran `./init.sh`, moved the `Back to home` control into the valuation hero's top-right corner, removed the extra hero action row, kept the dashboard link as a lighter secondary action beneath the ticker chips, and removed the sector pill from the DCF workbench header so the page starts with less non-essential framing.
 - Verification run: `./init.sh`; `cd frontend && npm.cmd run lint`; `cd frontend && npm.cmd run typecheck`
 - Evidence captured: `./init.sh` passed again before the refinement; frontend `npm.cmd run lint` passed; frontend `npm.cmd run typecheck` passed.
-- Commits: none yet
+- Commits: `5f0d50b Trim valuation page header chrome`
 - Files or artifacts updated: `frontend/src/app/valuation/page.tsx`, `frontend/src/app/_components/dcf-calculator-panel.tsx`, `frontend/src/app/globals.css`, `progress.md`, `session-handoff.md`
 - Known risk or unresolved issue: This is a presentational cleanup only; no new feature-level verification contract changed, and the valuation route still depends on the same live DCF baseline path underneath.
 - Next best step: Resume the roadmap at `val-002` unless the user wants more valuation-page UI trimming.

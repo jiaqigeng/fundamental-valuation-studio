@@ -9,6 +9,7 @@
 
 - Code or behavior added: Simplified the DCF contract again so the baseline now fetches only current free cash flow, total cash, total debt, shares outstanding, and current stock price, while the user-editable assumptions are now limited to short-term growth, terminal growth, discount rate or WACC, and project years. Redesigned `/valuation` into a more professional dashboard-consistent workbench with color accents and a smaller, clearer results surface. The earlier dashboard concurrency pass is still in place, so Yahoo market-context, statement, and history requests plus the two FMP segment requests no longer run one by one.
 - Latest refinement: Trimmed the valuation-page header chrome by moving `Back to home` into the top-right corner of the hero, removing the extra action row, and dropping the sector pill from the DCF workbench header.
+- Latest refinement commit: `5f0d50b Trim valuation page header chrome`
 - Infrastructure or harness changes: Refreshed `artifacts/verification/val-001a-pytest.log` and `artifacts/verification/val-001b-playwright.log`, re-ran the targeted backend/frontend verification gates after the redesign and contract simplification, and finished with a clean passing `./init.sh` baseline rerun.
 - Documentation changes: Updated `docs/backend.md`, `docs/frontend.md`, `frontend/ARCHITECTURE.md`, `feature_list.json`, `progress.md`, and this handoff to reflect the streamlined live FCF DCF path and the new user-assumption contract.
 - Implementation commit: `807a100 Simplify DCF valuation workspace`
