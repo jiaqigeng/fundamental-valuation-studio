@@ -255,6 +255,20 @@ a {
   box-shadow: 0 12px 28px rgba(33, 64, 154, 0.12);
 }
 
+.valuation-ticker-row {
+  margin-top: 1.25rem;
+}
+
+.valuation-ticker-chip {
+  min-width: 5.9rem;
+}
+
+.valuation-ticker-chip-active {
+  box-shadow: 0 12px 28px rgba(33, 64, 154, 0.22);
+  outline: 2px solid rgba(15, 118, 110, 0.18);
+  outline-offset: 2px;
+}
+
 .ticker-search-button:disabled {
   cursor: wait;
   opacity: 0.8;
@@ -268,6 +282,37 @@ a {
 .project-overview {
   display: grid;
   gap: 1.2rem;
+}
+
+.valuation-calculator-picker {
+  display: grid;
+  gap: 1rem;
+}
+
+.valuation-calculator-cards {
+  display: grid;
+  gap: 1rem;
+}
+
+.valuation-calculator-card {
+  position: relative;
+}
+
+.valuation-calculator-card-active {
+  border-color: rgba(15, 118, 110, 0.18);
+  background:
+    radial-gradient(circle at top right, rgba(15, 118, 110, 0.12), transparent 38%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(240, 250, 247, 0.94));
+}
+
+.valuation-calculator-badge {
+  margin: 0 0 0.8rem;
+  color: var(--dashboard-blue);
+  font-family: var(--font-fira-code), monospace;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .project-overview-grid {
@@ -1059,6 +1104,182 @@ a {
   letter-spacing: -0.05em;
 }
 
+.valuation-calculator-shell {
+  display: grid;
+  gap: 1.4rem;
+}
+
+.valuation-company-strip {
+  display: grid;
+  gap: 1rem;
+}
+
+.valuation-company-copy {
+  margin: 0.7rem 0 0;
+  color: var(--muted);
+  font-size: 0.98rem;
+  line-height: 1.7;
+  max-width: 64ch;
+}
+
+.valuation-company-metrics {
+  display: grid;
+  gap: 0.85rem;
+  margin: 0;
+}
+
+.valuation-company-metric {
+  display: grid;
+  gap: 0.35rem;
+  border: 1px solid rgba(33, 64, 154, 0.1);
+  border-radius: 1rem;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.97), rgba(245, 249, 253, 0.93));
+  padding: 1rem 1.05rem;
+}
+
+.valuation-company-metric dt,
+.valuation-result-card p,
+.valuation-field span,
+.valuation-projection-table th,
+.valuation-note-list li::marker {
+  color: var(--muted);
+  font-family: var(--font-fira-code), monospace;
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.valuation-company-metric dd,
+.valuation-result-card strong {
+  margin: 0;
+  font-size: clamp(1.1rem, 2.3vw, 1.5rem);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+}
+
+.valuation-calculator-layout {
+  display: grid;
+  gap: 1.1rem;
+}
+
+.valuation-form-grid,
+.valuation-results-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.valuation-form-card,
+.valuation-assumption-notes,
+.valuation-result-card,
+.valuation-projection-table-wrap,
+.valuation-empty-state {
+  border: 1px solid rgba(33, 64, 154, 0.1);
+  border-radius: 1.2rem;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(243, 248, 252, 0.94));
+  padding: 1.2rem 1.25rem;
+}
+
+.valuation-form-card h3,
+.valuation-assumption-notes h3,
+.valuation-projection-shell h3 {
+  margin: 0 0 1rem;
+  font-size: clamp(1.18rem, 2.4vw, 1.5rem);
+  letter-spacing: -0.03em;
+}
+
+.valuation-field {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.valuation-field + .valuation-field {
+  margin-top: 0.9rem;
+}
+
+.valuation-field input {
+  width: 100%;
+  min-height: 3rem;
+  border: 1px solid rgba(15, 23, 42, 0.16);
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.82);
+  padding: 0 0.95rem;
+  color: var(--foreground);
+  font-size: 0.98rem;
+}
+
+.valuation-field input:focus-visible {
+  outline: 2px solid rgba(33, 64, 154, 0.28);
+  outline-offset: 3px;
+}
+
+.valuation-submit-button {
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.valuation-results-shell {
+  display: grid;
+  gap: 1rem;
+}
+
+.valuation-result-card {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.valuation-result-card p {
+  margin: 0;
+}
+
+.valuation-result-card-primary {
+  background:
+    radial-gradient(circle at top right, rgba(15, 118, 110, 0.12), transparent 35%),
+    linear-gradient(135deg, rgba(33, 64, 154, 0.08), rgba(255, 255, 255, 0.98));
+}
+
+.valuation-note-list {
+  margin: 0;
+  padding-left: 1.2rem;
+  color: var(--muted);
+  line-height: 1.75;
+}
+
+.valuation-projection-shell {
+  display: grid;
+  gap: 1rem;
+}
+
+.valuation-projection-table-wrap {
+  overflow-x: auto;
+}
+
+.valuation-projection-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.valuation-projection-table th,
+.valuation-projection-table td {
+  padding: 0.8rem 0.7rem;
+  text-align: left;
+}
+
+.valuation-projection-table th {
+  border-bottom: 1px solid rgba(33, 64, 154, 0.12);
+}
+
+.valuation-projection-table td {
+  border-bottom: 1px solid rgba(33, 64, 154, 0.08);
+  font-size: 0.95rem;
+}
+
+.valuation-projection-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
 .back-link {
   justify-self: start;
   padding-inline: 1.5rem;
@@ -1110,6 +1331,23 @@ a {
   .segment-breakdown-visual {
     grid-template-columns: minmax(15rem, 19rem) minmax(0, 1fr);
     align-items: center;
+  }
+
+  .valuation-calculator-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .valuation-company-metrics {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .valuation-calculator-layout {
+    grid-template-columns: minmax(21rem, 25rem) minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .valuation-results-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .overview-meta-grid {

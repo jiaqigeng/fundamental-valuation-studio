@@ -24,14 +24,18 @@ frontend/
 |  |- layout.tsx                   Root HTML shell, fonts, global CSS
 |  |- page.tsx                     Landing page (server component)
 |  |- valuation/
-|  |  `- page.tsx                  Valuation entry route (server component)
+|  |  `- page.tsx                  Valuation workspace route (server component)
 |  |- api/companies/[ticker]/validate/
 |  |  `- route.ts                  Server route: validate ticker before navigation
+|  |- api/valuations/dcf/
+|  |  `- route.ts                  Server route: proxy DCF recalculation to backend
 |  |- globals.css                  Hand-written + Tailwind v4 styles
 |  |- _components/                 Shared UI (underscore = off-route)
-|  |  |- ticker-search-form.tsx    Client component: form + inline validation + router.push
+|  |  |- dcf-calculator-panel.tsx  Client component: editable DCF form + recomputation
+|  |  `- ticker-search-form.tsx    Client component: form + inline validation + router.push
 |  |- _lib/                        Non-UI helpers (off-route)
-|  |  `- company-workspace.ts      Backend-backed workspace fetcher
+|  |  |- company-workspace.ts      Backend-backed dashboard fetcher
+|  |  `- valuation.ts              Backend-backed valuation baseline + DCF helpers
 |  |- dashboard/[ticker]/
 |     |- page.tsx                  Server component: renders workspace shell
 |- e2e/                            Playwright specs, one per feature id
@@ -60,7 +64,13 @@ User -> / (page.tsx)
         -> inline error when ticker is invalid
         -> router.push(`/dashboard/${TICKER}`) when valid
      -> /valuation (page.tsx)
-        -> renders valuation entry shell
+        -> getDcfBaselineData(ticker)   // from _lib
+        -> calculateDcfValuation(...)   // server-side initial result
+        -> renders calculator lineup + DCF workspace
+        -> <DcfCalculatorPanel> client component
+           -> /api/valuations/dcf route handler
+           -> backend valuation route
+           -> updates intrinsic value + projections
      -> /dashboard/[ticker] (page.tsx)
         -> getCompanyWorkspaceData(ticker)  // from _lib
         -> backend workspace route
@@ -72,7 +82,7 @@ Server components handle data lookup and 404s. The only client-side JavaScript o
 
 ## Data sources today
 
-`_lib/company-workspace.ts` is the primary frontend data entrypoint for the dashboard route. It calls the FastAPI backend for workspace data and returns `null` when the company cannot be loaded, leaving the dashboard route responsible for its not-found behavior. The landing page handles invalid-input UX earlier through the validation route handler.
+`_lib/company-workspace.ts` is the primary frontend data entrypoint for the dashboard route. `_lib/valuation.ts` now does the same job for the valuation route by fetching DCF baseline assumptions plus the initial valuation result from the backend. The landing page handles invalid-input UX earlier through the validation route handler.
 
 ## Verification boundary
 

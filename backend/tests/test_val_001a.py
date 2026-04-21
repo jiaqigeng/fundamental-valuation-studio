@@ -57,3 +57,27 @@ def test_dcf_endpoint_rejects_terminal_growth_at_or_above_wacc() -> None:
 
     assert response.status_code == 422
     assert "Terminal growth rate must be below WACC." in response.text
+
+
+def test_dcf_baseline_fixture_response(monkeypatch) -> None:
+    monkeypatch.setenv("FVS_MARKET_DATA_PROVIDER", "fixture")
+
+    response = client.get("/valuations/dcf/AAPL/baseline")
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["ticker"] == "AAPL"
+    assert body["company_name"] == "Apple Inc."
+    assert body["current_revenue"] == 391000000000.0
+    assert body["current_revenue_display"] == "$391.0B"
+    assert body["revenue_growth_rate"] == 0.06
+    assert body["projection_years"] == 5
+    assert len(body["assumption_notes"]) == 3
+
+
+def test_dcf_baseline_fixture_404(monkeypatch) -> None:
+    monkeypatch.setenv("FVS_MARKET_DATA_PROVIDER", "fixture")
+
+    response = client.get("/valuations/dcf/ZZZZ/baseline")
+
+    assert response.status_code == 404

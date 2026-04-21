@@ -1,8 +1,124 @@
+import os
+
+from app.clients.yahoo_finance import YahooFinanceClient, YahooFinanceLookupError
 from app.schemas.valuation import (
+    DcfBaselineResponse,
     DcfProjectionYear,
     DcfValuationRequest,
     DcfValuationResponse,
 )
+
+
+MARKET_DATA_PROVIDER_ENV = "FVS_MARKET_DATA_PROVIDER"
+
+
+class DcfBaselineNotFoundError(RuntimeError):
+    """Raised when a baseline cannot be found for a ticker."""
+
+
+class DcfBaselineUnavailableError(RuntimeError):
+    """Raised when the upstream provider cannot be reached."""
+
+
+FIXTURE_DCF_BASELINES: dict[str, DcfBaselineResponse] = {
+    "AAPL": DcfBaselineResponse(
+        ticker="AAPL",
+        company_name="Apple Inc.",
+        sector="Technology",
+        current_price=212.48,
+        current_price_display="$212.48",
+        current_revenue=391_000_000_000.0,
+        current_revenue_display="$391.0B",
+        revenue_growth_rate=0.06,
+        operating_margin=110_000_000_000.0 / 391_000_000_000.0,
+        tax_rate=0.17,
+        sales_to_capital_ratio=2.6,
+        wacc=0.102,
+        terminal_growth_rate=0.03,
+        shares_outstanding=15_100_000_000.0,
+        shares_outstanding_display="15.100B",
+        net_debt=-57_000_000_000.0,
+        net_debt_display="-$57.0B",
+        projection_years=5,
+        assumption_notes=[
+            "Revenue growth starts from the latest Apple annual revenue base.",
+            "Operating margin is anchored to Apple's latest reported operating profit margin.",
+            "WACC uses a beta-informed cost-of-equity estimate for the current company profile.",
+        ],
+    ),
+    "MSFT": DcfBaselineResponse(
+        ticker="MSFT",
+        company_name="Microsoft Corporation",
+        sector="Technology",
+        current_price=338.12,
+        current_price_display="$338.12",
+        current_revenue=245_100_000_000.0,
+        current_revenue_display="$245.1B",
+        revenue_growth_rate=0.11,
+        operating_margin=81_800_000_000.0 / 245_100_000_000.0,
+        tax_rate=0.16,
+        sales_to_capital_ratio=2.7,
+        wacc=0.099,
+        terminal_growth_rate=0.03,
+        shares_outstanding=7_425_000_000.0,
+        shares_outstanding_display="7.425B",
+        net_debt=-38_000_000_000.0,
+        net_debt_display="-$38.0B",
+        projection_years=5,
+        assumption_notes=[
+            "Revenue growth starts from Microsoft's latest annual revenue base.",
+            "Operating margin reflects the latest reported operating income over revenue.",
+            "WACC uses a beta-informed cost-of-equity estimate for the current company profile.",
+        ],
+    ),
+    "KO": DcfBaselineResponse(
+        ticker="KO",
+        company_name="The Coca-Cola Company",
+        sector="Consumer Defensive",
+        current_price=68.14,
+        current_price_display="$68.14",
+        current_revenue=45_800_000_000.0,
+        current_revenue_display="$45.8B",
+        revenue_growth_rate=0.05,
+        operating_margin=13_600_000_000.0 / 45_800_000_000.0,
+        tax_rate=0.19,
+        sales_to_capital_ratio=1.8,
+        wacc=0.084,
+        terminal_growth_rate=0.025,
+        shares_outstanding=4_320_000_000.0,
+        shares_outstanding_display="4.320B",
+        net_debt=28_000_000_000.0,
+        net_debt_display="$28.0B",
+        projection_years=5,
+        assumption_notes=[
+            "Revenue growth starts from Coca-Cola's latest annual revenue base.",
+            "Operating margin reflects the latest reported operating income over revenue.",
+            "WACC uses a lower beta-informed cost-of-equity estimate for a defensive consumer business.",
+        ],
+    ),
+}
+
+
+def get_dcf_baseline(ticker: str) -> DcfBaselineResponse:
+    normalized_ticker = ticker.upper()
+    provider = os.getenv(MARKET_DATA_PROVIDER_ENV, "yahoo").strip().lower()
+
+    if provider == "fixture":
+        fixture = FIXTURE_DCF_BASELINES.get(normalized_ticker)
+        if fixture is None:
+            raise DcfBaselineNotFoundError(
+                f"No fixture valuation baseline exists for ticker {normalized_ticker}."
+            )
+        return fixture
+
+    client = YahooFinanceClient()
+    try:
+        return client.fetch_dcf_baseline(normalized_ticker)
+    except YahooFinanceLookupError as exc:
+        message = str(exc)
+        if "no result" in message.lower():
+            raise DcfBaselineNotFoundError(message) from exc
+        raise DcfBaselineUnavailableError(message) from exc
 
 
 def calculate_dcf_valuation(payload: DcfValuationRequest) -> DcfValuationResponse:

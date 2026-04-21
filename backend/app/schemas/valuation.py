@@ -38,3 +38,25 @@ class DcfValuationResponse(BaseModel):
     enterprise_value: float
     equity_value: float
     intrinsic_value_per_share: float
+
+
+class DcfBaselineResponse(BaseModel):
+    ticker: str
+    company_name: str
+    sector: str
+    current_price: float | None = None
+    current_price_display: str
+    current_revenue: float
+    current_revenue_display: str
+    revenue_growth_rate: float
+    operating_margin: float
+    tax_rate: float
+    sales_to_capital_ratio: float
+    wacc: float
+    terminal_growth_rate: float
+    shares_outstanding: float
+    shares_outstanding_display: str
+    net_debt: float
+    net_debt_display: str
+    projection_years: int
+    assumption_notes: list[str]

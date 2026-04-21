@@ -1,53 +1,115 @@
 import Link from "next/link";
 
-export default function ValuationPage() {
+import { DcfCalculatorPanel } from "@/app/_components/dcf-calculator-panel";
+import {
+  buildDcfPayloadFromBaseline,
+  calculateDcfValuation,
+  getDcfBaselineData,
+} from "@/app/_lib/valuation";
+
+const FEATURED_TICKERS = ["AAPL", "MSFT", "KO"] as const;
+
+export default async function ValuationPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ ticker?: string }>;
+}) {
+  const resolvedSearchParams = await searchParams;
+  const activeTicker =
+    resolvedSearchParams.ticker?.trim().toUpperCase() || "AAPL";
+  const baseline = await getDcfBaselineData(activeTicker);
+  const initialResult = baseline
+    ? await calculateDcfValuation(buildDcfPayloadFromBaseline(baseline))
+    : null;
+
   return (
     <main className="landing-shell">
       <section className="landing-hero valuation-hero">
         <p className="eyebrow">Valuation</p>
-        <h1>Build intrinsic value views from one workspace.</h1>
+        <h1>Open the calculator stack for a company.</h1>
         <p className="hero-copy">
-          The valuation surface is now online as its own route. The backend DCF
-          math layer is already in place, and the next UI slice will prefill
-          assumptions from company data so you can move from a ticker to an
-          editable model more directly.
+          Start with a DCF view that already knows the company&apos;s current
+          revenue base, margin profile, capital structure, and a first-pass cost
+          of capital. The other calculators stay visible here so the valuation
+          workspace feels like one connected surface instead of isolated tools.
         </p>
+        <div className="ticker-chip-row valuation-ticker-row" aria-label="Featured valuation tickers">
+          {FEATURED_TICKERS.map((ticker) => (
+            <Link
+              key={ticker}
+              className={`ticker-chip valuation-ticker-chip${ticker === activeTicker ? " valuation-ticker-chip-active" : ""}`}
+              href={`/valuation?ticker=${ticker}`}
+            >
+              {ticker}
+            </Link>
+          ))}
+        </div>
         <div className="valuation-hero-actions">
           <Link className="back-link landing-valuation-link" href="/">
             Back to home
           </Link>
-          <Link className="valuation-secondary-link" href="/dashboard/AAPL">
-            Open Apple dashboard
+          <Link
+            className="valuation-secondary-link"
+            href={`/dashboard/${encodeURIComponent(activeTicker)}`}
+          >
+            Open {activeTicker} dashboard
           </Link>
         </div>
       </section>
 
-      <section className="supported-companies project-overview" aria-label="Valuation roadmap">
-        <p className="panel-label">What&apos;s next</p>
-        <div className="project-overview-grid">
-          <article className="project-overview-card">
-            <h2>DCF baseline</h2>
+      <section
+        className="supported-companies valuation-calculator-picker"
+        aria-label="Calculator lineup"
+      >
+        <p className="panel-label">Calculator lineup</p>
+        <div className="valuation-calculator-cards">
+          <article className="project-overview-card valuation-calculator-card valuation-calculator-card-active">
+            <p className="valuation-calculator-badge">Live now</p>
+            <h2>Discounted cash flow</h2>
             <p>
-              Prefill growth, margin, WACC, and terminal assumptions from
-              company data, while keeping every input user-editable.
+              Load baseline assumptions from company data, override the core
+              drivers, and recompute intrinsic value in one place.
             </p>
           </article>
-          <article className="project-overview-card">
-            <h2>Model expansion</h2>
+          <article className="project-overview-card valuation-calculator-card">
+            <p className="valuation-calculator-badge">Next up</p>
+            <h2>Dividend discount model</h2>
             <p>
-              Add dividend discount, residual-income, and peer-comparison views
-              so valuation methods can be compared side by side.
+              Focus on dividend payers with editable dividend growth and cost of
+              equity assumptions.
             </p>
           </article>
-          <article className="project-overview-card">
-            <h2>Scenario tools</h2>
+          <article className="project-overview-card valuation-calculator-card">
+            <p className="valuation-calculator-badge">Planned</p>
+            <h2>Residual income model</h2>
             <p>
-              Layer in bull, base, and bear cases plus sensitivity grids to
-              turn point estimates into a full valuation range.
+              Bring book value and ROE-based valuation into the same workspace
+              for businesses where FCF is less useful.
+            </p>
+          </article>
+          <article className="project-overview-card valuation-calculator-card">
+            <p className="valuation-calculator-badge">Planned</p>
+            <h2>Relative valuation</h2>
+            <p>
+              Compare multiples and implied price ranges against a peer set
+              without leaving the valuation flow.
             </p>
           </article>
         </div>
       </section>
+
+      {baseline !== null && initialResult !== null ? (
+        <DcfCalculatorPanel baseline={baseline} initialResult={initialResult} />
+      ) : (
+        <section className="workspace-panel valuation-empty-state">
+          <p className="panel-label">Calculator unavailable</p>
+          <h2>We couldn&apos;t load a DCF baseline for {activeTicker}.</h2>
+          <p className="panel-copy">
+            Try one of the featured tickers above or return to the dashboard
+            flow to confirm the company can be loaded there first.
+          </p>
+        </section>
+      )}
     </main>
   );
 }

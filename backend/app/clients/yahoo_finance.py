@@ -21,6 +21,7 @@ from app.schemas.company_workspace import (
     PerformanceSeries,
     QuoteDetail,
 )
+from app.schemas.valuation import DcfBaselineResponse
 
 
 YFINANCE_CACHE_DIR = Path(__file__).resolve().parents[2] / "tmp" / "yfinance-cache"
@@ -85,6 +86,7 @@ class ComparisonSeriesSeed:
 @dataclass(frozen=True)
 class StatementPeriodData:
     values: dict[str, float]
+    previous_values: dict[str, float]
     end_date: date | None
     previous_end_date: date | None
 
@@ -151,6 +153,96 @@ class YahooFinanceClient:
             ),
             market_contexts=payload.market_contexts,
             performance_chart_ranges=payload.performance_chart_ranges,
+        )
+
+    def fetch_dcf_baseline(self, ticker: str) -> DcfBaselineResponse:
+        try:
+            info = dict(yf.Ticker(ticker).info)
+        except Exception as exc:  # pragma: no cover - upstream library errors vary.
+            raise YahooFinanceLookupError(
+                f"yfinance request failed for ticker {ticker}."
+            ) from exc
+
+        if _looks_like_missing_ticker(info):
+            raise YahooFinanceLookupError(
+                f"Yahoo Finance returned no result for ticker {ticker}."
+            )
+
+        statement_period_data = _fetch_income_statement_period_data(
+            ticker,
+            statement_attribute="income_stmt",
+        )
+        revenue = _first_number(
+            statement_period_data.values.get("revenue"),
+            info.get("totalRevenue"),
+        )
+        if revenue is None:
+            raise YahooFinanceLookupError(
+                f"Yahoo Finance did not return enough revenue data for ticker {ticker}."
+            )
+
+        previous_revenue = _first_number(statement_period_data.previous_values.get("revenue"))
+        revenue_growth_rate = _derive_revenue_growth_rate(
+            revenue=revenue,
+            previous_revenue=previous_revenue,
+            info=info,
+        )
+        operating_margin = _derive_operating_margin(
+            revenue=revenue,
+            statement_values=statement_period_data.values,
+            info=info,
+        )
+        tax_rate = _derive_tax_rate(
+            statement_values=statement_period_data.values,
+        )
+        current_price = _first_number(
+            info.get("currentPrice"),
+            info.get("regularMarketPrice"),
+        )
+        shares_outstanding = _derive_shares_outstanding(
+            info=info,
+            current_price=current_price,
+        )
+        if shares_outstanding is None:
+            raise YahooFinanceLookupError(
+                f"Yahoo Finance did not return share-count data for ticker {ticker}."
+            )
+
+        net_debt = _derive_net_debt(info)
+        sector = _string_field(info, "sector") or "Unknown sector"
+        wacc = _derive_wacc(info)
+        terminal_growth_rate = _derive_terminal_growth_rate(sector)
+
+        return DcfBaselineResponse(
+            ticker=ticker,
+            company_name=(
+                _string_field(info, "longName")
+                or _string_field(info, "shortName")
+                or ticker
+            ),
+            sector=sector,
+            current_price=current_price,
+            current_price_display=_format_currency(current_price),
+            current_revenue=float(revenue),
+            current_revenue_display=_format_compact_currency(revenue),
+            revenue_growth_rate=revenue_growth_rate,
+            operating_margin=operating_margin,
+            tax_rate=tax_rate,
+            sales_to_capital_ratio=_derive_sales_to_capital_ratio(sector),
+            wacc=wacc,
+            terminal_growth_rate=terminal_growth_rate,
+            shares_outstanding=float(shares_outstanding),
+            shares_outstanding_display=_format_compact_number(shares_outstanding),
+            net_debt=net_debt,
+            net_debt_display=_format_signed_compact_currency(net_debt),
+            projection_years=5,
+            assumption_notes=_build_dcf_assumption_notes(
+                revenue=revenue,
+                previous_revenue=previous_revenue,
+                operating_margin=operating_margin,
+                wacc=wacc,
+                sector=sector,
+            ),
         )
 
     def _fetch_payload(self, ticker: str) -> YahooWorkspacePayload:
@@ -550,19 +642,35 @@ def _fetch_income_statement_period_data(
     try:
         statement = getattr(yf.Ticker(ticker), statement_attribute)
     except Exception:
-        return StatementPeriodData(values={}, end_date=None, previous_end_date=None)
+        return StatementPeriodData(
+            values={},
+            previous_values={},
+            end_date=None,
+            previous_end_date=None,
+        )
 
     if statement is None or getattr(statement, "empty", True):
-        return StatementPeriodData(values={}, end_date=None, previous_end_date=None)
+        return StatementPeriodData(
+            values={},
+            previous_values={},
+            end_date=None,
+            previous_end_date=None,
+        )
 
     columns = list(getattr(statement, "columns", []))
     current_column = columns[0] if columns else None
     previous_column = columns[1] if len(columns) > 1 else None
 
     if current_column is None:
-        return StatementPeriodData(values={}, end_date=None, previous_end_date=None)
+        return StatementPeriodData(
+            values={},
+            previous_values={},
+            end_date=None,
+            previous_end_date=None,
+        )
 
     values: dict[str, float] = {}
+    previous_values: dict[str, float] = {}
     for field_name, aliases in INCOME_STATEMENT_ROW_ALIASES.items():
         value = _lookup_statement_value(
             statement,
@@ -571,12 +679,157 @@ def _fetch_income_statement_period_data(
         )
         if value is not None:
             values[field_name] = value
+        if previous_column is not None:
+            previous_value = _lookup_statement_value(
+                statement,
+                aliases,
+                column=previous_column,
+            )
+            if previous_value is not None:
+                previous_values[field_name] = previous_value
 
     return StatementPeriodData(
         values=values,
+        previous_values=previous_values,
         end_date=_coerce_statement_date(current_column),
         previous_end_date=_coerce_statement_date(previous_column),
     )
+
+
+SECTOR_SALES_TO_CAPITAL_RATIOS: dict[str, float] = {
+    "Technology": 2.7,
+    "Communication Services": 2.3,
+    "Consumer Cyclical": 2.2,
+    "Consumer Defensive": 1.8,
+    "Healthcare": 1.9,
+    "Industrials": 1.8,
+    "Financial Services": 1.4,
+}
+
+
+def _derive_revenue_growth_rate(
+    *,
+    revenue: float | int,
+    previous_revenue: float | int | None,
+    info: dict,
+) -> float:
+    if previous_revenue is not None and float(previous_revenue) > 0:
+        growth_rate = (float(revenue) / float(previous_revenue)) - 1
+        return _clamp(growth_rate, -0.05, 0.18)
+
+    info_growth = _first_number(info.get("revenueGrowth"))
+    if info_growth is not None:
+        return _clamp(float(info_growth), -0.05, 0.18)
+
+    return 0.05
+
+
+def _derive_operating_margin(
+    *,
+    revenue: float | int,
+    statement_values: dict[str, float],
+    info: dict,
+) -> float:
+    operating_income = _first_number(statement_values.get("operating_income"))
+    if operating_income is not None and float(revenue) > 0:
+        return _clamp(float(operating_income) / float(revenue), 0.05, 0.45)
+
+    info_margin = _first_number(info.get("operatingMargins"))
+    if info_margin is not None:
+        return _clamp(float(info_margin), 0.05, 0.45)
+
+    return 0.2
+
+
+def _derive_tax_rate(
+    *,
+    statement_values: dict[str, float],
+) -> float:
+    pretax_income = _first_number(statement_values.get("pretax_income"))
+    tax_provision = _first_number(statement_values.get("tax_provision"))
+    if (
+        pretax_income is not None
+        and abs(float(pretax_income)) > 0.005
+        and tax_provision is not None
+    ):
+        return _clamp(abs(float(tax_provision)) / abs(float(pretax_income)), 0.12, 0.3)
+
+    return 0.21
+
+
+def _derive_shares_outstanding(
+    *,
+    info: dict,
+    current_price: float | int | None,
+) -> float | None:
+    shares_outstanding = _first_number(info.get("sharesOutstanding"))
+    if shares_outstanding is not None:
+        return float(shares_outstanding)
+
+    market_cap = _first_number(info.get("marketCap"))
+    if market_cap is not None and current_price is not None and float(current_price) > 0:
+        return float(market_cap) / float(current_price)
+
+    return None
+
+
+def _derive_net_debt(info: dict) -> float:
+    total_debt = _first_number(info.get("totalDebt")) or 0.0
+    total_cash = _first_number(info.get("totalCash"), info.get("cash")) or 0.0
+    return float(total_debt) - float(total_cash)
+
+
+def _derive_wacc(info: dict) -> float:
+    beta = _first_number(info.get("beta")) or 1.0
+    risk_free_rate = 0.043
+    equity_risk_premium = 0.05
+    return _clamp(risk_free_rate + float(beta) * equity_risk_premium, 0.075, 0.125)
+
+
+def _derive_terminal_growth_rate(sector: str) -> float:
+    if sector in {"Consumer Defensive", "Utilities"}:
+        return 0.025
+    return 0.03
+
+
+def _derive_sales_to_capital_ratio(sector: str) -> float:
+    return SECTOR_SALES_TO_CAPITAL_RATIOS.get(sector, 2.0)
+
+
+def _build_dcf_assumption_notes(
+    *,
+    revenue: float | int,
+    previous_revenue: float | int | None,
+    operating_margin: float,
+    wacc: float,
+    sector: str,
+) -> list[str]:
+    notes = []
+    if previous_revenue is not None and float(previous_revenue) > 0:
+        growth_rate = (float(revenue) / float(previous_revenue)) - 1
+        notes.append(
+            "Revenue growth starts from the latest annual revenue versus the prior reported year."
+        )
+        notes.append(
+            f"The latest year-over-year revenue change is {_format_optional_percent(growth_rate) or 'N/A'}."
+        )
+    else:
+        notes.append("Revenue growth falls back to Yahoo's available growth signal when prior-year revenue is unavailable.")
+
+    notes.append(
+        f"Operating margin is anchored to the latest reported operating margin of {_format_optional_percent(operating_margin) or 'N/A'}."
+    )
+    notes.append(
+        f"WACC uses a beta-informed cost-of-equity estimate and is currently set to {_format_optional_percent(wacc) or 'N/A'}."
+    )
+    notes.append(
+        f"Sales-to-capital uses a sector heuristic for {sector} until a richer reinvestment history is wired in."
+    )
+    return notes
+
+
+def _clamp(value: float, minimum: float, maximum: float) -> float:
+    return max(minimum, min(maximum, value))
 
 
 def _lookup_statement_value(
