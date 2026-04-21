@@ -605,7 +605,7 @@
 - Completed: Read the repo harness files, ran `./init.sh`, added a new landing-page CTA that routes to `/valuation`, created `frontend/src/app/valuation/page.tsx` as a lightweight valuation entry page, and updated frontend documentation to include the new route.
 - Verification run: `./init.sh`; `cd frontend && npm run lint`; `cd frontend && npm run typecheck`
 - Evidence captured: `./init.sh` completed successfully before the refinement; frontend `npm run lint` passed when rerun through `npm.cmd` because PowerShell blocked `npm.ps1`; frontend `npm run typecheck` also passed through `npm.cmd`.
-- Commits: none yet
+- Commits: `1a4e024 Add valuation entry route from landing page`
 - Files or artifacts updated: `frontend/src/app/page.tsx`, `frontend/src/app/valuation/page.tsx`, `frontend/src/app/globals.css`, `frontend/ARCHITECTURE.md`, `docs/frontend.md`, `progress.md`, `session-handoff.md`
 - Known risk or unresolved issue: This is a navigation and route-shell refinement only. The full valuation calculator UI for `val-001b` still needs to be implemented and verified with its future Playwright gate.
 - Next best step: Continue `val-001b` by turning `/valuation` into the actual DCF calculator entry flow with backend-backed baseline assumptions.
