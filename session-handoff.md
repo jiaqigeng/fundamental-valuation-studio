@@ -12,6 +12,7 @@
 - Latest refinement: Trimmed the valuation-page header chrome by moving `Back to home` into the top-right corner of the hero, removing the extra action row, and dropping the sector pill from the DCF workbench header.
 - Latest refinement commit: `5f0d50b Trim valuation page header chrome`
 - Newest refinement: Removed the separate valuation hero card entirely and moved both navigation buttons plus the featured ticker chips into the DCF workbench header.
+- Newest refinement commit: `904feb1 Collapse valuation page into one card`
 - Infrastructure or harness changes: Refreshed `artifacts/verification/val-001a-pytest.log` and `artifacts/verification/val-001b-playwright.log`, re-ran the targeted backend/frontend verification gates after the redesign and contract simplification, and finished with a clean passing `./init.sh` baseline rerun.
 - Documentation changes: Updated `docs/backend.md`, `docs/frontend.md`, `frontend/ARCHITECTURE.md`, `feature_list.json`, `progress.md`, and this handoff to reflect the streamlined live FCF DCF path and the new user-assumption contract.
 - Implementation commit: `807a100 Simplify DCF valuation workspace`
