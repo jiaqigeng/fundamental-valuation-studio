@@ -765,3 +765,15 @@
 - Files or artifacts updated: `frontend/src/app/_components/dcf-calculator-panel.tsx`, `frontend/src/app/globals.css`, `progress.md`, `session-handoff.md`
 - Known risk or unresolved issue: This is still a presentation-only refinement; the DCF calculation flow and data contract are unchanged underneath.
 - Next best step: Resume the roadmap at `val-002` unless the user wants more valuation-page UI cleanup.
+
+### Session 064
+
+- Date: 2026-04-20
+- Goal: Give the company title a more distinctive but still professional type treatment.
+- Completed: Re-ran `./init.sh`, added `IBM Plex Sans` through `next/font/google`, and applied it specifically to the valuation workbench company title so the heading feels more finance-native and less plain than the default Fira Sans treatment.
+- Verification run: `./init.sh`; `cd frontend && npm.cmd run lint`; `cd frontend && npm.cmd run typecheck`
+- Evidence captured: `./init.sh` passed again before the refinement; frontend `npm.cmd run lint` passed; frontend `npm.cmd run typecheck` passed.
+- Commits: none yet
+- Files or artifacts updated: `frontend/src/app/layout.tsx`, `frontend/src/app/globals.css`, `progress.md`, `session-handoff.md`
+- Known risk or unresolved issue: This is a typography-only refinement; the DCF calculation flow and data contract are unchanged underneath.
+- Next best step: Resume the roadmap at `val-002` unless the user wants more valuation-page visual cleanup.

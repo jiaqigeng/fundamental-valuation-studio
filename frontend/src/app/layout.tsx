@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Fira_Code, Fira_Sans } from "next/font/google";
+import { Fira_Code, Fira_Sans, IBM_Plex_Sans } from "next/font/google";
 import "./globals.css";
 
 const firaSans = Fira_Sans({
@@ -10,6 +10,12 @@ const firaSans = Fira_Sans({
 
 const firaCode = Fira_Code({
   variable: "--font-fira-code",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+});
+
+const ibmPlexSans = IBM_Plex_Sans({
+  variable: "--font-ibm-plex-sans",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
 });
@@ -27,7 +33,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${firaSans.variable} ${firaCode.variable} h-full antialiased`}
+      className={`${firaSans.variable} ${firaCode.variable} ${ibmPlexSans.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
