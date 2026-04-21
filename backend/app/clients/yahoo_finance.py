@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from datetime import date
 from datetime import UTC, datetime
@@ -97,9 +98,13 @@ class YahooFinanceClient:
         _configure_yfinance_cache()
 
     def fetch_company_workspace_snapshot(self, ticker: str) -> CompanyWorkspaceSnapshot:
-        payload = self._fetch_payload(ticker)
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            payload_future = executor.submit(self._fetch_payload, ticker)
+            dividend_future = executor.submit(_fetch_ttm_dividend, ticker)
+            payload = payload_future.result()
+            trailing_ttm_dividend = dividend_future.result()
+
         info = payload.company_info
-        trailing_ttm_dividend = _fetch_ttm_dividend(ticker)
         financial_bridge_periods = _build_financial_bridge_periods(
             ticker=ticker,
             info=info,
@@ -261,18 +266,23 @@ class YahooFinanceClient:
             sector,
             ("XLK", "Sector benchmark"),
         )
-        market_context_snapshots = [
-            _build_market_context_snapshot(
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            broad_market_future = executor.submit(
+                _build_market_context_snapshot,
                 label="S&P 500",
                 symbol="^GSPC",
                 description="Broad-market baseline for the current U.S. session.",
-            ),
-            _build_market_context_snapshot(
+            )
+            sector_future = executor.submit(
+                _build_market_context_snapshot,
                 label=benchmark_label,
                 symbol=benchmark_symbol,
                 description="Sector proxy chosen from the company's reported sector.",
-            ),
-        ]
+            )
+            market_context_snapshots = [
+                broad_market_future.result(),
+                sector_future.result(),
+            ]
         market_contexts = [snapshot.card for snapshot in market_context_snapshots]
         comparison_series = [
             ComparisonSeriesSeed(
@@ -595,11 +605,18 @@ def _build_financial_bridge_periods(
     annual_period_end_date: date | None = None
     periods: list[FinancialBridgePeriod] = []
 
-    for period_key, label, statement_attribute in FINANCIAL_BRIDGE_PERIOD_SPECS:
-        statement_period_data = _fetch_income_statement_period_data(
-            ticker,
-            statement_attribute=statement_attribute,
-        )
+    with ThreadPoolExecutor(max_workers=len(FINANCIAL_BRIDGE_PERIOD_SPECS)) as executor:
+        period_data_by_key = {
+            period_key: executor.submit(
+                _fetch_income_statement_period_data,
+                ticker,
+                statement_attribute=statement_attribute,
+            )
+            for period_key, _label, statement_attribute in FINANCIAL_BRIDGE_PERIOD_SPECS
+        }
+
+    for period_key, label, _statement_attribute in FINANCIAL_BRIDGE_PERIOD_SPECS:
+        statement_period_data = period_data_by_key[period_key].result()
         waterfall = _build_income_statement_waterfall_from_values(
             info=info,
             statement_values=statement_period_data.values,
@@ -1000,23 +1017,34 @@ def _build_performance_chart_ranges(
     chart_ranges: list[PerformanceChartRange] = []
     last_error: YahooFinanceLookupError | None = None
 
-    for range_key, label, years, period, interval in PERFORMANCE_RANGE_SPECS:
-        try:
-            chart_ranges.append(
-                PerformanceChartRange(
-                    range_key=range_key,
-                    label=label,
-                    series=_build_performance_chart(
-                        ticker=ticker,
-                        comparison_series=comparison_series,
-                        years=years,
-                        period=period,
-                        interval=interval,
-                    ),
-                )
+    with ThreadPoolExecutor(max_workers=len(PERFORMANCE_RANGE_SPECS)) as executor:
+        range_futures = [
+            (
+                range_key,
+                label,
+                executor.submit(
+                    _build_performance_chart,
+                    ticker=ticker,
+                    comparison_series=comparison_series,
+                    years=years,
+                    period=period,
+                    interval=interval,
+                ),
             )
-        except YahooFinanceLookupError as exc:
-            last_error = exc
+            for range_key, label, years, period, interval in PERFORMANCE_RANGE_SPECS
+        ]
+
+        for range_key, label, range_future in range_futures:
+            try:
+                chart_ranges.append(
+                    PerformanceChartRange(
+                        range_key=range_key,
+                        label=label,
+                        series=range_future.result(),
+                    )
+                )
+            except YahooFinanceLookupError as exc:
+                last_error = exc
 
     if chart_ranges:
         return chart_ranges
@@ -1039,14 +1067,30 @@ def _build_performance_chart(
 ) -> list[PerformanceSeries]:
     current_date = datetime.now(UTC).date()
     anchor_date = _subtract_years(current_date, years)
-    history_by_symbol = {
-        symbol: _fetch_history_points(symbol, period=period, interval=interval)
-        for symbol in {series.symbol for series in comparison_series}
-    }
-    anchor_value_by_symbol = {
-        symbol: _fetch_anchor_value(symbol, anchor_date)
-        for symbol in {series.symbol for series in comparison_series}
-    }
+    unique_symbols = sorted({series.symbol for series in comparison_series})
+
+    with ThreadPoolExecutor(max_workers=max(1, len(unique_symbols) * 2)) as executor:
+        history_futures = {
+            symbol: executor.submit(
+                _fetch_history_points,
+                symbol,
+                period=period,
+                interval=interval,
+            )
+            for symbol in unique_symbols
+        }
+        anchor_futures = {
+            symbol: executor.submit(_fetch_anchor_value, symbol, anchor_date)
+            for symbol in unique_symbols
+        }
+        history_by_symbol = {
+            symbol: history_future.result()
+            for symbol, history_future in history_futures.items()
+        }
+        anchor_value_by_symbol = {
+            symbol: anchor_future.result()
+            for symbol, anchor_future in anchor_futures.items()
+        }
     common_dates = sorted(
         set.intersection(*(set(history.keys()) for history in history_by_symbol.values()))
     )

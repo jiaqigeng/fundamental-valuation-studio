@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from concurrent.futures import ThreadPoolExecutor
 from datetime import date
 from datetime import datetime
 from decimal import Decimal, ROUND_HALF_UP
@@ -58,20 +59,25 @@ class FinancialModelingPrepClient:
             return None
 
         with httpx.Client(base_url=FMP_BASE_URL, timeout=self._timeout) as client:
-            product_breakdown = self._fetch_breakdown_for_endpoint(
-                client,
-                endpoint=FMP_PRODUCT_SEGMENT_ENDPOINT,
-                ticker=ticker,
-                target_revenue=target_revenue,
-                period=period,
-            )
-            geographic_breakdown = self._fetch_breakdown_for_endpoint(
-                client,
-                endpoint=FMP_GEOGRAPHIC_SEGMENT_ENDPOINT,
-                ticker=ticker,
-                target_revenue=target_revenue,
-                period=period,
-            )
+            with ThreadPoolExecutor(max_workers=2) as executor:
+                product_future = executor.submit(
+                    self._fetch_breakdown_for_endpoint,
+                    client,
+                    endpoint=FMP_PRODUCT_SEGMENT_ENDPOINT,
+                    ticker=ticker,
+                    target_revenue=target_revenue,
+                    period=period,
+                )
+                geographic_future = executor.submit(
+                    self._fetch_breakdown_for_endpoint,
+                    client,
+                    endpoint=FMP_GEOGRAPHIC_SEGMENT_ENDPOINT,
+                    ticker=ticker,
+                    target_revenue=target_revenue,
+                    period=period,
+                )
+                product_breakdown = product_future.result()
+                geographic_breakdown = geographic_future.result()
 
         return _choose_preferred_breakdown(
             product_breakdown=product_breakdown,

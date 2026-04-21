@@ -633,3 +633,15 @@
 - Files or artifacts updated: `backend/app/clients/yahoo_finance.py`, `backend/app/schemas/valuation.py`, `backend/app/services/valuation.py`, `backend/tests/test_val_001a.py`, `backend/ARCHITECTURE.md`, `docs/backend.md`, `docs/frontend.md`, `frontend/ARCHITECTURE.md`, `frontend/src/app/valuation/page.tsx`, `frontend/src/app/_components/dcf-calculator-panel.tsx`, `frontend/src/app/_lib/valuation.ts`, `frontend/e2e/val-001b.spec.ts`, `artifacts/verification/val-001a-pytest.log`, `artifacts/verification/val-001b-playwright.log`, `feature_list.json`, `progress.md`, `session-handoff.md`
 - Known risk or unresolved issue: The valuation app path no longer relies on hardcoded DCF numbers, but it now depends directly on live yfinance availability for the baseline fetch. The DCF model is intentionally a simple direct-FCF growth model, so it does not yet support staged growth curves, margin-driven forecast builds, or scenario persistence. The dashboard still keeps its own fixture mode for deterministic non-DCF verification.
 - Next best step: Resume the roadmap at `val-002` when ready, keeping the new DCF contract stable while the dividend discount model is added beside it.
+
+### Session 053
+
+- Date: 2026-04-20
+- Goal: Improve dashboard responsiveness by parallelizing the stacked live Yahoo Finance and FMP fetches without widening scope into caching or layout changes.
+- Completed: Parallelized the two live FMP segment requests, parallelized Yahoo market-context snapshot fetches, parallelized yearly and quarterly income-statement fetches for the financial bridge, parallelized the performance-chart range builds, and parallelized the per-symbol history and anchor lookups inside each range so the dashboard backend no longer waits on those upstream calls one by one.
+- Verification run: `cd backend && .venv/Scripts/python.exe -m pytest tests/test_company_workspace.py -q`; `cd backend && .venv/Scripts/python.exe -m pytest tests/test_val_001a.py -q`
+- Evidence captured: `cd backend && .venv/Scripts/python.exe -m pytest tests/test_company_workspace.py -q` passed with `14 passed` plus one existing pytest cache warning; `cd backend && .venv/Scripts/python.exe -m pytest tests/test_val_001a.py -q` passed with `5 passed` plus one existing pytest cache warning.
+- Commits: none yet
+- Files or artifacts updated: `backend/app/clients/yahoo_finance.py`, `backend/app/clients/financial_modeling_prep.py`, `progress.md`, `session-handoff.md`
+- Known risk or unresolved issue: This trims stacked latency, but the dashboard still performs live upstream work on every request because the frontend workspace fetch remains `cache: "no-store"` and the backend still does not cache assembled workspace payloads.
+- Next best step: If the dashboard is still slower than expected after this concurrency pass, add a short backend TTL cache for `/companies/{ticker}/workspace` before splitting sections or changing the frontend fetch policy.
