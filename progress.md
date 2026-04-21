@@ -737,7 +737,7 @@
 - Completed: Re-ran `./init.sh`, removed the extra per-field top margin that was offsetting the assumption grid, and tightened the upside/downside color selectors so a positive upside now renders green while downside stays red.
 - Verification run: `./init.sh`; `cd frontend && npm.cmd run lint`; `cd frontend && npm.cmd run typecheck`
 - Evidence captured: `./init.sh` passed again before the fix; frontend `npm.cmd run lint` passed; frontend `npm.cmd run typecheck` passed.
-- Commits: none yet
+- Commits: `d389fa2 Fix valuation field alignment and upside color`
 - Files or artifacts updated: `frontend/src/app/globals.css`, `progress.md`, `session-handoff.md`
 - Known risk or unresolved issue: This is still a presentational correction only; the DCF calculation flow and data contract are unchanged underneath.
 - Next best step: Resume the roadmap at `val-002` unless the user wants more valuation-page UI cleanup.
