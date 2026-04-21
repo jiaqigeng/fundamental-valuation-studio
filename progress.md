@@ -725,7 +725,7 @@
 - Completed: Re-ran `./init.sh`, changed the desktop output grid so the two result tiles split the output section evenly, made any computed non-upside valuation gap use the red downside styling while positive upside stays green, and set the valuation input and select controls to the same explicit height so the assumption fields line up consistently.
 - Verification run: `./init.sh`; `cd frontend && npm.cmd run lint`; `cd frontend && npm.cmd run typecheck`
 - Evidence captured: `./init.sh` passed again before the refinement; frontend `npm.cmd run lint` passed; frontend `npm.cmd run typecheck` passed.
-- Commits: none yet
+- Commits: `4bafb67 Polish DCF output and input layout`
 - Files or artifacts updated: `frontend/src/app/_components/dcf-calculator-panel.tsx`, `frontend/src/app/globals.css`, `progress.md`, `session-handoff.md`
 - Known risk or unresolved issue: This is still a presentation-only polish pass; the DCF calculation flow and data contract are unchanged underneath.
 - Next best step: Resume the roadmap at `val-002` unless the user wants more valuation-page UI cleanup.

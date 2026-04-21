@@ -22,6 +22,7 @@
 - Latest tweak: Removed current stock price from the output block and changed the remaining pre-calculation output placeholders to `-`.
 - Latest tweak commit: `f876c16 Trim DCF output placeholders`
 - Newest polish: Made the two output tiles span the output row more evenly, kept positive upside green and non-upside values red, and normalized the valuation assumption field heights.
+- Newest polish commit: `4bafb67 Polish DCF output and input layout`
 - Infrastructure or harness changes: Refreshed `artifacts/verification/val-001a-pytest.log` and `artifacts/verification/val-001b-playwright.log`, re-ran the targeted backend/frontend verification gates after the redesign and contract simplification, and finished with a clean passing `./init.sh` baseline rerun.
 - Documentation changes: Updated `docs/backend.md`, `docs/frontend.md`, `frontend/ARCHITECTURE.md`, `feature_list.json`, `progress.md`, and this handoff to reflect the streamlined live FCF DCF path and the new user-assumption contract.
 - Implementation commit: `807a100 Simplify DCF valuation workspace`
