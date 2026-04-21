@@ -15,12 +15,10 @@ export function TickerSearchForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-
+  async function handleRouteSelection(destination: "dashboard" | "valuation") {
     const normalizedTicker = ticker.trim().toUpperCase();
     if (!normalizedTicker) {
-      setErrorMessage("Enter a ticker to open a company workspace.");
+      setErrorMessage("Enter a ticker before choosing where to go.");
       return;
     }
 
@@ -40,7 +38,11 @@ export function TickerSearchForm({
         | { valid: false; message: string };
 
       if (payload.valid) {
-        router.push(`/dashboard/${normalizedTicker}`);
+        if (destination === "dashboard") {
+          router.push(`/dashboard/${normalizedTicker}`);
+        } else {
+          router.push(`/valuation?ticker=${encodeURIComponent(normalizedTicker)}`);
+        }
         return;
       }
 
@@ -55,7 +57,12 @@ export function TickerSearchForm({
   }
 
   return (
-    <form className="ticker-search-form" onSubmit={handleSubmit}>
+    <form
+      className="ticker-search-form"
+      onSubmit={(event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+      }}
+    >
       <label className="ticker-search-label" htmlFor="ticker-input">
         Ticker
       </label>
@@ -72,6 +79,11 @@ export function TickerSearchForm({
               setErrorMessage(null);
             }
           }}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") {
+              event.preventDefault();
+            }
+          }}
           placeholder="Ticker symbol"
           autoComplete="off"
           spellCheck={false}
@@ -83,16 +95,32 @@ export function TickerSearchForm({
           }
           aria-invalid={errorMessage ? "true" : "false"}
         />
-        <button
-          className="ticker-search-button"
-          type="submit"
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? "Checking ticker..." : "Open workspace"}
-        </button>
+        <div className="ticker-search-actions">
+          <button
+            className="ticker-search-button"
+            type="button"
+            disabled={isSubmitting}
+            onClick={() => {
+              void handleRouteSelection("dashboard");
+            }}
+          >
+            {isSubmitting ? "Checking ticker..." : "Financial Dashboard"}
+          </button>
+          <button
+            className="back-link landing-valuation-link"
+            type="button"
+            disabled={isSubmitting}
+            onClick={() => {
+              void handleRouteSelection("valuation");
+            }}
+          >
+            Value Calculator
+          </button>
+        </div>
       </div>
       <p className="ticker-search-help" id="ticker-search-help">
-        Search by a public-company ticker to open the company workspace.
+        Enter a public-company ticker, then choose whether to open the financial
+        dashboard or the value calculators.
       </p>
       {errorMessage ? (
         <p className="ticker-search-error" id="ticker-search-error" role="alert">

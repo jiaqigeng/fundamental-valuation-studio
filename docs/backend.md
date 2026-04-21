@@ -41,7 +41,7 @@ It should not be the source of truth for where backend code belongs as the servi
 - `backend/app/main.py` now constructs the FastAPI app and includes routers rather than owning every responsibility directly.
 - `backend/app/routers/companies.py`, `app/services/company_workspace.py`, `app/clients/yahoo_finance.py`, and `app/schemas/company_workspace.py` are the reference shape for the first external-data feature.
 - `backend/app/routers/valuations.py`, `app/services/valuation.py`, and `app/schemas/valuation.py` are the reference shape for backend-only valuation math.
-- `GET /valuations/dcf/{ticker}/baseline` now provides the frontend-facing DCF baseline contract by pulling live yfinance company inputs such as free cash flow, shares outstanding, debt, cash, beta, Treasury proxy, and current price.
+- `GET /valuations/dcf/{ticker}/baseline` now provides the frontend-facing DCF baseline contract by pulling live yfinance company inputs such as current free cash flow, total cash, total debt, shares outstanding, and current stock price.
 - `backend/tests/test_health.py`, `backend/tests/test_company_workspace.py`, and `backend/tests/test_val_001a.py` are the current backend reference tests.
 - SQLAlchemy is installed but not yet used by the running app.
 

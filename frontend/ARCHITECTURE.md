@@ -14,7 +14,7 @@ It should avoid repeating routine commands, test-running instructions, and edit-
 
 ## What the frontend does
 
-The frontend is the user's entry point into Fundamental Valuation Studio. A user lands on a ticker-search page, can either submit a ticker into the dashboard flow or jump directly to the valuation route, and is routed into dedicated workspace pages. The dashboard route now depends on backend-backed workspace data, while the landing-page search form validates tickers through a small local route handler before navigation so invalid input can be handled inline.
+The frontend is the user's entry point into Fundamental Valuation Studio. A user lands on a ticker-search page, enters a ticker, explicitly chooses either the dashboard or valuation flow, and is routed into dedicated workspace pages. The dashboard route now depends on backend-backed workspace data, while the landing-page search form validates tickers through a small local route handler before navigation so invalid input can be handled inline.
 
 ## Top-level shape
 
@@ -58,14 +58,13 @@ The underscore prefix on `_components/` and `_lib/` keeps them out of the Next.j
 
 ```text
 User -> / (page.tsx)
-     -> <Link href="/valuation"> from landing CTA
      -> <TickerSearchForm> client component
         -> /api/companies/[ticker]/validate route handler
         -> inline error when ticker is invalid
-        -> router.push(`/dashboard/${TICKER}`) when valid
+        -> router.push(`/dashboard/${TICKER}`) or router.push(`/valuation?ticker=${TICKER}`) when valid
      -> /valuation (page.tsx)
         -> getDcfBaselineData(ticker)   // from _lib
-        -> renders calculator lineup + DCF workspace
+        -> renders DCF workspace shell
         -> <DcfCalculatorPanel> client component
            -> /api/valuations/dcf route handler
            -> backend valuation route

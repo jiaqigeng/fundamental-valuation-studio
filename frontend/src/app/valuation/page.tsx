@@ -16,17 +16,19 @@ export default async function ValuationPage({
   const baseline = await getDcfBaselineData(activeTicker);
 
   return (
-    <main className="landing-shell">
-      <section className="landing-hero valuation-hero">
+    <main className="dashboard-shell valuation-page-shell">
+      <section className="dashboard-hero valuation-hero">
         <p className="eyebrow">Valuation</p>
-        <h1>Open the calculator stack for a company.</h1>
-        <p className="hero-copy">
-          Start with a DCF view that already knows the company&apos;s current
-          free cash flow, capital structure, beta, Treasury proxy, and stock
-          price. From there, enter your own growth and discount assumptions
-          instead of relying on hardcoded model guesses.
+        <h1 className="dashboard-company-title">Value a company with a cleaner DCF workflow.</h1>
+        <p className="hero-copy valuation-hero-copy">
+          Start from the latest free cash flow, cash, debt, share count, and
+          stock price. Then set only the growth path, terminal growth, discount
+          rate, and projection horizon.
         </p>
-        <div className="ticker-chip-row valuation-ticker-row" aria-label="Featured valuation tickers">
+        <div
+          className="ticker-chip-row valuation-ticker-row"
+          aria-label="Featured valuation tickers"
+        >
           {FEATURED_TICKERS.map((ticker) => (
             <Link
               key={ticker}
@@ -47,47 +49,6 @@ export default async function ValuationPage({
           >
             Open {activeTicker} dashboard
           </Link>
-        </div>
-      </section>
-
-      <section
-        className="supported-companies valuation-calculator-picker"
-        aria-label="Calculator lineup"
-      >
-        <p className="panel-label">Calculator lineup</p>
-        <div className="valuation-calculator-cards">
-          <article className="project-overview-card valuation-calculator-card valuation-calculator-card-active">
-            <p className="valuation-calculator-badge">Live now</p>
-            <h2>Discounted cash flow</h2>
-            <p>
-              Load baseline assumptions from company data, override the core
-              drivers, and recompute intrinsic value in one place.
-            </p>
-          </article>
-          <article className="project-overview-card valuation-calculator-card">
-            <p className="valuation-calculator-badge">Next up</p>
-            <h2>Dividend discount model</h2>
-            <p>
-              Focus on dividend payers with editable dividend growth and cost of
-              equity assumptions.
-            </p>
-          </article>
-          <article className="project-overview-card valuation-calculator-card">
-            <p className="valuation-calculator-badge">Planned</p>
-            <h2>Residual income model</h2>
-            <p>
-              Bring book value and ROE-based valuation into the same workspace
-              for businesses where FCF is less useful.
-            </p>
-          </article>
-          <article className="project-overview-card valuation-calculator-card">
-            <p className="valuation-calculator-badge">Planned</p>
-            <h2>Relative valuation</h2>
-            <p>
-              Compare multiples and implied price ranges against a peer set
-              without leaving the valuation flow.
-            </p>
-          </article>
         </div>
       </section>
 

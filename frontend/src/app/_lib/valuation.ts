@@ -6,30 +6,22 @@ export type DcfBaselineData = {
   readonly currentPriceDisplay: string;
   readonly currentFreeCashFlow: number;
   readonly currentFreeCashFlowDisplay: string;
-  readonly sharesOutstanding: number;
-  readonly sharesOutstandingDisplay: string;
+  readonly totalCash: number;
+  readonly totalCashDisplay: string;
   readonly totalDebt: number;
   readonly totalDebtDisplay: string;
-  readonly cashAndCashEquivalents: number;
-  readonly cashAndCashEquivalentsDisplay: string;
-  readonly riskFreeRate: number | null;
-  readonly riskFreeRateDisplay: string;
-  readonly beta: number | null;
-  readonly betaDisplay: string;
-  readonly assumptionNotes: readonly string[];
+  readonly sharesOutstanding: number;
+  readonly sharesOutstandingDisplay: string;
 };
 
 export type DcfValuationPayload = {
   readonly currentFreeCashFlow: number;
   readonly shortTermGrowthRate: number;
   readonly terminalGrowthRate: number;
-  readonly equityRiskPremium: number;
-  readonly riskFreeRate: number | null;
-  readonly beta: number | null;
   readonly discountRate: number;
   readonly sharesOutstanding: number;
   readonly totalDebt: number;
-  readonly cashAndCashEquivalents: number;
+  readonly totalCash: number;
   readonly projectionYears: number;
 };
 
@@ -41,7 +33,6 @@ export type DcfProjectionYear = {
 
 export type DcfValuationResult = {
   readonly projections: readonly DcfProjectionYear[];
-  readonly capmCostOfEquity: number | null;
   readonly terminalFreeCashFlow: number;
   readonly terminalValue: number;
   readonly terminalPresentValue: number;
@@ -92,13 +83,10 @@ export async function calculateDcfValuation(
       current_free_cash_flow: payload.currentFreeCashFlow,
       short_term_growth_rate: payload.shortTermGrowthRate,
       terminal_growth_rate: payload.terminalGrowthRate,
-      equity_risk_premium: payload.equityRiskPremium,
-      risk_free_rate: payload.riskFreeRate,
-      beta: payload.beta,
       discount_rate: payload.discountRate,
       shares_outstanding: payload.sharesOutstanding,
       total_debt: payload.totalDebt,
-      cash_and_cash_equivalents: payload.cashAndCashEquivalents,
+      cash_and_cash_equivalents: payload.totalCash,
       projection_years: payload.projectionYears,
     }),
   });
@@ -120,7 +108,6 @@ export function mapDcfValuationResponse(
       freeCashFlow: projection.free_cash_flow,
       presentValue: projection.present_value,
     })),
-    capmCostOfEquity: payload.capm_cost_of_equity,
     terminalFreeCashFlow: payload.terminal_free_cash_flow,
     terminalValue: payload.terminal_value,
     terminalPresentValue: payload.terminal_present_value,
@@ -138,17 +125,12 @@ type BackendDcfBaselineData = {
   current_price_display: string;
   current_free_cash_flow: number;
   current_free_cash_flow_display: string;
-  shares_outstanding: number;
-  shares_outstanding_display: string;
+  total_cash: number;
+  total_cash_display: string;
   total_debt: number;
   total_debt_display: string;
-  cash_and_cash_equivalents: number;
-  cash_and_cash_equivalents_display: string;
-  risk_free_rate: number | null;
-  risk_free_rate_display: string;
-  beta: number | null;
-  beta_display: string;
-  assumption_notes: string[];
+  shares_outstanding: number;
+  shares_outstanding_display: string;
 };
 
 type BackendDcfValuationResult = {
@@ -157,7 +139,6 @@ type BackendDcfValuationResult = {
     free_cash_flow: number;
     present_value: number;
   }[];
-  capm_cost_of_equity: number | null;
   terminal_free_cash_flow: number;
   terminal_value: number;
   terminal_present_value: number;
@@ -175,16 +156,11 @@ function mapDcfBaseline(payload: BackendDcfBaselineData): DcfBaselineData {
     currentPriceDisplay: payload.current_price_display,
     currentFreeCashFlow: payload.current_free_cash_flow,
     currentFreeCashFlowDisplay: payload.current_free_cash_flow_display,
-    sharesOutstanding: payload.shares_outstanding,
-    sharesOutstandingDisplay: payload.shares_outstanding_display,
+    totalCash: payload.total_cash,
+    totalCashDisplay: payload.total_cash_display,
     totalDebt: payload.total_debt,
     totalDebtDisplay: payload.total_debt_display,
-    cashAndCashEquivalents: payload.cash_and_cash_equivalents,
-    cashAndCashEquivalentsDisplay: payload.cash_and_cash_equivalents_display,
-    riskFreeRate: payload.risk_free_rate,
-    riskFreeRateDisplay: payload.risk_free_rate_display,
-    beta: payload.beta,
-    betaDisplay: payload.beta_display,
-    assumptionNotes: payload.assumption_notes,
+    sharesOutstanding: payload.shares_outstanding,
+    sharesOutstandingDisplay: payload.shares_outstanding_display,
   };
 }

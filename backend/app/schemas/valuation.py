@@ -5,9 +5,6 @@ class DcfValuationRequest(BaseModel):
     current_free_cash_flow: float
     short_term_growth_rate: float = Field(..., gt=-0.99, lt=1)
     terminal_growth_rate: float = Field(..., gt=-0.99, lt=1)
-    equity_risk_premium: float = Field(..., ge=0, lt=1)
-    risk_free_rate: float | None = Field(default=None, ge=0, lt=1)
-    beta: float | None = None
     discount_rate: float = Field(..., gt=0, lt=1)
     shares_outstanding: float = Field(..., gt=0)
     total_debt: float = Field(default=0.0, ge=0)
@@ -31,7 +28,6 @@ class DcfProjectionYear(BaseModel):
 
 class DcfValuationResponse(BaseModel):
     projections: list[DcfProjectionYear]
-    capm_cost_of_equity: float | None = None
     terminal_free_cash_flow: float
     terminal_value: float
     terminal_present_value: float
@@ -48,14 +44,9 @@ class DcfBaselineResponse(BaseModel):
     current_price_display: str
     current_free_cash_flow: float
     current_free_cash_flow_display: str
-    shares_outstanding: float
-    shares_outstanding_display: str
+    total_cash: float
+    total_cash_display: str
     total_debt: float
     total_debt_display: str
-    cash_and_cash_equivalents: float
-    cash_and_cash_equivalents_display: str
-    risk_free_rate: float | None = None
-    risk_free_rate_display: str
-    beta: float | None = None
-    beta_display: str
-    assumption_notes: list[str]
+    shares_outstanding: float
+    shares_outstanding_display: str

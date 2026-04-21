@@ -65,15 +65,8 @@ def calculate_dcf_valuation(payload: DcfValuationRequest) -> DcfValuationRespons
     )
     intrinsic_value_per_share = equity_value / payload.shares_outstanding
 
-    capm_cost_of_equity = None
-    if payload.risk_free_rate is not None and payload.beta is not None:
-        capm_cost_of_equity = payload.risk_free_rate + (
-            payload.beta * payload.equity_risk_premium
-        )
-
     return DcfValuationResponse(
         projections=projections,
-        capm_cost_of_equity=capm_cost_of_equity,
         terminal_free_cash_flow=terminal_free_cash_flow,
         terminal_value=terminal_value,
         terminal_present_value=terminal_present_value,

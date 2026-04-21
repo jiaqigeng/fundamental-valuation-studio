@@ -16,7 +16,6 @@ type DcfCalculatorPanelProps = {
 type DcfFormState = {
   readonly shortTermGrowthRate: string;
   readonly terminalGrowthRate: string;
-  readonly equityRiskPremium: string;
   readonly discountRate: string;
   readonly projectionYears: string;
 };
@@ -27,7 +26,6 @@ type BackendDcfValuationResult = {
     free_cash_flow: number;
     present_value: number;
   }[];
-  capm_cost_of_equity: number | null;
   terminal_free_cash_flow: number;
   terminal_value: number;
   terminal_present_value: number;
@@ -36,11 +34,47 @@ type BackendDcfValuationResult = {
   intrinsic_value_per_share: number;
 };
 
+const FETCHED_METRICS: Array<{
+  readonly label: string;
+  readonly valueKey:
+    | "currentFreeCashFlowDisplay"
+    | "totalCashDisplay"
+    | "totalDebtDisplay"
+    | "sharesOutstandingDisplay"
+    | "currentPriceDisplay";
+  readonly tone: "blue" | "teal" | "gold";
+}> = [
+  {
+    label: "Current Free Cash Flow",
+    valueKey: "currentFreeCashFlowDisplay",
+    tone: "blue",
+  },
+  {
+    label: "Total Cash",
+    valueKey: "totalCashDisplay",
+    tone: "teal",
+  },
+  {
+    label: "Total Debt",
+    valueKey: "totalDebtDisplay",
+    tone: "gold",
+  },
+  {
+    label: "Shares Outstanding",
+    valueKey: "sharesOutstandingDisplay",
+    tone: "blue",
+  },
+  {
+    label: "Current Stock Price",
+    valueKey: "currentPriceDisplay",
+    tone: "teal",
+  },
+];
+
 export function DcfCalculatorPanel({ baseline }: DcfCalculatorPanelProps) {
   const [formState, setFormState] = useState<DcfFormState>({
     shortTermGrowthRate: "",
     terminalGrowthRate: "",
-    equityRiskPremium: "",
     discountRate: "",
     projectionYears: "5",
   });
@@ -48,7 +82,6 @@ export function DcfCalculatorPanel({ baseline }: DcfCalculatorPanelProps) {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
-  const capmPreview = buildCapmPreview(formState.equityRiskPremium, baseline);
   const valuationGap =
     result && baseline.currentPrice && baseline.currentPrice > 0
       ? result.intrinsicValuePerShare / baseline.currentPrice - 1
@@ -67,7 +100,7 @@ export function DcfCalculatorPanel({ baseline }: DcfCalculatorPanelProps) {
     const payload = buildPayload(formState, baseline);
     if (payload === null) {
       setErrorMessage(
-        "Enter valid growth, equity risk premium, and discount-rate assumptions before recalculating.",
+        "Enter valid growth and discount assumptions before recalculating.",
       );
       return;
     }
@@ -89,13 +122,10 @@ export function DcfCalculatorPanel({ baseline }: DcfCalculatorPanelProps) {
             current_free_cash_flow: payload.currentFreeCashFlow,
             short_term_growth_rate: payload.shortTermGrowthRate,
             terminal_growth_rate: payload.terminalGrowthRate,
-            equity_risk_premium: payload.equityRiskPremium,
-            risk_free_rate: payload.riskFreeRate,
-            beta: payload.beta,
             discount_rate: payload.discountRate,
             shares_outstanding: payload.sharesOutstanding,
             total_debt: payload.totalDebt,
-            cash_and_cash_equivalents: payload.cashAndCashEquivalents,
+            cash_and_cash_equivalents: payload.totalCash,
             projection_years: payload.projectionYears,
           }),
         });
@@ -126,59 +156,65 @@ export function DcfCalculatorPanel({ baseline }: DcfCalculatorPanelProps) {
 
   return (
     <section
+      aria-label="Discounted cash flow"
       aria-labelledby="dcf-calculator-heading"
-      className="workspace-panel valuation-calculator-shell"
+      className="workspace-panel valuation-workbench-shell"
     >
-      <div className="valuation-company-strip">
-        <div>
-          <p className="panel-label">Selected company</p>
-          <h2 id="dcf-calculator-heading">Discounted cash flow</h2>
-          <p className="valuation-company-copy">
-            {baseline.companyName} ({baseline.ticker}) in {baseline.sector}.
-            Company inputs come from yfinance; growth and discount assumptions
-            come from you.
+      <div className="valuation-workbench-hero">
+        <div className="valuation-workbench-hero-copy">
+          <p className="panel-label">DCF Workbench</p>
+          <h2 id="dcf-calculator-heading">
+            {baseline.companyName} ({baseline.ticker})
+          </h2>
+          <p className="valuation-workbench-copy">
+            A cleaner direct-FCF DCF built from the latest capital structure and
+            trading context, with only the assumptions you actually need to
+            control.
           </p>
         </div>
-        <dl className="valuation-company-metrics">
-          <div className="valuation-company-metric">
-            <dt>Price</dt>
-            <dd>{baseline.currentPriceDisplay}</dd>
-          </div>
-          <div className="valuation-company-metric">
-            <dt>Current free cash flow</dt>
-            <dd>{baseline.currentFreeCashFlowDisplay}</dd>
-          </div>
-          <div className="valuation-company-metric">
-            <dt>Shares outstanding</dt>
-            <dd>{baseline.sharesOutstandingDisplay}</dd>
-          </div>
-          <div className="valuation-company-metric">
-            <dt>Total debt</dt>
-            <dd>{baseline.totalDebtDisplay}</dd>
-          </div>
-          <div className="valuation-company-metric">
-            <dt>Cash &amp; equivalents</dt>
-            <dd>{baseline.cashAndCashEquivalentsDisplay}</dd>
-          </div>
-          <div className="valuation-company-metric">
-            <dt>Risk-free rate</dt>
-            <dd>{baseline.riskFreeRateDisplay}</dd>
-          </div>
-          <div className="valuation-company-metric">
-            <dt>Beta</dt>
-            <dd>{baseline.betaDisplay}</dd>
-          </div>
-        </dl>
+        <div className="valuation-status-pill">
+          <span>Sector</span>
+          <strong>{baseline.sector}</strong>
+        </div>
       </div>
 
-      <div className="valuation-calculator-layout">
-        <form className="valuation-form-grid" onSubmit={handleSubmit}>
-          <div className="valuation-form-card">
-            <h3>User assumptions</h3>
+      <div className="valuation-workbench-layout">
+        <section className="valuation-fetched-panel" aria-label="Fetched company inputs">
+          <div className="financial-bridge-subsection-header">
+            <h3>Fetched company inputs</h3>
+            <p className="financial-bridge-period-status">
+              Live values from yfinance
+            </p>
+          </div>
+          <div className="valuation-fetched-grid">
+            {FETCHED_METRICS.map((metric) => (
+              <article
+                key={metric.label}
+                className={`valuation-fetched-card valuation-fetched-card-${metric.tone}`}
+              >
+                <p>{metric.label}</p>
+                <strong>{baseline[metric.valueKey]}</strong>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <form
+          className="valuation-assumptions-panel"
+          onSubmit={handleSubmit}
+          aria-label="DCF assumptions"
+        >
+          <div className="financial-bridge-subsection-header">
+            <h3>Assumptions</h3>
+            <p className="financial-bridge-period-status">
+              Keep the model focused on growth and discounting
+            </p>
+          </div>
+          <div className="valuation-assumptions-grid">
             <label className="valuation-field">
-              <span>Short-term FCF growth (%)</span>
+              <span>Short-Term Growth Rate (%)</span>
               <input
-                aria-label="Short-term FCF growth"
+                aria-label="Short-Term Growth Rate"
                 inputMode="decimal"
                 type="number"
                 step="0.1"
@@ -189,9 +225,9 @@ export function DcfCalculatorPanel({ baseline }: DcfCalculatorPanelProps) {
               />
             </label>
             <label className="valuation-field">
-              <span>Terminal growth (%)</span>
+              <span>Terminal Growth Rate (%)</span>
               <input
-                aria-label="Terminal growth"
+                aria-label="Terminal Growth Rate"
                 inputMode="decimal"
                 type="number"
                 step="0.1"
@@ -202,22 +238,9 @@ export function DcfCalculatorPanel({ baseline }: DcfCalculatorPanelProps) {
               />
             </label>
             <label className="valuation-field">
-              <span>Equity risk premium (%)</span>
+              <span>Discount Rate / WACC (%)</span>
               <input
-                aria-label="Equity risk premium"
-                inputMode="decimal"
-                type="number"
-                step="0.1"
-                value={formState.equityRiskPremium}
-                onChange={(event) =>
-                  updateField("equityRiskPremium", event.target.value)
-                }
-              />
-            </label>
-            <label className="valuation-field">
-              <span>WACC / discount rate (%)</span>
-              <input
-                aria-label="WACC / discount rate"
+                aria-label="Discount Rate / WACC"
                 inputMode="decimal"
                 type="number"
                 step="0.1"
@@ -227,99 +250,96 @@ export function DcfCalculatorPanel({ baseline }: DcfCalculatorPanelProps) {
                 }
               />
             </label>
-          </div>
-
-          <div className="valuation-form-card">
-            <h3>Model settings</h3>
             <label className="valuation-field">
-              <span>Projection horizon</span>
+              <span>Project Years</span>
               <select
-                aria-label="Projection horizon"
+                aria-label="Project Years"
                 value={formState.projectionYears}
                 onChange={(event) =>
                   updateField("projectionYears", event.target.value)
                 }
               >
-                <option value="5">Years 1-5</option>
-                <option value="10">Years 1-10</option>
+                <option value="5">5 years</option>
+                <option value="10">10 years</option>
               </select>
             </label>
-            <div className="valuation-result-card">
-              <p>CAPM cost of equity</p>
-              <strong>{formatPercent(capmPreview)}</strong>
-            </div>
-            <p className="panel-copy">
-              CAPM uses the fetched risk-free rate and beta with your equity risk
-              premium as a reference point; the valuation still discounts with
-              your chosen WACC / discount rate.
-            </p>
-            <button
-              className="ticker-search-button valuation-submit-button"
-              disabled={isPending}
-              type="submit"
-            >
-              {isPending ? "Recalculating..." : "Recalculate valuation"}
-            </button>
-            {errorMessage ? (
-              <p className="ticker-search-error" role="alert">
-                {errorMessage}
-              </p>
-            ) : null}
           </div>
+          <button
+            className="ticker-search-button valuation-submit-button"
+            disabled={isPending}
+            type="submit"
+          >
+            {isPending ? "Recalculating..." : "Calculate intrinsic value"}
+          </button>
+          {errorMessage ? (
+            <p className="ticker-search-error" role="alert">
+              {errorMessage}
+            </p>
+          ) : null}
         </form>
 
-        <div className="valuation-results-shell">
-          <div className="valuation-results-grid">
+        <section className="valuation-results-panel" aria-label="DCF results">
+          <div className="financial-bridge-subsection-header">
+            <h3>Output</h3>
+            <p className="financial-bridge-period-status">
+              Core value signals only
+            </p>
+          </div>
+          <div className="valuation-results-grid valuation-results-grid-compact">
             <article className="valuation-result-card valuation-result-card-primary">
               <p>Intrinsic value per share</p>
               <strong data-testid="intrinsic-value-per-share">
-                {result ? formatCurrency(result.intrinsicValuePerShare) : "Awaiting assumptions"}
+                {result
+                  ? formatCurrency(result.intrinsicValuePerShare)
+                  : "Awaiting assumptions"}
               </strong>
             </article>
             <article className="valuation-result-card">
-              <p>Price gap</p>
-              <strong>{result ? formatSignedPercent(valuationGap) : "Awaiting assumptions"}</strong>
+              <p>Current stock price</p>
+              <strong>{baseline.currentPriceDisplay}</strong>
             </article>
             <article className="valuation-result-card">
-              <p>Enterprise value</p>
+              <p>Upside / downside</p>
               <strong>
-                {result ? formatCompactCurrency(result.enterpriseValue) : "Awaiting assumptions"}
+                {result ? formatSignedPercent(valuationGap) : "Awaiting assumptions"}
               </strong>
             </article>
             <article className="valuation-result-card">
               <p>Equity value</p>
               <strong>
-                {result ? formatCompactCurrency(result.equityValue) : "Awaiting assumptions"}
+                {result
+                  ? formatCompactCurrency(result.equityValue)
+                  : "Awaiting assumptions"}
               </strong>
             </article>
-            <article className="valuation-result-card">
-              <p>Terminal value</p>
+          </div>
+          <div className="valuation-summary-band">
+            <div>
+              <span>Terminal value</span>
               <strong>
-                {result ? formatCompactCurrency(result.terminalValue) : "Awaiting assumptions"}
+                {result
+                  ? formatCompactCurrency(result.terminalValue)
+                  : "Awaiting assumptions"}
               </strong>
-            </article>
-            <article className="valuation-result-card">
-              <p>Terminal FCF</p>
+            </div>
+            <div>
+              <span>Enterprise value</span>
+              <strong>
+                {result
+                  ? formatCompactCurrency(result.enterpriseValue)
+                  : "Awaiting assumptions"}
+              </strong>
+            </div>
+            <div>
+              <span>Terminal FCF</span>
               <strong>
                 {result
                   ? formatCompactCurrency(result.terminalFreeCashFlow)
                   : "Awaiting assumptions"}
               </strong>
-            </article>
+            </div>
           </div>
-
-          <section
-            className="valuation-assumption-notes"
-            aria-label="Assumption notes"
-          >
-            <h3>Fetched baseline</h3>
-            <ul className="valuation-note-list">
-              {baseline.assumptionNotes.map((note) => (
-                <li key={note}>{note}</li>
-              ))}
-            </ul>
-          </section>
-        </div>
+        </section>
       </div>
 
       <section
@@ -337,8 +357,8 @@ export function DcfCalculatorPanel({ baseline }: DcfCalculatorPanelProps) {
             <thead>
               <tr>
                 <th>Year</th>
-                <th>Free cash flow</th>
-                <th>Present value</th>
+                <th>Free Cash Flow</th>
+                <th>Present Value</th>
               </tr>
             </thead>
             <tbody>
@@ -352,7 +372,9 @@ export function DcfCalculatorPanel({ baseline }: DcfCalculatorPanelProps) {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={3}>Enter your assumptions to project cash flows.</td>
+                  <td colSpan={3}>
+                    Enter the four assumptions above to generate the cash-flow path.
+                  </td>
                 </tr>
               )}
             </tbody>
@@ -369,14 +391,12 @@ function buildPayload(
 ): DcfValuationPayload | null {
   const shortTermGrowthRate = parseInputNumber(formState.shortTermGrowthRate);
   const terminalGrowthRate = parseInputNumber(formState.terminalGrowthRate);
-  const equityRiskPremium = parseInputNumber(formState.equityRiskPremium);
   const discountRate = parseInputNumber(formState.discountRate);
   const projectionYears = parseProjectionYears(formState.projectionYears);
 
   if (
     shortTermGrowthRate === null ||
     terminalGrowthRate === null ||
-    equityRiskPremium === null ||
     discountRate === null ||
     projectionYears === null
   ) {
@@ -387,31 +407,12 @@ function buildPayload(
     currentFreeCashFlow: baseline.currentFreeCashFlow,
     shortTermGrowthRate: shortTermGrowthRate / 100,
     terminalGrowthRate: terminalGrowthRate / 100,
-    equityRiskPremium: equityRiskPremium / 100,
-    riskFreeRate: baseline.riskFreeRate,
-    beta: baseline.beta,
     discountRate: discountRate / 100,
     sharesOutstanding: baseline.sharesOutstanding,
     totalDebt: baseline.totalDebt,
-    cashAndCashEquivalents: baseline.cashAndCashEquivalents,
+    totalCash: baseline.totalCash,
     projectionYears,
   };
-}
-
-function buildCapmPreview(
-  equityRiskPremiumInput: string,
-  baseline: DcfBaselineData,
-): number | null {
-  const equityRiskPremium = parseInputNumber(equityRiskPremiumInput);
-  if (
-    equityRiskPremium === null ||
-    baseline.riskFreeRate === null ||
-    baseline.beta === null
-  ) {
-    return null;
-  }
-
-  return baseline.riskFreeRate + baseline.beta * (equityRiskPremium / 100);
 }
 
 function parseInputNumber(value: string): number | null {
@@ -442,16 +443,6 @@ function formatCompactCurrency(value: number): string {
     style: "currency",
     currency: "USD",
     notation: "compact",
-    maximumFractionDigits: 1,
-  }).format(value);
-}
-
-function formatPercent(value: number | null): string {
-  if (value === null || Number.isNaN(value)) {
-    return "N/A";
-  }
-  return new Intl.NumberFormat("en-US", {
-    style: "percent",
     maximumFractionDigits: 1,
   }).format(value);
 }

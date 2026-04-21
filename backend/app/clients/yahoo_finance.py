@@ -196,13 +196,11 @@ class YahooFinanceClient:
             )
 
         total_debt = _derive_total_debt(ticker=ticker, info=info)
-        cash_and_cash_equivalents = _derive_cash_and_cash_equivalents(
+        total_cash = _derive_cash_and_cash_equivalents(
             ticker=ticker,
             info=info,
         )
         sector = _string_field(info, "sector") or "Unknown sector"
-        beta = _first_number(info.get("beta"))
-        risk_free_rate = _fetch_risk_free_rate()
 
         return DcfBaselineResponse(
             ticker=ticker,
@@ -218,26 +216,12 @@ class YahooFinanceClient:
             current_free_cash_flow_display=_format_signed_compact_currency(
                 current_free_cash_flow
             ),
-            shares_outstanding=float(shares_outstanding),
-            shares_outstanding_display=_format_compact_number(shares_outstanding),
+            total_cash=total_cash,
+            total_cash_display=_format_compact_currency(total_cash),
             total_debt=total_debt,
             total_debt_display=_format_compact_currency(total_debt),
-            cash_and_cash_equivalents=cash_and_cash_equivalents,
-            cash_and_cash_equivalents_display=_format_compact_currency(
-                cash_and_cash_equivalents
-            ),
-            risk_free_rate=risk_free_rate,
-            risk_free_rate_display=_format_optional_percent(risk_free_rate) or "N/A",
-            beta=float(beta) if beta is not None else None,
-            beta_display=_format_optional_number(beta) or "N/A",
-            assumption_notes=_build_dcf_assumption_notes(
-                ticker=ticker,
-                current_free_cash_flow=current_free_cash_flow,
-                total_debt=total_debt,
-                cash_and_cash_equivalents=cash_and_cash_equivalents,
-                risk_free_rate=risk_free_rate,
-                beta=beta,
-            ),
+            shares_outstanding=float(shares_outstanding),
+            shares_outstanding_display=_format_compact_number(shares_outstanding),
         )
 
     def _fetch_payload(self, ticker: str) -> YahooWorkspacePayload:
@@ -819,55 +803,6 @@ def _derive_cash_and_cash_equivalents(
         BALANCE_SHEET_ROW_ALIASES["cash_and_cash_equivalents"],
     )
     return max(float(statement_cash or 0.0), 0.0)
-
-
-def _fetch_risk_free_rate() -> float | None:
-    try:
-        history = _fetch_history_points_for_dates(
-            "^TNX",
-            start_date=datetime.now(UTC).date() - timedelta(days=14),
-            end_date=datetime.now(UTC).date(),
-            interval="1d",
-        )
-    except YahooFinanceLookupError:
-        return None
-    if not history:
-        return None
-
-    latest_yield_quote = history[sorted(history)[-1]]
-    if latest_yield_quote >= 20:
-        return float(latest_yield_quote) / 1000
-    if latest_yield_quote >= 1:
-        return float(latest_yield_quote) / 100
-    return float(latest_yield_quote)
-
-
-def _build_dcf_assumption_notes(
-    *,
-    ticker: str,
-    current_free_cash_flow: float | int,
-    total_debt: float | int,
-    cash_and_cash_equivalents: float | int,
-    risk_free_rate: float | int | None,
-    beta: float | int | None,
-) -> list[str]:
-    return [
-        (
-            f"Current free cash flow for {ticker} starts from Yahoo Finance's direct "
-            f"free-cash-flow field or the latest annual cash-flow statement value of "
-            f"{_format_signed_compact_currency(current_free_cash_flow)}."
-        ),
-        (
-            "Equity value bridges enterprise value to equity by subtracting total debt "
-            f"of {_format_compact_currency(total_debt)} and adding cash and equivalents "
-            f"of {_format_compact_currency(cash_and_cash_equivalents)}."
-        ),
-        (
-            "The fetched market inputs show the latest 10-year Treasury proxy and "
-            f"Yahoo beta: risk-free {_format_optional_percent(risk_free_rate) or 'N/A'}, "
-            f"beta {_format_optional_number(beta) or 'N/A'}."
-        ),
-    ]
 
 
 def _clamp(value: float, minimum: float, maximum: float) -> float:

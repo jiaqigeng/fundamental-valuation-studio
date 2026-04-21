@@ -5,56 +5,41 @@ test("val-001b shows a yfinance-backed DCF calculator and recomputes from user a
 }) => {
   await page.goto("/valuation?ticker=AAPL");
 
-  const dcfCalculator = page.getByRole("region", {
-    name: /discounted cash flow/i,
-  });
+  const dcfCalculator = page.locator('section[aria-label="Discounted cash flow"]');
 
   await expect(dcfCalculator).toBeVisible();
-  await expect(
-    page.getByRole("heading", { name: /dividend discount model/i }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole("heading", { name: /residual income model/i }),
-  ).toBeVisible();
   await expect(page.getByText(/Apple Inc\./i)).toBeVisible();
 
   await expect(
-    dcfCalculator.getByText("Current free cash flow", { exact: true }),
+    dcfCalculator.getByText("Current Free Cash Flow", { exact: true }),
   ).toBeVisible();
+  await expect(dcfCalculator.getByText("Total Cash", { exact: true })).toBeVisible();
   await expect(
-    dcfCalculator.getByText("Shares outstanding", { exact: true }),
+    dcfCalculator.getByText("Shares Outstanding", { exact: true }),
   ).toBeVisible();
-  await expect(dcfCalculator.getByText("Total debt", { exact: true })).toBeVisible();
+  await expect(dcfCalculator.getByText("Total Debt", { exact: true })).toBeVisible();
   await expect(
-    dcfCalculator.getByText("Cash & equivalents", { exact: true }),
+    dcfCalculator.getByText("Current Stock Price", { exact: true }),
   ).toBeVisible();
-  await expect(
-    dcfCalculator.getByText("Risk-free rate", { exact: true }),
-  ).toBeVisible();
-  await expect(dcfCalculator.getByText("Beta", { exact: true })).toBeVisible();
 
   const shortTermGrowthInput =
-    dcfCalculator.getByLabel(/short-term fcf growth/i);
-  const terminalGrowthInput = dcfCalculator.getByLabel(/terminal growth/i);
-  const equityRiskPremiumInput =
-    dcfCalculator.getByLabel(/equity risk premium/i);
+    dcfCalculator.getByLabel(/short-term growth rate/i);
+  const terminalGrowthInput = dcfCalculator.getByLabel(/terminal growth rate/i);
   const discountRateInput =
-    dcfCalculator.getByLabel(/wacc \/ discount rate/i);
-  const projectionHorizon = dcfCalculator.getByLabel(/projection horizon/i);
+    dcfCalculator.getByLabel(/discount rate \/ wacc/i);
+  const projectionHorizon = dcfCalculator.getByLabel(/project years/i);
 
   await expect(shortTermGrowthInput).toHaveValue("");
   await expect(terminalGrowthInput).toHaveValue("");
-  await expect(equityRiskPremiumInput).toHaveValue("");
   await expect(discountRateInput).toHaveValue("");
   await expect(projectionHorizon).toHaveValue("5");
 
   await shortTermGrowthInput.fill("8");
   await terminalGrowthInput.fill("3");
-  await equityRiskPremiumInput.fill("5");
   await discountRateInput.fill("10");
 
   await dcfCalculator
-    .getByRole("button", { name: /recalculate valuation/i })
+    .getByRole("button", { name: /calculate intrinsic value/i })
     .click();
 
   const intrinsicValue = dcfCalculator.getByTestId("intrinsic-value-per-share");
@@ -64,7 +49,7 @@ test("val-001b shows a yfinance-backed DCF calculator and recomputes from user a
 
   await projectionHorizon.selectOption("10");
   await dcfCalculator
-    .getByRole("button", { name: /recalculate valuation/i })
+    .getByRole("button", { name: /calculate intrinsic value/i })
     .click();
 
   await expect(dcfCalculator.locator("tbody tr")).toHaveCount(10);
