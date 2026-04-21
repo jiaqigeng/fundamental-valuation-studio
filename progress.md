@@ -6,7 +6,7 @@
 - Standard startup path: `./init.sh`
 - Standard verification path: `./init.sh` for baseline health plus `feature_list.json -> features[*].verification.command` for feature passing
 - Current highest-priority unfinished feature: `val-002`
-- Current blocker: none recorded. `val-001a` and `val-001b` now pass with a live yfinance-backed FCF DCF flow: `GET /valuations/dcf/{ticker}/baseline` fetches current free cash flow, shares, debt, cash, risk-free rate, beta, and price, while `POST /valuations/dcf` discounts user-entered growth plus discount assumptions. `dash-006` remains intentionally de-prioritized so the roadmap can continue through the valuation stack instead of returning to optional dashboard work.
+- Current blocker: none recorded. `val-001a` and `val-001b` now pass with a live yfinance-backed FCF DCF flow: `GET /valuations/dcf/{ticker}/baseline` fetches current free cash flow, total cash, total debt, shares outstanding, and current stock price, while `POST /valuations/dcf` discounts user-entered short-term growth, terminal growth, discount rate or WACC, and project years. `dash-006` remains intentionally de-prioritized so the roadmap can continue through the valuation stack instead of returning to optional dashboard work.
 
 ## Session Log
 
@@ -641,7 +641,19 @@
 - Completed: Parallelized the two live FMP segment requests, parallelized Yahoo market-context snapshot fetches, parallelized yearly and quarterly income-statement fetches for the financial bridge, parallelized the performance-chart range builds, and parallelized the per-symbol history and anchor lookups inside each range so the dashboard backend no longer waits on those upstream calls one by one.
 - Verification run: `cd backend && .venv/Scripts/python.exe -m pytest tests/test_company_workspace.py -q`; `cd backend && .venv/Scripts/python.exe -m pytest tests/test_val_001a.py -q`
 - Evidence captured: `cd backend && .venv/Scripts/python.exe -m pytest tests/test_company_workspace.py -q` passed with `14 passed` plus one existing pytest cache warning; `cd backend && .venv/Scripts/python.exe -m pytest tests/test_val_001a.py -q` passed with `5 passed` plus one existing pytest cache warning.
-- Commits: none yet
+- Commits: `09c81b2 Parallelize dashboard provider fetches`
 - Files or artifacts updated: `backend/app/clients/yahoo_finance.py`, `backend/app/clients/financial_modeling_prep.py`, `progress.md`, `session-handoff.md`
 - Known risk or unresolved issue: This trims stacked latency, but the dashboard still performs live upstream work on every request because the frontend workspace fetch remains `cache: "no-store"` and the backend still does not cache assembled workspace payloads.
 - Next best step: If the dashboard is still slower than expected after this concurrency pass, add a short backend TTL cache for `/companies/{ticker}/workspace` before splitting sections or changing the frontend fetch policy.
+
+### Session 054
+
+- Date: 2026-04-20
+- Goal: Simplify the DCF calculator contract again, keep only the core fetched values and assumptions, and redesign the valuation page so it feels consistent with the dashboard.
+- Completed: Read the repo harness files again, ran `./init.sh`, removed the extra DCF baseline fields and CAPM-specific assumption path, kept only current free cash flow, total cash, total debt, shares outstanding, and current stock price as fetched inputs, reduced the user inputs to short-term growth, terminal growth, discount rate or WACC, and project years, redesigned `/valuation` into a more professional dashboard-consistent workbench with color accents, and refreshed the backend/frontend DCF verification gates plus the supporting docs and handoff artifacts.
+- Verification run: `./init.sh`; `cd backend && .venv/Scripts/python.exe -m pytest tests/test_val_001a.py -q`; `cd frontend && npm.cmd run lint`; `cd frontend && npm.cmd run typecheck`; `cd frontend && cmd /c npx playwright test e2e/val-001b.spec.ts`
+- Evidence captured: `cd backend && .venv/Scripts/python.exe -m pytest tests/test_val_001a.py -q` passed and refreshed `artifacts/verification/val-001a-pytest.log`; `cd frontend && npm.cmd run lint` passed; `cd frontend && npm.cmd run typecheck` passed; `cd frontend && cmd /c npx playwright test e2e/val-001b.spec.ts` passed after clearing a stale local `next dev` process and refreshed `artifacts/verification/val-001b-playwright.log`; the final `./init.sh` rerun also passed with backend `20 passed`, frontend lint passing, and frontend typecheck passing; implementation commit is `807a100`.
+- Commits: `807a100 Simplify DCF valuation workspace`
+- Files or artifacts updated: `backend/app/clients/yahoo_finance.py`, `backend/app/schemas/valuation.py`, `backend/app/services/valuation.py`, `backend/tests/test_val_001a.py`, `docs/backend.md`, `docs/frontend.md`, `feature_list.json`, `frontend/ARCHITECTURE.md`, `frontend/e2e/val-001b.spec.ts`, `frontend/src/app/_components/dcf-calculator-panel.tsx`, `frontend/src/app/_lib/valuation.ts`, `frontend/src/app/globals.css`, `frontend/src/app/page.tsx`, `frontend/src/app/_components/ticker-search-form.tsx`, `frontend/src/app/valuation/page.tsx`, `progress.md`, `session-handoff.md`, `artifacts/verification/val-001a-pytest.log`, `artifacts/verification/val-001b-playwright.log`
+- Known risk or unresolved issue: The DCF workbench is intentionally streamlined, but it still depends on live yfinance availability for the baseline fetch and still supports only a single-stage short-term growth path plus a terminal growth rate rather than a richer multi-stage scenario builder.
+- Next best step: Resume the roadmap at `val-002`, keeping the simplified DCF contract stable while the dividend discount model is added beside it.

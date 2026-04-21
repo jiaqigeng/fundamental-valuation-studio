@@ -232,26 +232,26 @@
       "section": "valuation",
       "area": "dcf",
       "title": "DCF calculator math with manual inputs",
-      "behavior": "A user runs a direct FCF DCF by entering short-term FCF growth, terminal growth, equity risk premium, and WACC or discount rate, and sees projected cash flows plus intrinsic value per share.",
+      "behavior": "A user runs a direct FCF DCF by entering short-term growth, terminal growth, a discount rate or WACC, and project years, then sees projected cash flows plus intrinsic value per share.",
       "verification": {
         "command": "cd backend && .venv/Scripts/python.exe -m pytest tests/test_val_001a.py -q",
         "kind": "backend",
         "manual_steps": [
           "Open the DCF calculator for AAPL.",
-          "Enter short-term FCF growth, terminal growth, equity risk premium, and WACC or discount rate.",
+          "Enter short-term growth, terminal growth, a discount rate or WACC, and project years.",
           "Verify projected FCF and intrinsic value per share are computed.",
           "Change the discount rate and verify the intrinsic value updates."
         ]
       },
       "evidence": {
-        "commit": "50b0b4f",
+        "commit": "807a100",
         "verification_run": "cd backend && .venv/Scripts/python.exe -m pytest tests/test_val_001a.py -q",
         "output_log": "artifacts/verification/val-001a-pytest.log",
-        "timestamp": "2026-04-20T21:02:39.6470674-04:00"
+        "timestamp": "2026-04-20T21:46:37.5515111-04:00"
       },
       "depends_on": ["dash-001"],
       "status": "passing",
-      "notes": "Implemented as a backend `POST /valuations/dcf` endpoint with dedicated request/response schemas and a pure service-layer FCF DCF calculator. The current manual-input math projects free cash flow directly from the fetched current FCF base, discounts those flows at the user-provided WACC or discount rate, bridges enterprise value to equity value with total debt and cash, and returns a CAPM cost-of-equity reference from the fetched risk-free rate plus beta and the user-entered equity risk premium."
+      "notes": "Implemented as a backend `POST /valuations/dcf` endpoint with dedicated request/response schemas and a pure service-layer FCF DCF calculator. The current manual-input math projects free cash flow directly from the fetched current FCF base, discounts those flows at the user-provided WACC or discount rate, bridges enterprise value to equity value with total debt and cash, and returns the projected cash-flow path plus intrinsic value outputs without any CAPM-specific assumption layer."
     },
     {
       "id": "val-001b",
@@ -259,27 +259,27 @@
       "section": "valuation",
       "area": "dcf",
       "title": "DCF auto-fetched baseline assumptions",
-      "behavior": "Opening the DCF calculator fetches live yfinance company inputs such as current free cash flow, shares outstanding, total debt, cash and equivalents, risk-free rate, beta, and current stock price, while the user enters growth and discount assumptions before running the model.",
+      "behavior": "Opening the DCF calculator fetches live yfinance company inputs for current free cash flow, total cash, total debt, shares outstanding, and current stock price, while the user enters short-term growth, terminal growth, a discount rate or WACC, and project years before running the model.",
       "verification": {
         "command": "cd frontend && npx playwright test e2e/val-001b.spec.ts",
         "kind": "e2e",
         "manual_steps": [
           "Open the DCF calculator for AAPL.",
-          "Verify the fetched DCF baseline shows current free cash flow, shares outstanding, total debt, cash and equivalents, risk-free rate, beta, and current stock price.",
-          "Enter short-term FCF growth, terminal growth, equity risk premium, and WACC or discount rate.",
+          "Verify the fetched DCF baseline shows current free cash flow, total cash, total debt, shares outstanding, and current stock price.",
+          "Enter short-term growth, terminal growth, a discount rate or WACC, and project years.",
           "Verify the projection and intrinsic value recompute.",
           "Switch the projection horizon between 5 years and 10 years and verify the cash-flow table updates."
         ]
       },
       "evidence": {
-        "commit": "50b0b4f",
+        "commit": "807a100",
         "verification_run": "cd frontend && npx playwright test e2e/val-001b.spec.ts",
         "output_log": "artifacts/verification/val-001b-playwright.log",
-        "timestamp": "2026-04-20T21:02:39.6470674-04:00"
+        "timestamp": "2026-04-20T21:46:37.5515111-04:00"
       },
       "depends_on": ["val-001a", "dash-002b"],
       "status": "passing",
-      "notes": "Implemented on the `/valuation` route as the first real calculator workspace. The page now shows a calculator lineup plus an active DCF panel that fetches featured tickers (`AAPL`, `MSFT`, `KO`) with live yfinance company inputs, displays current FCF plus capital-structure and market context, lets the user enter short-term growth, terminal growth, equity risk premium, and WACC or discount-rate assumptions, and refreshes intrinsic value plus projected cash flows without leaving the page. The backend exposes `GET /valuations/dcf/{ticker}/baseline` for those company inputs and `POST /valuations/dcf` for the FCF DCF math; the old hardcoded DCF baseline path has been removed from the app."
+      "notes": "Implemented on the `/valuation` route as the first real calculator workspace. The page now presents a dashboard-consistent DCF workbench for featured tickers (`AAPL`, `MSFT`, `KO`), fetches live yfinance company inputs for current FCF, total cash, total debt, shares, and price, lets the user enter short-term growth, terminal growth, discount rate or WACC, and project years, and refreshes intrinsic value plus projected cash flows without leaving the page. The backend exposes `GET /valuations/dcf/{ticker}/baseline` for those company inputs and `POST /valuations/dcf` for the FCF DCF math; the old hardcoded DCF baseline path has been removed from the app."
     },
     {
       "id": "val-002",
