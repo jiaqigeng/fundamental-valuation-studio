@@ -11,7 +11,7 @@ test("val-001b shows a yfinance-backed DCF calculator and recomputes from user a
   await expect(page.getByText(/Apple Inc\./i)).toBeVisible();
 
   await expect(
-    dcfCalculator.getByText("Current Free Cash Flow", { exact: true }),
+    dcfCalculator.getByText("Free Cashflow", { exact: true }),
   ).toBeVisible();
   await expect(dcfCalculator.getByText("Total Cash", { exact: true })).toBeVisible();
   await expect(
@@ -27,12 +27,21 @@ test("val-001b shows a yfinance-backed DCF calculator and recomputes from user a
   const terminalGrowthInput = dcfCalculator.getByLabel(/terminal growth rate/i);
   const discountRateInput =
     dcfCalculator.getByLabel(/discount rate \/ wacc/i);
-  const projectionHorizon = dcfCalculator.getByLabel(/project years/i);
+  const projectionHorizon = dcfCalculator.getByRole("group", {
+    name: /project years/i,
+  });
+  const fiveYearButton = projectionHorizon.getByRole("button", {
+    name: /5 years/i,
+  });
+  const tenYearButton = projectionHorizon.getByRole("button", {
+    name: /10 years/i,
+  });
 
   await expect(shortTermGrowthInput).toHaveValue("");
   await expect(terminalGrowthInput).toHaveValue("");
   await expect(discountRateInput).toHaveValue("");
-  await expect(projectionHorizon).toHaveValue("5");
+  await expect(fiveYearButton).toHaveAttribute("aria-pressed", "true");
+  await expect(tenYearButton).toHaveAttribute("aria-pressed", "false");
 
   await shortTermGrowthInput.fill("8");
   await terminalGrowthInput.fill("3");
@@ -47,10 +56,12 @@ test("val-001b shows a yfinance-backed DCF calculator and recomputes from user a
   await expect(page.getByText(/projected cash flows/i)).toBeVisible();
   await expect(dcfCalculator.locator("tbody tr")).toHaveCount(5);
 
-  await projectionHorizon.selectOption("10");
+  await tenYearButton.click();
   await dcfCalculator
     .getByRole("button", { name: /calculate intrinsic value/i })
     .click();
 
+  await expect(fiveYearButton).toHaveAttribute("aria-pressed", "false");
+  await expect(tenYearButton).toHaveAttribute("aria-pressed", "true");
   await expect(dcfCalculator.locator("tbody tr")).toHaveCount(10);
 });

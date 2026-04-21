@@ -789,3 +789,14 @@
 - Files or artifacts updated: `frontend/src/app/_components/dcf-calculator-panel.tsx`, `frontend/src/app/globals.css`, `progress.md`, `session-handoff.md`
 - Known risk or unresolved issue: This is a wording-and-layout cleanup only; the DCF calculation flow and data contract are unchanged underneath.
 - Next best step: Resume the roadmap at `val-002` unless the user wants more valuation-page wording or visual cleanup.
+
+### Session 066
+
+- Date: 2026-04-20
+- Goal: Apply the next user-requested valuation copy and hierarchy cleanup.
+- Completed: Re-ran `./init.sh`, renamed the fetched FCF tile from `Current Free Cash Flow` to `Free Cashflow`, reduced the valuation workbench company-title scale again, tightened the `Company snapshot` heading size, and refreshed the `val-001b` Playwright spec so it matches both the new FCF label and the already-shipped segmented `Project Years` control.
+- Verification run: `./init.sh`; `cd frontend && npm.cmd run lint`; `cd frontend && npm.cmd run typecheck`; `cd frontend && cmd /c npx playwright test e2e/val-001b.spec.ts`
+- Evidence captured: `./init.sh` passed before the refinement; frontend `npm.cmd run lint` passed; frontend `npm.cmd run typecheck` passed; an initial sandboxed Playwright attempt hit the known local `spawn EPERM`, and the rerun outside the sandbox passed with `1 passed`.
+- Files or artifacts updated: `feature_list.json`, `frontend/src/app/_components/dcf-calculator-panel.tsx`, `frontend/src/app/globals.css`, `frontend/e2e/val-001b.spec.ts`, `progress.md`, `session-handoff.md`
+- Known risk or unresolved issue: This remains a presentation-and-copy cleanup only; the DCF calculation flow and live yfinance baseline contract are unchanged underneath.
+- Next best step: Resume the roadmap at `val-002` unless the user wants another narrow valuation-page wording or sizing refinement.

@@ -265,7 +265,7 @@
         "kind": "e2e",
         "manual_steps": [
           "Open the DCF calculator for AAPL.",
-          "Verify the fetched DCF baseline shows current free cash flow, total cash, total debt, shares outstanding, and current stock price.",
+          "Verify the fetched DCF baseline shows Free Cashflow, total cash, total debt, shares outstanding, and current stock price.",
           "Enter short-term growth, terminal growth, a discount rate or WACC, and project years.",
           "Verify the projection and intrinsic value recompute.",
           "Switch the projection horizon between 5 years and 10 years and verify the cash-flow table updates."
@@ -279,7 +279,7 @@
       },
       "depends_on": ["val-001a", "dash-002b"],
       "status": "passing",
-      "notes": "Implemented on the `/valuation` route as the first real calculator workspace. The page now presents a dashboard-consistent DCF workbench for featured tickers (`AAPL`, `MSFT`, `KO`), fetches live yfinance company inputs for current FCF, total cash, total debt, shares, and price, lets the user enter short-term growth, terminal growth, discount rate or WACC, and project years, and refreshes intrinsic value plus projected cash flows without leaving the page. The backend exposes `GET /valuations/dcf/{ticker}/baseline` for those company inputs and `POST /valuations/dcf` for the FCF DCF math; the old hardcoded DCF baseline path has been removed from the app."
+        "notes": "Implemented on the `/valuation` route as the first real calculator workspace. The page now presents a dashboard-consistent DCF workbench for featured tickers (`AAPL`, `MSFT`, `KO`), fetches live yfinance company inputs for current FCF, total cash, total debt, shares, and price, lets the user enter short-term growth, terminal growth, discount rate or WACC, and project years, and refreshes intrinsic value plus projected cash flows without leaving the page. The DCF card now labels the fetched FCF metric as `Free Cashflow`, keeps a smaller company-title scale, and uses a reduced `Company snapshot` heading so the visual hierarchy stays tighter. The backend exposes `GET /valuations/dcf/{ticker}/baseline` for those company inputs and `POST /valuations/dcf` for the FCF DCF math; the old hardcoded DCF baseline path has been removed from the app."
     },
     {
       "id": "val-002",

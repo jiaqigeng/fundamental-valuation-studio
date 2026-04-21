@@ -47,7 +47,7 @@ const FETCHED_METRICS: Array<{
   readonly tone: "blue" | "teal" | "gold";
 }> = [
   {
-    label: "Current Free Cash Flow",
+    label: "Free Cashflow",
     valueKey: "currentFreeCashFlowDisplay",
     tone: "blue",
   },

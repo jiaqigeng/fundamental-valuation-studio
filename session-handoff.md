@@ -38,6 +38,7 @@
 - Newest refinement commit: `8d07b9a Refine valuation title typography`
 - Latest cleanup: Removed the title divider line and renamed the top data section to `Company snapshot`.
 - Latest cleanup commit: `4bd8573 Remove valuation title divider`
+- Newest cleanup: Renamed the fetched FCF tile to `Free Cashflow`, reduced the company-title scale again, tightened the `Company snapshot` heading, and refreshed the `val-001b` Playwright spec so it matches the segmented `Project Years` control plus the new label.
 - Infrastructure or harness changes: Refreshed `artifacts/verification/val-001a-pytest.log` and `artifacts/verification/val-001b-playwright.log`, re-ran the targeted backend/frontend verification gates after the redesign and contract simplification, and finished with a clean passing `./init.sh` baseline rerun.
 - Documentation changes: Updated `docs/backend.md`, `docs/frontend.md`, `frontend/ARCHITECTURE.md`, `feature_list.json`, `progress.md`, and this handoff to reflect the streamlined live FCF DCF path and the new user-assumption contract.
 - Implementation commit: `807a100 Simplify DCF valuation workspace`
