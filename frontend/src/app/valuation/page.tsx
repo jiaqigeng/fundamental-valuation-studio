@@ -1,11 +1,7 @@
 import Link from "next/link";
 
 import { DcfCalculatorPanel } from "@/app/_components/dcf-calculator-panel";
-import {
-  buildDcfPayloadFromBaseline,
-  calculateDcfValuation,
-  getDcfBaselineData,
-} from "@/app/_lib/valuation";
+import { getDcfBaselineData } from "@/app/_lib/valuation";
 
 const FEATURED_TICKERS = ["AAPL", "MSFT", "KO"] as const;
 
@@ -18,9 +14,6 @@ export default async function ValuationPage({
   const activeTicker =
     resolvedSearchParams.ticker?.trim().toUpperCase() || "AAPL";
   const baseline = await getDcfBaselineData(activeTicker);
-  const initialResult = baseline
-    ? await calculateDcfValuation(buildDcfPayloadFromBaseline(baseline))
-    : null;
 
   return (
     <main className="landing-shell">
@@ -29,9 +22,9 @@ export default async function ValuationPage({
         <h1>Open the calculator stack for a company.</h1>
         <p className="hero-copy">
           Start with a DCF view that already knows the company&apos;s current
-          revenue base, margin profile, capital structure, and a first-pass cost
-          of capital. The other calculators stay visible here so the valuation
-          workspace feels like one connected surface instead of isolated tools.
+          free cash flow, capital structure, beta, Treasury proxy, and stock
+          price. From there, enter your own growth and discount assumptions
+          instead of relying on hardcoded model guesses.
         </p>
         <div className="ticker-chip-row valuation-ticker-row" aria-label="Featured valuation tickers">
           {FEATURED_TICKERS.map((ticker) => (
@@ -98,8 +91,8 @@ export default async function ValuationPage({
         </div>
       </section>
 
-      {baseline !== null && initialResult !== null ? (
-        <DcfCalculatorPanel baseline={baseline} initialResult={initialResult} />
+      {baseline !== null ? (
+        <DcfCalculatorPanel baseline={baseline} />
       ) : (
         <section className="workspace-panel valuation-empty-state">
           <p className="panel-label">Calculator unavailable</p>

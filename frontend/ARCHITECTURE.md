@@ -31,7 +31,7 @@ frontend/
 |  |  `- route.ts                  Server route: proxy DCF recalculation to backend
 |  |- globals.css                  Hand-written + Tailwind v4 styles
 |  |- _components/                 Shared UI (underscore = off-route)
-|  |  |- dcf-calculator-panel.tsx  Client component: editable DCF form + recomputation
+|  |  |- dcf-calculator-panel.tsx  Client component: yfinance-backed DCF form + recomputation
 |  |  `- ticker-search-form.tsx    Client component: form + inline validation + router.push
 |  |- _lib/                        Non-UI helpers (off-route)
 |  |  |- company-workspace.ts      Backend-backed dashboard fetcher
@@ -65,12 +65,11 @@ User -> / (page.tsx)
         -> router.push(`/dashboard/${TICKER}`) when valid
      -> /valuation (page.tsx)
         -> getDcfBaselineData(ticker)   // from _lib
-        -> calculateDcfValuation(...)   // server-side initial result
         -> renders calculator lineup + DCF workspace
         -> <DcfCalculatorPanel> client component
            -> /api/valuations/dcf route handler
            -> backend valuation route
-           -> updates intrinsic value + projections
+           -> updates intrinsic value + FCF projections
      -> /dashboard/[ticker] (page.tsx)
         -> getCompanyWorkspaceData(ticker)  // from _lib
         -> backend workspace route
@@ -82,7 +81,7 @@ Server components handle data lookup and 404s. The only client-side JavaScript o
 
 ## Data sources today
 
-`_lib/company-workspace.ts` is the primary frontend data entrypoint for the dashboard route. `_lib/valuation.ts` now does the same job for the valuation route by fetching DCF baseline assumptions plus the initial valuation result from the backend. The landing page handles invalid-input UX earlier through the validation route handler.
+`_lib/company-workspace.ts` is the primary frontend data entrypoint for the dashboard route. `_lib/valuation.ts` now does the same job for the valuation route by fetching yfinance-backed DCF baseline company inputs and posting user assumptions back to the backend for recalculation. The landing page handles invalid-input UX earlier through the validation route handler.
 
 ## Verification boundary
 

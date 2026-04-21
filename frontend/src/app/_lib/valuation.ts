@@ -4,47 +4,44 @@ export type DcfBaselineData = {
   readonly sector: string;
   readonly currentPrice: number | null;
   readonly currentPriceDisplay: string;
-  readonly currentRevenue: number;
-  readonly currentRevenueDisplay: string;
-  readonly revenueGrowthRate: number;
-  readonly operatingMargin: number;
-  readonly taxRate: number;
-  readonly salesToCapitalRatio: number;
-  readonly wacc: number;
-  readonly terminalGrowthRate: number;
+  readonly currentFreeCashFlow: number;
+  readonly currentFreeCashFlowDisplay: string;
   readonly sharesOutstanding: number;
   readonly sharesOutstandingDisplay: string;
-  readonly netDebt: number;
-  readonly netDebtDisplay: string;
-  readonly projectionYears: number;
+  readonly totalDebt: number;
+  readonly totalDebtDisplay: string;
+  readonly cashAndCashEquivalents: number;
+  readonly cashAndCashEquivalentsDisplay: string;
+  readonly riskFreeRate: number | null;
+  readonly riskFreeRateDisplay: string;
+  readonly beta: number | null;
+  readonly betaDisplay: string;
   readonly assumptionNotes: readonly string[];
 };
 
 export type DcfValuationPayload = {
-  readonly currentRevenue: number;
-  readonly revenueGrowthRate: number;
-  readonly operatingMargin: number;
-  readonly taxRate: number;
-  readonly salesToCapitalRatio: number;
-  readonly wacc: number;
+  readonly currentFreeCashFlow: number;
+  readonly shortTermGrowthRate: number;
   readonly terminalGrowthRate: number;
+  readonly equityRiskPremium: number;
+  readonly riskFreeRate: number | null;
+  readonly beta: number | null;
+  readonly discountRate: number;
   readonly sharesOutstanding: number;
-  readonly netDebt: number;
+  readonly totalDebt: number;
+  readonly cashAndCashEquivalents: number;
   readonly projectionYears: number;
 };
 
 export type DcfProjectionYear = {
   readonly year: number;
-  readonly revenue: number;
-  readonly operatingIncome: number;
-  readonly nopat: number;
-  readonly reinvestment: number;
   readonly freeCashFlow: number;
   readonly presentValue: number;
 };
 
 export type DcfValuationResult = {
   readonly projections: readonly DcfProjectionYear[];
+  readonly capmCostOfEquity: number | null;
   readonly terminalFreeCashFlow: number;
   readonly terminalValue: number;
   readonly terminalPresentValue: number;
@@ -92,15 +89,16 @@ export async function calculateDcfValuation(
     },
     cache: "no-store",
     body: JSON.stringify({
-      current_revenue: payload.currentRevenue,
-      revenue_growth_rate: payload.revenueGrowthRate,
-      operating_margin: payload.operatingMargin,
-      tax_rate: payload.taxRate,
-      sales_to_capital_ratio: payload.salesToCapitalRatio,
-      wacc: payload.wacc,
+      current_free_cash_flow: payload.currentFreeCashFlow,
+      short_term_growth_rate: payload.shortTermGrowthRate,
       terminal_growth_rate: payload.terminalGrowthRate,
+      equity_risk_premium: payload.equityRiskPremium,
+      risk_free_rate: payload.riskFreeRate,
+      beta: payload.beta,
+      discount_rate: payload.discountRate,
       shares_outstanding: payload.sharesOutstanding,
-      net_debt: payload.netDebt,
+      total_debt: payload.totalDebt,
+      cash_and_cash_equivalents: payload.cashAndCashEquivalents,
       projection_years: payload.projectionYears,
     }),
   });
@@ -113,36 +111,16 @@ export async function calculateDcfValuation(
   return mapDcfValuationResponse(responsePayload);
 }
 
-export function buildDcfPayloadFromBaseline(
-  baseline: DcfBaselineData,
-): DcfValuationPayload {
-  return {
-    currentRevenue: baseline.currentRevenue,
-    revenueGrowthRate: baseline.revenueGrowthRate,
-    operatingMargin: baseline.operatingMargin,
-    taxRate: baseline.taxRate,
-    salesToCapitalRatio: baseline.salesToCapitalRatio,
-    wacc: baseline.wacc,
-    terminalGrowthRate: baseline.terminalGrowthRate,
-    sharesOutstanding: baseline.sharesOutstanding,
-    netDebt: baseline.netDebt,
-    projectionYears: baseline.projectionYears,
-  };
-}
-
 export function mapDcfValuationResponse(
   payload: BackendDcfValuationResult,
 ): DcfValuationResult {
   return {
     projections: payload.projections.map((projection) => ({
       year: projection.year,
-      revenue: projection.revenue,
-      operatingIncome: projection.operating_income,
-      nopat: projection.nopat,
-      reinvestment: projection.reinvestment,
       freeCashFlow: projection.free_cash_flow,
       presentValue: projection.present_value,
     })),
+    capmCostOfEquity: payload.capm_cost_of_equity,
     terminalFreeCashFlow: payload.terminal_free_cash_flow,
     terminalValue: payload.terminal_value,
     terminalPresentValue: payload.terminal_present_value,
@@ -158,32 +136,28 @@ type BackendDcfBaselineData = {
   sector: string;
   current_price: number | null;
   current_price_display: string;
-  current_revenue: number;
-  current_revenue_display: string;
-  revenue_growth_rate: number;
-  operating_margin: number;
-  tax_rate: number;
-  sales_to_capital_ratio: number;
-  wacc: number;
-  terminal_growth_rate: number;
+  current_free_cash_flow: number;
+  current_free_cash_flow_display: string;
   shares_outstanding: number;
   shares_outstanding_display: string;
-  net_debt: number;
-  net_debt_display: string;
-  projection_years: number;
+  total_debt: number;
+  total_debt_display: string;
+  cash_and_cash_equivalents: number;
+  cash_and_cash_equivalents_display: string;
+  risk_free_rate: number | null;
+  risk_free_rate_display: string;
+  beta: number | null;
+  beta_display: string;
   assumption_notes: string[];
 };
 
 type BackendDcfValuationResult = {
   projections: {
     year: number;
-    revenue: number;
-    operating_income: number;
-    nopat: number;
-    reinvestment: number;
     free_cash_flow: number;
     present_value: number;
   }[];
+  capm_cost_of_equity: number | null;
   terminal_free_cash_flow: number;
   terminal_value: number;
   terminal_present_value: number;
@@ -199,19 +173,18 @@ function mapDcfBaseline(payload: BackendDcfBaselineData): DcfBaselineData {
     sector: payload.sector,
     currentPrice: payload.current_price,
     currentPriceDisplay: payload.current_price_display,
-    currentRevenue: payload.current_revenue,
-    currentRevenueDisplay: payload.current_revenue_display,
-    revenueGrowthRate: payload.revenue_growth_rate,
-    operatingMargin: payload.operating_margin,
-    taxRate: payload.tax_rate,
-    salesToCapitalRatio: payload.sales_to_capital_ratio,
-    wacc: payload.wacc,
-    terminalGrowthRate: payload.terminal_growth_rate,
+    currentFreeCashFlow: payload.current_free_cash_flow,
+    currentFreeCashFlowDisplay: payload.current_free_cash_flow_display,
     sharesOutstanding: payload.shares_outstanding,
     sharesOutstandingDisplay: payload.shares_outstanding_display,
-    netDebt: payload.net_debt,
-    netDebtDisplay: payload.net_debt_display,
-    projectionYears: payload.projection_years,
+    totalDebt: payload.total_debt,
+    totalDebtDisplay: payload.total_debt_display,
+    cashAndCashEquivalents: payload.cash_and_cash_equivalents,
+    cashAndCashEquivalentsDisplay: payload.cash_and_cash_equivalents_display,
+    riskFreeRate: payload.risk_free_rate,
+    riskFreeRateDisplay: payload.risk_free_rate_display,
+    beta: payload.beta,
+    betaDisplay: payload.beta_display,
     assumptionNotes: payload.assumption_notes,
   };
 }

@@ -65,8 +65,8 @@ Keep this direction one-way. Routers call services; services call clients. Servi
 | ------ | ------------------------------ | ------------------------------------- | ---------------------------------------- |
 | GET    | `/health`                      | `main.health_check`                   | Liveness probe for CI                    |
 | GET    | `/companies/{ticker}/workspace` | `routers.companies.company_workspace` | Dashboard workspace market-data snapshot |
-| GET    | `/valuations/dcf/{ticker}/baseline` | `routers.valuations.dcf_baseline` | DCF baseline assumptions for valuation UI |
-| POST   | `/valuations/dcf`             | `routers.valuations.discounted_cash_flow` | Manual-input DCF valuation math          |
+| GET    | `/valuations/dcf/{ticker}/baseline` | `routers.valuations.dcf_baseline` | yfinance-backed DCF company inputs for the valuation UI |
+| POST   | `/valuations/dcf`             | `routers.valuations.discounted_cash_flow` | User-assumption FCF DCF valuation math   |
 
 Every new feature adds rows here.
 

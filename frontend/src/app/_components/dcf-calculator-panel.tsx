@@ -11,38 +11,46 @@ import { mapDcfValuationResponse } from "@/app/_lib/valuation";
 
 type DcfCalculatorPanelProps = {
   readonly baseline: DcfBaselineData;
-  readonly initialResult: DcfValuationResult;
 };
 
 type DcfFormState = {
-  readonly revenueGrowthRate: string;
-  readonly operatingMargin: string;
-  readonly taxRate: string;
-  readonly salesToCapitalRatio: string;
-  readonly wacc: string;
+  readonly shortTermGrowthRate: string;
   readonly terminalGrowthRate: string;
+  readonly equityRiskPremium: string;
+  readonly discountRate: string;
   readonly projectionYears: string;
 };
 
-export function DcfCalculatorPanel({
-  baseline,
-  initialResult,
-}: DcfCalculatorPanelProps) {
+type BackendDcfValuationResult = {
+  projections: {
+    year: number;
+    free_cash_flow: number;
+    present_value: number;
+  }[];
+  capm_cost_of_equity: number | null;
+  terminal_free_cash_flow: number;
+  terminal_value: number;
+  terminal_present_value: number;
+  enterprise_value: number;
+  equity_value: number;
+  intrinsic_value_per_share: number;
+};
+
+export function DcfCalculatorPanel({ baseline }: DcfCalculatorPanelProps) {
   const [formState, setFormState] = useState<DcfFormState>({
-    revenueGrowthRate: formatPercentInput(baseline.revenueGrowthRate),
-    operatingMargin: formatPercentInput(baseline.operatingMargin),
-    taxRate: formatPercentInput(baseline.taxRate),
-    salesToCapitalRatio: baseline.salesToCapitalRatio.toFixed(1),
-    wacc: formatPercentInput(baseline.wacc),
-    terminalGrowthRate: formatPercentInput(baseline.terminalGrowthRate),
-    projectionYears: `${baseline.projectionYears}`,
+    shortTermGrowthRate: "",
+    terminalGrowthRate: "",
+    equityRiskPremium: "",
+    discountRate: "",
+    projectionYears: "5",
   });
-  const [result, setResult] = useState(initialResult);
+  const [result, setResult] = useState<DcfValuationResult | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
+  const capmPreview = buildCapmPreview(formState.equityRiskPremium, baseline);
   const valuationGap =
-    baseline.currentPrice && baseline.currentPrice > 0
+    result && baseline.currentPrice && baseline.currentPrice > 0
       ? result.intrinsicValuePerShare / baseline.currentPrice - 1
       : null;
 
@@ -59,13 +67,13 @@ export function DcfCalculatorPanel({
     const payload = buildPayload(formState, baseline);
     if (payload === null) {
       setErrorMessage(
-        "Enter valid numeric assumptions before recalculating the DCF view.",
+        "Enter valid growth, equity risk premium, and discount-rate assumptions before recalculating.",
       );
       return;
     }
 
-    if (payload.terminalGrowthRate >= payload.wacc) {
-      setErrorMessage("Terminal growth must stay below WACC.");
+    if (payload.terminalGrowthRate >= payload.discountRate) {
+      setErrorMessage("Terminal growth must stay below the discount rate.");
       return;
     }
 
@@ -78,15 +86,16 @@ export function DcfCalculatorPanel({
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            current_revenue: payload.currentRevenue,
-            revenue_growth_rate: payload.revenueGrowthRate,
-            operating_margin: payload.operatingMargin,
-            tax_rate: payload.taxRate,
-            sales_to_capital_ratio: payload.salesToCapitalRatio,
-            wacc: payload.wacc,
+            current_free_cash_flow: payload.currentFreeCashFlow,
+            short_term_growth_rate: payload.shortTermGrowthRate,
             terminal_growth_rate: payload.terminalGrowthRate,
+            equity_risk_premium: payload.equityRiskPremium,
+            risk_free_rate: payload.riskFreeRate,
+            beta: payload.beta,
+            discount_rate: payload.discountRate,
             shares_outstanding: payload.sharesOutstanding,
-            net_debt: payload.netDebt,
+            total_debt: payload.totalDebt,
+            cash_and_cash_equivalents: payload.cashAndCashEquivalents,
             projection_years: payload.projectionYears,
           }),
         });
@@ -126,7 +135,8 @@ export function DcfCalculatorPanel({
           <h2 id="dcf-calculator-heading">Discounted cash flow</h2>
           <p className="valuation-company-copy">
             {baseline.companyName} ({baseline.ticker}) in {baseline.sector}.
-            Inputs start from company data and stay fully editable once loaded.
+            Company inputs come from yfinance; growth and discount assumptions
+            come from you.
           </p>
         </div>
         <dl className="valuation-company-metrics">
@@ -135,16 +145,28 @@ export function DcfCalculatorPanel({
             <dd>{baseline.currentPriceDisplay}</dd>
           </div>
           <div className="valuation-company-metric">
-            <dt>Revenue</dt>
-            <dd>{baseline.currentRevenueDisplay}</dd>
+            <dt>Current free cash flow</dt>
+            <dd>{baseline.currentFreeCashFlowDisplay}</dd>
           </div>
           <div className="valuation-company-metric">
-            <dt>Shares</dt>
+            <dt>Shares outstanding</dt>
             <dd>{baseline.sharesOutstandingDisplay}</dd>
           </div>
           <div className="valuation-company-metric">
-            <dt>Net debt</dt>
-            <dd>{baseline.netDebtDisplay}</dd>
+            <dt>Total debt</dt>
+            <dd>{baseline.totalDebtDisplay}</dd>
+          </div>
+          <div className="valuation-company-metric">
+            <dt>Cash &amp; equivalents</dt>
+            <dd>{baseline.cashAndCashEquivalentsDisplay}</dd>
+          </div>
+          <div className="valuation-company-metric">
+            <dt>Risk-free rate</dt>
+            <dd>{baseline.riskFreeRateDisplay}</dd>
+          </div>
+          <div className="valuation-company-metric">
+            <dt>Beta</dt>
+            <dd>{baseline.betaDisplay}</dd>
           </div>
         </dl>
       </div>
@@ -152,42 +174,18 @@ export function DcfCalculatorPanel({
       <div className="valuation-calculator-layout">
         <form className="valuation-form-grid" onSubmit={handleSubmit}>
           <div className="valuation-form-card">
-            <h3>Core assumptions</h3>
+            <h3>User assumptions</h3>
             <label className="valuation-field">
-              <span>Revenue growth (%)</span>
+              <span>Short-term FCF growth (%)</span>
               <input
-                aria-label="Revenue growth"
+                aria-label="Short-term FCF growth"
                 inputMode="decimal"
                 type="number"
                 step="0.1"
-                value={formState.revenueGrowthRate}
+                value={formState.shortTermGrowthRate}
                 onChange={(event) =>
-                  updateField("revenueGrowthRate", event.target.value)
+                  updateField("shortTermGrowthRate", event.target.value)
                 }
-              />
-            </label>
-            <label className="valuation-field">
-              <span>Operating margin (%)</span>
-              <input
-                aria-label="Operating margin"
-                inputMode="decimal"
-                type="number"
-                step="0.1"
-                value={formState.operatingMargin}
-                onChange={(event) =>
-                  updateField("operatingMargin", event.target.value)
-                }
-              />
-            </label>
-            <label className="valuation-field">
-              <span>WACC (%)</span>
-              <input
-                aria-label="WACC"
-                inputMode="decimal"
-                type="number"
-                step="0.1"
-                value={formState.wacc}
-                onChange={(event) => updateField("wacc", event.target.value)}
               />
             </label>
             <label className="valuation-field">
@@ -203,49 +201,58 @@ export function DcfCalculatorPanel({
                 }
               />
             </label>
+            <label className="valuation-field">
+              <span>Equity risk premium (%)</span>
+              <input
+                aria-label="Equity risk premium"
+                inputMode="decimal"
+                type="number"
+                step="0.1"
+                value={formState.equityRiskPremium}
+                onChange={(event) =>
+                  updateField("equityRiskPremium", event.target.value)
+                }
+              />
+            </label>
+            <label className="valuation-field">
+              <span>WACC / discount rate (%)</span>
+              <input
+                aria-label="WACC / discount rate"
+                inputMode="decimal"
+                type="number"
+                step="0.1"
+                value={formState.discountRate}
+                onChange={(event) =>
+                  updateField("discountRate", event.target.value)
+                }
+              />
+            </label>
           </div>
 
           <div className="valuation-form-card">
             <h3>Model settings</h3>
             <label className="valuation-field">
-              <span>Tax rate (%)</span>
-              <input
-                aria-label="Tax rate"
-                inputMode="decimal"
-                type="number"
-                step="0.1"
-                value={formState.taxRate}
-                onChange={(event) => updateField("taxRate", event.target.value)}
-              />
-            </label>
-            <label className="valuation-field">
-              <span>Sales to capital ratio</span>
-              <input
-                aria-label="Sales to capital ratio"
-                inputMode="decimal"
-                type="number"
-                step="0.1"
-                value={formState.salesToCapitalRatio}
-                onChange={(event) =>
-                  updateField("salesToCapitalRatio", event.target.value)
-                }
-              />
-            </label>
-            <label className="valuation-field">
-              <span>Projection years</span>
-              <input
-                aria-label="Projection years"
-                inputMode="numeric"
-                type="number"
-                min={1}
-                max={10}
-                step={1}
+              <span>Projection horizon</span>
+              <select
+                aria-label="Projection horizon"
                 value={formState.projectionYears}
                 onChange={(event) =>
                   updateField("projectionYears", event.target.value)
                 }
-              />
+              >
+                <option value="5">Years 1-5</option>
+                <option value="10">Years 1-10</option>
+              </select>
             </label>
+            <div className="valuation-result-card">
+              <p>CAPM cost of equity</p>
+              <strong>{formatPercent(capmPreview)}</strong>
+            </div>
+            <p className="panel-copy">
+              CAPM uses the fetched risk-free rate and beta with your equity risk
+              premium as a reference point; the valuation still discounts with
+              your chosen WACC / discount rate.
+            </p>
             <button
               className="ticker-search-button valuation-submit-button"
               disabled={isPending}
@@ -266,33 +273,46 @@ export function DcfCalculatorPanel({
             <article className="valuation-result-card valuation-result-card-primary">
               <p>Intrinsic value per share</p>
               <strong data-testid="intrinsic-value-per-share">
-                {formatCurrency(result.intrinsicValuePerShare)}
+                {result ? formatCurrency(result.intrinsicValuePerShare) : "Awaiting assumptions"}
               </strong>
             </article>
             <article className="valuation-result-card">
               <p>Price gap</p>
-              <strong>{formatSignedPercent(valuationGap)}</strong>
+              <strong>{result ? formatSignedPercent(valuationGap) : "Awaiting assumptions"}</strong>
             </article>
             <article className="valuation-result-card">
               <p>Enterprise value</p>
-              <strong>{formatCompactCurrency(result.enterpriseValue)}</strong>
+              <strong>
+                {result ? formatCompactCurrency(result.enterpriseValue) : "Awaiting assumptions"}
+              </strong>
             </article>
             <article className="valuation-result-card">
               <p>Equity value</p>
-              <strong>{formatCompactCurrency(result.equityValue)}</strong>
+              <strong>
+                {result ? formatCompactCurrency(result.equityValue) : "Awaiting assumptions"}
+              </strong>
             </article>
             <article className="valuation-result-card">
               <p>Terminal value</p>
-              <strong>{formatCompactCurrency(result.terminalValue)}</strong>
+              <strong>
+                {result ? formatCompactCurrency(result.terminalValue) : "Awaiting assumptions"}
+              </strong>
             </article>
             <article className="valuation-result-card">
               <p>Terminal FCF</p>
-              <strong>{formatCompactCurrency(result.terminalFreeCashFlow)}</strong>
+              <strong>
+                {result
+                  ? formatCompactCurrency(result.terminalFreeCashFlow)
+                  : "Awaiting assumptions"}
+              </strong>
             </article>
           </div>
 
-          <section className="valuation-assumption-notes" aria-label="Assumption notes">
-            <h3>Why these starting points</h3>
+          <section
+            className="valuation-assumption-notes"
+            aria-label="Assumption notes"
+          >
+            <h3>Fetched baseline</h3>
             <ul className="valuation-note-list">
               {baseline.assumptionNotes.map((note) => (
                 <li key={note}>{note}</li>
@@ -302,11 +322,14 @@ export function DcfCalculatorPanel({
         </div>
       </div>
 
-      <section className="valuation-projection-shell" aria-label="DCF projections">
+      <section
+        className="valuation-projection-shell"
+        aria-label="DCF projections"
+      >
         <div className="financial-bridge-subsection-header">
           <h3>Projected cash flows</h3>
           <p className="financial-bridge-period-status">
-            {baseline.projectionYears}-year explicit forecast
+            {formState.projectionYears}-year explicit forecast
           </p>
         </div>
         <div className="valuation-projection-table-wrap">
@@ -314,22 +337,24 @@ export function DcfCalculatorPanel({
             <thead>
               <tr>
                 <th>Year</th>
-                <th>Revenue</th>
-                <th>Operating income</th>
-                <th>FCF</th>
+                <th>Free cash flow</th>
                 <th>Present value</th>
               </tr>
             </thead>
             <tbody>
-              {result.projections.map((projection) => (
-                <tr key={projection.year}>
-                  <td>{projection.year}</td>
-                  <td>{formatCompactCurrency(projection.revenue)}</td>
-                  <td>{formatCompactCurrency(projection.operatingIncome)}</td>
-                  <td>{formatCompactCurrency(projection.freeCashFlow)}</td>
-                  <td>{formatCompactCurrency(projection.presentValue)}</td>
+              {result ? (
+                result.projections.map((projection) => (
+                  <tr key={projection.year}>
+                    <td>{projection.year}</td>
+                    <td>{formatCompactCurrency(projection.freeCashFlow)}</td>
+                    <td>{formatCompactCurrency(projection.presentValue)}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={3}>Enter your assumptions to project cash flows.</td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>
@@ -338,60 +363,55 @@ export function DcfCalculatorPanel({
   );
 }
 
-type BackendDcfValuationResult = {
-  projections: {
-    year: number;
-    revenue: number;
-    operating_income: number;
-    nopat: number;
-    reinvestment: number;
-    free_cash_flow: number;
-    present_value: number;
-  }[];
-  terminal_free_cash_flow: number;
-  terminal_value: number;
-  terminal_present_value: number;
-  enterprise_value: number;
-  equity_value: number;
-  intrinsic_value_per_share: number;
-};
-
 function buildPayload(
   formState: DcfFormState,
   baseline: DcfBaselineData,
 ): DcfValuationPayload | null {
-  const revenueGrowthRate = parseInputNumber(formState.revenueGrowthRate);
-  const operatingMargin = parseInputNumber(formState.operatingMargin);
-  const taxRate = parseInputNumber(formState.taxRate);
-  const salesToCapitalRatio = parseInputNumber(formState.salesToCapitalRatio);
-  const wacc = parseInputNumber(formState.wacc);
+  const shortTermGrowthRate = parseInputNumber(formState.shortTermGrowthRate);
   const terminalGrowthRate = parseInputNumber(formState.terminalGrowthRate);
-  const projectionYears = parseIntegerInput(formState.projectionYears);
+  const equityRiskPremium = parseInputNumber(formState.equityRiskPremium);
+  const discountRate = parseInputNumber(formState.discountRate);
+  const projectionYears = parseProjectionYears(formState.projectionYears);
 
   if (
-    revenueGrowthRate === null ||
-    operatingMargin === null ||
-    taxRate === null ||
-    salesToCapitalRatio === null ||
-    wacc === null ||
+    shortTermGrowthRate === null ||
     terminalGrowthRate === null ||
+    equityRiskPremium === null ||
+    discountRate === null ||
     projectionYears === null
   ) {
     return null;
   }
 
   return {
-    currentRevenue: baseline.currentRevenue,
-    revenueGrowthRate: revenueGrowthRate / 100,
-    operatingMargin: operatingMargin / 100,
-    taxRate: taxRate / 100,
-    salesToCapitalRatio,
-    wacc: wacc / 100,
+    currentFreeCashFlow: baseline.currentFreeCashFlow,
+    shortTermGrowthRate: shortTermGrowthRate / 100,
     terminalGrowthRate: terminalGrowthRate / 100,
+    equityRiskPremium: equityRiskPremium / 100,
+    riskFreeRate: baseline.riskFreeRate,
+    beta: baseline.beta,
+    discountRate: discountRate / 100,
     sharesOutstanding: baseline.sharesOutstanding,
-    netDebt: baseline.netDebt,
+    totalDebt: baseline.totalDebt,
+    cashAndCashEquivalents: baseline.cashAndCashEquivalents,
     projectionYears,
   };
+}
+
+function buildCapmPreview(
+  equityRiskPremiumInput: string,
+  baseline: DcfBaselineData,
+): number | null {
+  const equityRiskPremium = parseInputNumber(equityRiskPremiumInput);
+  if (
+    equityRiskPremium === null ||
+    baseline.riskFreeRate === null ||
+    baseline.beta === null
+  ) {
+    return null;
+  }
+
+  return baseline.riskFreeRate + baseline.beta * (equityRiskPremium / 100);
 }
 
 function parseInputNumber(value: string): number | null {
@@ -402,20 +422,11 @@ function parseInputNumber(value: string): number | null {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
-function parseIntegerInput(value: string): number | null {
-  const parsed = parseInputNumber(value);
-  if (parsed === null) {
-    return null;
+function parseProjectionYears(value: string): number | null {
+  if (value === "5" || value === "10") {
+    return Number(value);
   }
-  const rounded = Math.round(parsed);
-  if (rounded < 1 || rounded > 10) {
-    return null;
-  }
-  return rounded;
-}
-
-function formatPercentInput(value: number): string {
-  return (value * 100).toFixed(1);
+  return null;
 }
 
 function formatCurrency(value: number): string {
@@ -435,14 +446,23 @@ function formatCompactCurrency(value: number): string {
   }).format(value);
 }
 
+function formatPercent(value: number | null): string {
+  if (value === null || Number.isNaN(value)) {
+    return "N/A";
+  }
+  return new Intl.NumberFormat("en-US", {
+    style: "percent",
+    maximumFractionDigits: 1,
+  }).format(value);
+}
+
 function formatSignedPercent(value: number | null): string {
   if (value === null || Number.isNaN(value)) {
     return "N/A";
   }
-  const formatted = new Intl.NumberFormat("en-US", {
+  return new Intl.NumberFormat("en-US", {
     style: "percent",
     signDisplay: "always",
     maximumFractionDigits: 1,
   }).format(value);
-  return formatted.replace("%", "%");
 }

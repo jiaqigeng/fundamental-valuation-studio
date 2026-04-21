@@ -2,36 +2,36 @@ from pydantic import BaseModel, Field, model_validator
 
 
 class DcfValuationRequest(BaseModel):
-    current_revenue: float = Field(..., gt=0)
-    revenue_growth_rate: float = Field(..., gt=-0.99, lt=1)
-    operating_margin: float = Field(..., ge=0, le=1)
-    tax_rate: float = Field(default=0.21, ge=0, le=1)
-    sales_to_capital_ratio: float = Field(default=2.0, gt=0)
-    wacc: float = Field(..., gt=0, lt=1)
+    current_free_cash_flow: float
+    short_term_growth_rate: float = Field(..., gt=-0.99, lt=1)
     terminal_growth_rate: float = Field(..., gt=-0.99, lt=1)
+    equity_risk_premium: float = Field(..., ge=0, lt=1)
+    risk_free_rate: float | None = Field(default=None, ge=0, lt=1)
+    beta: float | None = None
+    discount_rate: float = Field(..., gt=0, lt=1)
     shares_outstanding: float = Field(..., gt=0)
-    net_debt: float = 0.0
-    projection_years: int = Field(default=5, ge=1, le=10)
+    total_debt: float = Field(default=0.0, ge=0)
+    cash_and_cash_equivalents: float = Field(default=0.0, ge=0)
+    projection_years: int = Field(default=5, ge=5, le=10)
 
     @model_validator(mode="after")
     def validate_terminal_growth(self) -> "DcfValuationRequest":
-        if self.terminal_growth_rate >= self.wacc:
-            raise ValueError("Terminal growth rate must be below WACC.")
+        if self.terminal_growth_rate >= self.discount_rate:
+            raise ValueError("Terminal growth rate must be below the discount rate.")
+        if self.projection_years not in {5, 10}:
+            raise ValueError("Projection years must be either 5 or 10.")
         return self
 
 
 class DcfProjectionYear(BaseModel):
     year: int
-    revenue: float
-    operating_income: float
-    nopat: float
-    reinvestment: float
     free_cash_flow: float
     present_value: float
 
 
 class DcfValuationResponse(BaseModel):
     projections: list[DcfProjectionYear]
+    capm_cost_of_equity: float | None = None
     terminal_free_cash_flow: float
     terminal_value: float
     terminal_present_value: float
@@ -46,17 +46,16 @@ class DcfBaselineResponse(BaseModel):
     sector: str
     current_price: float | None = None
     current_price_display: str
-    current_revenue: float
-    current_revenue_display: str
-    revenue_growth_rate: float
-    operating_margin: float
-    tax_rate: float
-    sales_to_capital_ratio: float
-    wacc: float
-    terminal_growth_rate: float
+    current_free_cash_flow: float
+    current_free_cash_flow_display: str
     shares_outstanding: float
     shares_outstanding_display: str
-    net_debt: float
-    net_debt_display: str
-    projection_years: int
+    total_debt: float
+    total_debt_display: str
+    cash_and_cash_equivalents: float
+    cash_and_cash_equivalents_display: str
+    risk_free_rate: float | None = None
+    risk_free_rate_display: str
+    beta: float | None = None
+    beta_display: str
     assumption_notes: list[str]

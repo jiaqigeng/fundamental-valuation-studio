@@ -43,7 +43,7 @@ It should not be the source of truth for folder ownership or long-lived code str
 
 - The dashboard now relies on backend-backed workspace data through `frontend/src/app/_lib/company-workspace.ts`; the old frontend seed fallback path has been removed.
 - The landing-page search form now validates tickers through the local route handler at `frontend/src/app/api/companies/[ticker]/validate/route.ts` before routing, so invalid tickers stay on `/` with an inline error instead of navigating to a 404 page.
-- The landing page exposes a direct CTA to `frontend/src/app/valuation/page.tsx`, and that route now renders the first real calculator UI: a DCF workspace with backend-prefilled assumptions, editable inputs, and a local API proxy at `frontend/src/app/api/valuations/dcf/route.ts` for recalculation.
+- The landing page exposes a direct CTA to `frontend/src/app/valuation/page.tsx`, and that route now renders the first real calculator UI: a DCF workspace with live yfinance-backed company inputs, user-entered FCF growth plus discount assumptions, and a local API proxy at `frontend/src/app/api/valuations/dcf/route.ts` for recalculation.
 - `frontend/playwright.config.ts` declares multiple `webServer` entries so Playwright can auto-start both the frontend and backend during e2e runs.
 
 ## Commands

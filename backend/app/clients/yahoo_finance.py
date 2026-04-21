@@ -168,33 +168,15 @@ class YahooFinanceClient:
                 f"Yahoo Finance returned no result for ticker {ticker}."
             )
 
-        statement_period_data = _fetch_income_statement_period_data(
-            ticker,
-            statement_attribute="income_stmt",
+        current_free_cash_flow = _derive_current_free_cash_flow(
+            ticker=ticker,
+            info=info,
         )
-        revenue = _first_number(
-            statement_period_data.values.get("revenue"),
-            info.get("totalRevenue"),
-        )
-        if revenue is None:
+        if current_free_cash_flow is None:
             raise YahooFinanceLookupError(
-                f"Yahoo Finance did not return enough revenue data for ticker {ticker}."
+                f"Yahoo Finance did not return enough free-cash-flow data for ticker {ticker}."
             )
 
-        previous_revenue = _first_number(statement_period_data.previous_values.get("revenue"))
-        revenue_growth_rate = _derive_revenue_growth_rate(
-            revenue=revenue,
-            previous_revenue=previous_revenue,
-            info=info,
-        )
-        operating_margin = _derive_operating_margin(
-            revenue=revenue,
-            statement_values=statement_period_data.values,
-            info=info,
-        )
-        tax_rate = _derive_tax_rate(
-            statement_values=statement_period_data.values,
-        )
         current_price = _first_number(
             info.get("currentPrice"),
             info.get("regularMarketPrice"),
@@ -208,10 +190,14 @@ class YahooFinanceClient:
                 f"Yahoo Finance did not return share-count data for ticker {ticker}."
             )
 
-        net_debt = _derive_net_debt(info)
+        total_debt = _derive_total_debt(ticker=ticker, info=info)
+        cash_and_cash_equivalents = _derive_cash_and_cash_equivalents(
+            ticker=ticker,
+            info=info,
+        )
         sector = _string_field(info, "sector") or "Unknown sector"
-        wacc = _derive_wacc(info)
-        terminal_growth_rate = _derive_terminal_growth_rate(sector)
+        beta = _first_number(info.get("beta"))
+        risk_free_rate = _fetch_risk_free_rate()
 
         return DcfBaselineResponse(
             ticker=ticker,
@@ -223,25 +209,29 @@ class YahooFinanceClient:
             sector=sector,
             current_price=current_price,
             current_price_display=_format_currency(current_price),
-            current_revenue=float(revenue),
-            current_revenue_display=_format_compact_currency(revenue),
-            revenue_growth_rate=revenue_growth_rate,
-            operating_margin=operating_margin,
-            tax_rate=tax_rate,
-            sales_to_capital_ratio=_derive_sales_to_capital_ratio(sector),
-            wacc=wacc,
-            terminal_growth_rate=terminal_growth_rate,
+            current_free_cash_flow=float(current_free_cash_flow),
+            current_free_cash_flow_display=_format_signed_compact_currency(
+                current_free_cash_flow
+            ),
             shares_outstanding=float(shares_outstanding),
             shares_outstanding_display=_format_compact_number(shares_outstanding),
-            net_debt=net_debt,
-            net_debt_display=_format_signed_compact_currency(net_debt),
-            projection_years=5,
+            total_debt=total_debt,
+            total_debt_display=_format_compact_currency(total_debt),
+            cash_and_cash_equivalents=cash_and_cash_equivalents,
+            cash_and_cash_equivalents_display=_format_compact_currency(
+                cash_and_cash_equivalents
+            ),
+            risk_free_rate=risk_free_rate,
+            risk_free_rate_display=_format_optional_percent(risk_free_rate) or "N/A",
+            beta=float(beta) if beta is not None else None,
+            beta_display=_format_optional_number(beta) or "N/A",
             assumption_notes=_build_dcf_assumption_notes(
-                revenue=revenue,
-                previous_revenue=previous_revenue,
-                operating_margin=operating_margin,
-                wacc=wacc,
-                sector=sector,
+                ticker=ticker,
+                current_free_cash_flow=current_free_cash_flow,
+                total_debt=total_debt,
+                cash_and_cash_equivalents=cash_and_cash_equivalents,
+                risk_free_rate=risk_free_rate,
+                beta=beta,
             ),
         )
 
@@ -481,6 +471,23 @@ INCOME_STATEMENT_ROW_ALIASES: dict[str, tuple[str, ...]] = {
     ),
 }
 
+CASH_FLOW_ROW_ALIASES: dict[str, tuple[str, ...]] = {
+    "free_cash_flow": ("Free Cash Flow",),
+    "operating_cash_flow": ("Operating Cash Flow", "Cash Flow From Continuing Operating Activities"),
+    "capital_expenditure": ("Capital Expenditure",),
+}
+
+BALANCE_SHEET_ROW_ALIASES: dict[str, tuple[str, ...]] = {
+    "total_debt": ("Total Debt", "Current Debt And Capital Lease Obligation"),
+    "long_term_debt": ("Long Term Debt", "Long Term Debt And Capital Lease Obligation"),
+    "current_debt": ("Current Debt", "Current Debt And Capital Lease Obligation"),
+    "cash_and_cash_equivalents": (
+        "Cash And Cash Equivalents",
+        "Cash Cash Equivalents And Short Term Investments",
+        "Cash Equivalents",
+    ),
+}
+
 
 def _build_income_statement_waterfall(
     *,
@@ -696,67 +703,6 @@ def _fetch_income_statement_period_data(
     )
 
 
-SECTOR_SALES_TO_CAPITAL_RATIOS: dict[str, float] = {
-    "Technology": 2.7,
-    "Communication Services": 2.3,
-    "Consumer Cyclical": 2.2,
-    "Consumer Defensive": 1.8,
-    "Healthcare": 1.9,
-    "Industrials": 1.8,
-    "Financial Services": 1.4,
-}
-
-
-def _derive_revenue_growth_rate(
-    *,
-    revenue: float | int,
-    previous_revenue: float | int | None,
-    info: dict,
-) -> float:
-    if previous_revenue is not None and float(previous_revenue) > 0:
-        growth_rate = (float(revenue) / float(previous_revenue)) - 1
-        return _clamp(growth_rate, -0.05, 0.18)
-
-    info_growth = _first_number(info.get("revenueGrowth"))
-    if info_growth is not None:
-        return _clamp(float(info_growth), -0.05, 0.18)
-
-    return 0.05
-
-
-def _derive_operating_margin(
-    *,
-    revenue: float | int,
-    statement_values: dict[str, float],
-    info: dict,
-) -> float:
-    operating_income = _first_number(statement_values.get("operating_income"))
-    if operating_income is not None and float(revenue) > 0:
-        return _clamp(float(operating_income) / float(revenue), 0.05, 0.45)
-
-    info_margin = _first_number(info.get("operatingMargins"))
-    if info_margin is not None:
-        return _clamp(float(info_margin), 0.05, 0.45)
-
-    return 0.2
-
-
-def _derive_tax_rate(
-    *,
-    statement_values: dict[str, float],
-) -> float:
-    pretax_income = _first_number(statement_values.get("pretax_income"))
-    tax_provision = _first_number(statement_values.get("tax_provision"))
-    if (
-        pretax_income is not None
-        and abs(float(pretax_income)) > 0.005
-        and tax_provision is not None
-    ):
-        return _clamp(abs(float(tax_provision)) / abs(float(pretax_income)), 0.12, 0.3)
-
-    return 0.21
-
-
 def _derive_shares_outstanding(
     *,
     info: dict,
@@ -773,63 +719,169 @@ def _derive_shares_outstanding(
     return None
 
 
-def _derive_net_debt(info: dict) -> float:
-    total_debt = _first_number(info.get("totalDebt")) or 0.0
-    total_cash = _first_number(info.get("totalCash"), info.get("cash")) or 0.0
-    return float(total_debt) - float(total_cash)
+def _derive_current_free_cash_flow(
+    *,
+    ticker: str,
+    info: dict,
+) -> float | None:
+    info_free_cash_flow = _first_number(info.get("freeCashflow"))
+    if info_free_cash_flow is not None:
+        return float(info_free_cash_flow)
+
+    statement = _fetch_statement(ticker, statement_attribute="cashflow")
+    if statement is None:
+        return None
+
+    direct_free_cash_flow = _lookup_latest_statement_value(
+        statement,
+        CASH_FLOW_ROW_ALIASES["free_cash_flow"],
+    )
+    if direct_free_cash_flow is not None:
+        return direct_free_cash_flow
+
+    operating_cash_flow = _lookup_latest_statement_value(
+        statement,
+        CASH_FLOW_ROW_ALIASES["operating_cash_flow"],
+    )
+    capital_expenditure = _lookup_latest_statement_value(
+        statement,
+        CASH_FLOW_ROW_ALIASES["capital_expenditure"],
+    )
+    if operating_cash_flow is None or capital_expenditure is None:
+        return None
+
+    return float(operating_cash_flow) + float(capital_expenditure)
 
 
-def _derive_wacc(info: dict) -> float:
-    beta = _first_number(info.get("beta")) or 1.0
-    risk_free_rate = 0.043
-    equity_risk_premium = 0.05
-    return _clamp(risk_free_rate + float(beta) * equity_risk_premium, 0.075, 0.125)
+def _derive_total_debt(
+    *,
+    ticker: str,
+    info: dict,
+) -> float:
+    info_total_debt = _first_number(info.get("totalDebt"))
+    if info_total_debt is not None:
+        return float(info_total_debt)
+
+    statement = _fetch_statement(ticker, statement_attribute="balance_sheet")
+    if statement is None:
+        return 0.0
+
+    direct_total_debt = _lookup_latest_statement_value(
+        statement,
+        BALANCE_SHEET_ROW_ALIASES["total_debt"],
+    )
+    if direct_total_debt is not None:
+        return max(float(direct_total_debt), 0.0)
+
+    long_term_debt = _lookup_latest_statement_value(
+        statement,
+        BALANCE_SHEET_ROW_ALIASES["long_term_debt"],
+    ) or 0.0
+    current_debt = _lookup_latest_statement_value(
+        statement,
+        BALANCE_SHEET_ROW_ALIASES["current_debt"],
+    ) or 0.0
+    return max(float(long_term_debt) + float(current_debt), 0.0)
 
 
-def _derive_terminal_growth_rate(sector: str) -> float:
-    if sector in {"Consumer Defensive", "Utilities"}:
-        return 0.025
-    return 0.03
+def _derive_cash_and_cash_equivalents(
+    *,
+    ticker: str,
+    info: dict,
+) -> float:
+    info_total_cash = _first_number(info.get("totalCash"), info.get("cash"))
+    if info_total_cash is not None:
+        return float(info_total_cash)
+
+    statement = _fetch_statement(ticker, statement_attribute="balance_sheet")
+    if statement is None:
+        return 0.0
+
+    statement_cash = _lookup_latest_statement_value(
+        statement,
+        BALANCE_SHEET_ROW_ALIASES["cash_and_cash_equivalents"],
+    )
+    return max(float(statement_cash or 0.0), 0.0)
 
 
-def _derive_sales_to_capital_ratio(sector: str) -> float:
-    return SECTOR_SALES_TO_CAPITAL_RATIOS.get(sector, 2.0)
+def _fetch_risk_free_rate() -> float | None:
+    try:
+        history = _fetch_history_points_for_dates(
+            "^TNX",
+            start_date=datetime.now(UTC).date() - timedelta(days=14),
+            end_date=datetime.now(UTC).date(),
+            interval="1d",
+        )
+    except YahooFinanceLookupError:
+        return None
+    if not history:
+        return None
+
+    latest_yield_quote = history[sorted(history)[-1]]
+    if latest_yield_quote >= 20:
+        return float(latest_yield_quote) / 1000
+    if latest_yield_quote >= 1:
+        return float(latest_yield_quote) / 100
+    return float(latest_yield_quote)
 
 
 def _build_dcf_assumption_notes(
     *,
-    revenue: float | int,
-    previous_revenue: float | int | None,
-    operating_margin: float,
-    wacc: float,
-    sector: str,
+    ticker: str,
+    current_free_cash_flow: float | int,
+    total_debt: float | int,
+    cash_and_cash_equivalents: float | int,
+    risk_free_rate: float | int | None,
+    beta: float | int | None,
 ) -> list[str]:
-    notes = []
-    if previous_revenue is not None and float(previous_revenue) > 0:
-        growth_rate = (float(revenue) / float(previous_revenue)) - 1
-        notes.append(
-            "Revenue growth starts from the latest annual revenue versus the prior reported year."
-        )
-        notes.append(
-            f"The latest year-over-year revenue change is {_format_optional_percent(growth_rate) or 'N/A'}."
-        )
-    else:
-        notes.append("Revenue growth falls back to Yahoo's available growth signal when prior-year revenue is unavailable.")
-
-    notes.append(
-        f"Operating margin is anchored to the latest reported operating margin of {_format_optional_percent(operating_margin) or 'N/A'}."
-    )
-    notes.append(
-        f"WACC uses a beta-informed cost-of-equity estimate and is currently set to {_format_optional_percent(wacc) or 'N/A'}."
-    )
-    notes.append(
-        f"Sales-to-capital uses a sector heuristic for {sector} until a richer reinvestment history is wired in."
-    )
-    return notes
+    return [
+        (
+            f"Current free cash flow for {ticker} starts from Yahoo Finance's direct "
+            f"free-cash-flow field or the latest annual cash-flow statement value of "
+            f"{_format_signed_compact_currency(current_free_cash_flow)}."
+        ),
+        (
+            "Equity value bridges enterprise value to equity by subtracting total debt "
+            f"of {_format_compact_currency(total_debt)} and adding cash and equivalents "
+            f"of {_format_compact_currency(cash_and_cash_equivalents)}."
+        ),
+        (
+            "The fetched market inputs show the latest 10-year Treasury proxy and "
+            f"Yahoo beta: risk-free {_format_optional_percent(risk_free_rate) or 'N/A'}, "
+            f"beta {_format_optional_number(beta) or 'N/A'}."
+        ),
+    ]
 
 
 def _clamp(value: float, minimum: float, maximum: float) -> float:
     return max(minimum, min(maximum, value))
+
+
+def _fetch_statement(
+    ticker: str,
+    *,
+    statement_attribute: str,
+) -> object | None:
+    try:
+        statement = getattr(yf.Ticker(ticker), statement_attribute)
+    except Exception:
+        return None
+
+    if statement is None or getattr(statement, "empty", True):
+        return None
+
+    return statement
+
+
+def _lookup_latest_statement_value(
+    statement: object,
+    aliases: tuple[str, ...],
+) -> float | None:
+    columns = list(getattr(statement, "columns", []))
+    current_column = columns[0] if columns else None
+    if current_column is None:
+        return None
+    return _lookup_statement_value(statement, aliases, column=current_column)
 
 
 def _lookup_statement_value(
