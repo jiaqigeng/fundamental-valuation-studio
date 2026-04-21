@@ -785,7 +785,7 @@
 - Completed: Re-ran `./init.sh`, removed the divider styling under the company title in the valuation workbench header, and renamed the `Fetched company inputs` section to `Company snapshot`.
 - Verification run: `./init.sh`; `cd frontend && npm.cmd run lint`; `cd frontend && npm.cmd run typecheck`
 - Evidence captured: An initial `./init.sh` attempt hit a Windows file-lock during `npm ci`, which was resolved by clearing the lock and repairing the frontend install; the final `./init.sh` rerun passed completely, and the frontend `npm.cmd run lint` plus `npm.cmd run typecheck` checks also passed.
-- Commits: none yet
+- Commits: `4bd8573 Remove valuation title divider`
 - Files or artifacts updated: `frontend/src/app/_components/dcf-calculator-panel.tsx`, `frontend/src/app/globals.css`, `progress.md`, `session-handoff.md`
 - Known risk or unresolved issue: This is a wording-and-layout cleanup only; the DCF calculation flow and data contract are unchanged underneath.
 - Next best step: Resume the roadmap at `val-002` unless the user wants more valuation-page wording or visual cleanup.
