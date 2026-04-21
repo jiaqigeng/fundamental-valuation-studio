@@ -28,6 +28,7 @@
 - Latest correction: Removed the extra assumption-field offset margin and strengthened the green upside selector so it overrides the base result-card text color.
 - Latest correction commit: `d389fa2 Fix valuation field alignment and upside color`
 - Newest fix: Replaced the undefined positive-upside color token with the existing dashboard teal token and hardened the valuation field box styles with explicit display, margin, and line-height settings.
+- Newest fix commit: `68787a9 Fix valuation upside color token`
 - Infrastructure or harness changes: Refreshed `artifacts/verification/val-001a-pytest.log` and `artifacts/verification/val-001b-playwright.log`, re-ran the targeted backend/frontend verification gates after the redesign and contract simplification, and finished with a clean passing `./init.sh` baseline rerun.
 - Documentation changes: Updated `docs/backend.md`, `docs/frontend.md`, `frontend/ARCHITECTURE.md`, `feature_list.json`, `progress.md`, and this handoff to reflect the streamlined live FCF DCF path and the new user-assumption contract.
 - Implementation commit: `807a100 Simplify DCF valuation workspace`

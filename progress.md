@@ -749,7 +749,7 @@
 - Completed: Re-ran `./init.sh`, found that the positive upside style was referencing an undefined `--dashboard-green` token, switched it to the existing dashboard teal token, and hardened the valuation `input` and `select` styles with explicit `display`, `margin`, and `line-height` settings so browser defaults are less likely to reintroduce field-height drift.
 - Verification run: `./init.sh`; `cd frontend && npm.cmd run lint`; `cd frontend && npm.cmd run typecheck`
 - Evidence captured: `./init.sh` passed again before the fix; frontend `npm.cmd run lint` passed; frontend `npm.cmd run typecheck` passed.
-- Commits: none yet
+- Commits: `68787a9 Fix valuation upside color token`
 - Files or artifacts updated: `frontend/src/app/globals.css`, `progress.md`, `session-handoff.md`
 - Known risk or unresolved issue: This is still a front-end presentation fix only; the DCF calculation flow and data contract are unchanged underneath.
 - Next best step: Resume the roadmap at `val-002` unless the user wants another valuation-page UI pass.
