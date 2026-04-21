@@ -14,7 +14,7 @@ It should avoid repeating day-to-day command usage, environment setup, and verif
 
 ## What the backend does
 
-The backend is a FastAPI service that serves the company, market, valuation, and AI-analysis data the frontend needs. It now exposes `/health` plus a company workspace market-data route, and every later backend-verified feature in `feature_list.json` will land on top of this same FastAPI app.
+The backend is a FastAPI service that serves the company, market, valuation, and AI-analysis data the frontend needs. It now exposes `/health`, a company workspace market-data route, and a valuation math route, and every later backend-verified feature in `feature_list.json` will land on top of this same FastAPI app.
 
 ## Top-level shape
 
@@ -65,6 +65,7 @@ Keep this direction one-way. Routers call services; services call clients. Servi
 | ------ | ------------------------------ | ------------------------------------- | ---------------------------------------- |
 | GET    | `/health`                      | `main.health_check`                   | Liveness probe for CI                    |
 | GET    | `/companies/{ticker}/workspace` | `routers.companies.company_workspace` | Dashboard workspace market-data snapshot |
+| POST   | `/valuations/dcf`             | `routers.valuations.discounted_cash_flow` | Manual-input DCF valuation math          |
 
 Every new feature adds rows here.
 

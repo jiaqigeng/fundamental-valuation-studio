@@ -1,7 +1,7 @@
 {
   "project": "fundamental-valuation-studio",
   "schema_version": 2,
-  "last_updated": "2026-04-19",
+  "last_updated": "2026-04-20",
   "rules": {
     "single_active_feature": true,
     "passing_requires_evidence": true,
@@ -201,7 +201,7 @@
     },
     {
       "id": "dash-006",
-      "priority": 6,
+      "priority": 8.5,
       "section": "dashboard",
       "area": "charts",
       "title": "Render historical financial trend charts",
@@ -224,7 +224,7 @@
       },
       "depends_on": ["dash-002b"],
       "status": "not_started",
-      "notes": ""
+      "notes": "User-directed de-prioritization on 2026-04-20 after the dashboard scope was judged good enough for now. Retained as an optional future enhancement, but it no longer blocks the valuation roadmap."
     },
     {
       "id": "val-001a",
@@ -244,14 +244,14 @@
         ]
       },
       "evidence": {
-        "commit": null,
-        "verification_run": null,
-        "output_log": null,
-        "timestamp": null
+        "commit": "2747584",
+        "verification_run": "cd backend && .venv/Scripts/python.exe -m pytest tests/test_val_001a.py -q",
+        "output_log": "artifacts/verification/val-001a-pytest.log",
+        "timestamp": "2026-04-20T20:01:06.9511064-04:00"
       },
       "depends_on": ["dash-001"],
-      "status": "not_started",
-      "notes": "Pure math layer first. Backend pytest covers the math; val-001b adds the auto-fetched baseline."
+      "status": "passing",
+      "notes": "Implemented as a backend `POST /valuations/dcf` endpoint with dedicated request/response schemas and a pure service-layer DCF calculator. The current manual-input math projects revenue, operating income, NOPAT, reinvestment, free cash flow, terminal value, enterprise value, equity value, and intrinsic value per share. `val-001b` will build on this baseline by pre-filling the assumptions from company data."
     },
     {
       "id": "val-001b",

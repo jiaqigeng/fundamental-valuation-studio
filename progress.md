@@ -5,8 +5,8 @@
 - Repository root: `c:\Users\gengj\source\repos\FundamentalValuationStudio`
 - Standard startup path: `./init.sh`
 - Standard verification path: `./init.sh` for baseline health plus `feature_list.json -> features[*].verification.command` for feature passing
-- Current highest-priority unfinished feature: `dash-006`
-- Current blocker: none recorded. `dash-006` is still the next roadmap item. Separately, the dashboard no longer uses frontend seed fallbacks or demo ticker entry points; the landing-page search now validates tickers inline before navigation, and the shared `Income Statement Bridge` card omits the pie chart whenever live FMP segment data is unavailable instead of falling back to hard-coded live segment values.
+- Current highest-priority unfinished feature: `val-001b`
+- Current blocker: none recorded. `val-001a` now passes through a backend `POST /valuations/dcf` endpoint plus `backend/tests/test_val_001a.py`, and the user explicitly de-prioritized `dash-006` on 2026-04-20 because the current dashboard scope is sufficient for now. The next roadmap step is the auto-fetched DCF baseline in `val-001b`.
 
 ## Session Log
 
@@ -585,3 +585,15 @@
 - Files or artifacts updated: `backend/app/services/company_workspace.py`, `backend/tests/test_company_workspace.py`, `frontend/src/app/_components/ticker-search-form.tsx`, `frontend/src/app/_lib/company-workspace.ts`, `frontend/src/app/dashboard/[ticker]/page.tsx`, `frontend/src/app/page.tsx`, `frontend/src/app/api/companies/[ticker]/validate/route.ts`, `frontend/src/app/globals.css`, `frontend/e2e/dash-001.spec.ts`, `docs/frontend.md`, `frontend/ARCHITECTURE.md`, `artifacts/verification/dash-001-playwright.log`, `artifacts/verification/dash-005-playwright.log`, `feature_list.json`, `progress.md`, `session-handoff.md`
 - Known risk or unresolved issue: Direct navigation to an invalid `/dashboard/[ticker]` URL still resolves through the dashboard route and can still end in the framework's not-found path; this session only changed the search-form flow so user-entered invalid tickers stay on `/`. The live workspace still depends on Yahoo for the broader company snapshot and on FMP for annual segment detail, so provider outages will now surface as missing sections instead of fixture-backed substitutes.
 - Next best step: Resume the roadmap at `dash-006` unless the user asks for another focused dashboard UX refinement first.
+
+### Session 049
+
+- Date: 2026-04-20
+- Goal: Follow the repository harness, honor the user-requested `dash-006` skip, and complete the next unfinished feature by implementing `val-001a`.
+- Completed: Read `AGENTS.md`, `progress.md`, `session-handoff.md`, and `feature_list.json`; ran `./init.sh`; recorded the user-directed de-prioritization of `dash-006`; added a backend valuation slice with `app/routers/valuations.py`, `app/schemas/valuation.py`, and `app/services/valuation.py`; exposed `POST /valuations/dcf`; and added `backend/tests/test_val_001a.py` to verify projected free cash flow plus intrinsic value per share from manual DCF inputs.
+- Verification run: `./init.sh`; `cd backend && .venv/Scripts/python.exe -m pytest tests/test_val_001a.py -q`
+- Evidence captured: `./init.sh` completed successfully before feature work; `cd backend && .venv/Scripts/python.exe -m pytest tests/test_val_001a.py -q` passed with `2 passed` plus one existing pytest cache warning; captured log saved at `artifacts/verification/val-001a-pytest.log`; implementation commit is `2747584`.
+- Commits: `2747584 Implement val-001a DCF math endpoint`
+- Files or artifacts updated: `backend/app/main.py`, `backend/app/routers/valuations.py`, `backend/app/schemas/valuation.py`, `backend/app/services/valuation.py`, `backend/tests/test_val_001a.py`, `backend/ARCHITECTURE.md`, `docs/backend.md`, `artifacts/verification/val-001a-pytest.log`, `feature_list.json`, `progress.md`, `session-handoff.md`
+- Known risk or unresolved issue: The DCF slice is intentionally manual-input math only. It does not yet auto-fill assumptions from company data, expose a frontend calculator surface, or model richer drivers such as staged growth, margin fade, or explicit ROIC-based reinvestment.
+- Next best step: Start `val-001b` and wire company-data baselines into the DCF flow so the user can open a calculator with prefilled assumptions and still override them.
