@@ -693,3 +693,15 @@
 - Files or artifacts updated: `frontend/src/app/_components/dcf-calculator-panel.tsx`, `frontend/src/app/valuation/page.tsx`, `frontend/src/app/globals.css`, `progress.md`, `session-handoff.md`
 - Known risk or unresolved issue: This is another presentation-only cleanup; the DCF calculator flow and its data contract are unchanged.
 - Next best step: Resume the roadmap at `val-002` unless the user wants more valuation-page simplification.
+
+### Session 058
+
+- Date: 2026-04-20
+- Goal: Simplify the DCF output section so it shows only the three most decision-relevant numbers.
+- Completed: Re-ran `./init.sh`, reduced the DCF output section to current stock price, estimated intrinsic value, and upside/downside, removed the extra equity-value and summary-band outputs, and added green/red directional styling so upside renders in green and downside renders in red.
+- Verification run: `./init.sh`; `cd frontend && npm.cmd run lint`; `cd frontend && npm.cmd run typecheck`
+- Evidence captured: `./init.sh` passed again before the refinement; frontend `npm.cmd run lint` passed; frontend `npm.cmd run typecheck` passed.
+- Commits: none yet
+- Files or artifacts updated: `frontend/src/app/_components/dcf-calculator-panel.tsx`, `frontend/src/app/globals.css`, `progress.md`, `session-handoff.md`
+- Known risk or unresolved issue: This is still a presentation-only cleanup; the calculation flow and DCF data contract are unchanged underneath.
+- Next best step: Resume the roadmap at `val-002` unless the user wants more valuation-page output cleanup.

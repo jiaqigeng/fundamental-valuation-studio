@@ -294,7 +294,7 @@ export function DcfCalculatorPanel({
           </div>
           <div className="valuation-results-grid valuation-results-grid-compact">
             <article className="valuation-result-card valuation-result-card-primary">
-              <p>Intrinsic value per share</p>
+              <p>Estimated intrinsic value</p>
               <strong data-testid="intrinsic-value-per-share">
                 {result
                   ? formatCurrency(result.intrinsicValuePerShare)
@@ -307,44 +307,10 @@ export function DcfCalculatorPanel({
             </article>
             <article className="valuation-result-card">
               <p>Upside / downside</p>
-              <strong>
+              <strong className={getValuationGapClassName(valuationGap, result)}>
                 {result ? formatSignedPercent(valuationGap) : "Awaiting assumptions"}
               </strong>
             </article>
-            <article className="valuation-result-card">
-              <p>Equity value</p>
-              <strong>
-                {result
-                  ? formatCompactCurrency(result.equityValue)
-                  : "Awaiting assumptions"}
-              </strong>
-            </article>
-          </div>
-          <div className="valuation-summary-band">
-            <div>
-              <span>Terminal value</span>
-              <strong>
-                {result
-                  ? formatCompactCurrency(result.terminalValue)
-                  : "Awaiting assumptions"}
-              </strong>
-            </div>
-            <div>
-              <span>Enterprise value</span>
-              <strong>
-                {result
-                  ? formatCompactCurrency(result.enterpriseValue)
-                  : "Awaiting assumptions"}
-              </strong>
-            </div>
-            <div>
-              <span>Terminal FCF</span>
-              <strong>
-                {result
-                  ? formatCompactCurrency(result.terminalFreeCashFlow)
-                  : "Awaiting assumptions"}
-              </strong>
-            </div>
           </div>
         </section>
       </div>
@@ -463,4 +429,23 @@ function formatSignedPercent(value: number | null): string {
     signDisplay: "always",
     maximumFractionDigits: 1,
   }).format(value);
+}
+
+function getValuationGapClassName(
+  valuationGap: number | null,
+  result: DcfValuationResult | null,
+): string | undefined {
+  if (result === null || valuationGap === null || Number.isNaN(valuationGap)) {
+    return undefined;
+  }
+
+  if (valuationGap > 0) {
+    return "valuation-trend-up";
+  }
+
+  if (valuationGap < 0) {
+    return "valuation-trend-down";
+  }
+
+  return undefined;
 }

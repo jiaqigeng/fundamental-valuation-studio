@@ -1170,7 +1170,6 @@ a {
 
 .valuation-fetched-card p,
 .valuation-result-card p,
-.valuation-summary-band span,
 .valuation-field span,
 .valuation-projection-table th {
   color: var(--muted);
@@ -1182,8 +1181,7 @@ a {
 }
 
 .valuation-fetched-card strong,
-.valuation-result-card strong,
-.valuation-summary-band strong {
+.valuation-result-card strong {
   margin: 0;
   font-size: clamp(1.1rem, 2.2vw, 1.45rem);
   font-weight: 700;
@@ -1309,18 +1307,15 @@ a {
 }
 
 .valuation-results-grid-compact {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: 1fr;
 }
 
-.valuation-summary-band {
-  display: grid;
-  gap: 0.85rem;
-  padding-top: 0.2rem;
+.valuation-trend-up {
+  color: var(--dashboard-green);
 }
 
-.valuation-summary-band div {
-  border-top: 1px solid rgba(33, 64, 154, 0.08);
-  padding-top: 0.85rem;
+.valuation-trend-down {
+  color: var(--dashboard-red);
 }
 
 .valuation-projection-shell {
@@ -1446,13 +1441,8 @@ a {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .valuation-results-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .valuation-summary-band {
+  .valuation-results-grid-compact {
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    align-items: start;
   }
 
   .overview-meta-grid {
