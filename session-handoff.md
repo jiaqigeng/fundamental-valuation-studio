@@ -19,6 +19,7 @@
 - Newest cleanup: Reduced the DCF output block to current stock price, estimated intrinsic value, and upside/downside, with upside shown in green and downside shown in red.
 - Newest cleanup commit: `9ed4636 Simplify DCF output section`
 - Latest tweak: Removed current stock price from the output block and changed the remaining pre-calculation output placeholders to `-`.
+- Latest tweak commit: `f876c16 Trim DCF output placeholders`
 - Infrastructure or harness changes: Refreshed `artifacts/verification/val-001a-pytest.log` and `artifacts/verification/val-001b-playwright.log`, re-ran the targeted backend/frontend verification gates after the redesign and contract simplification, and finished with a clean passing `./init.sh` baseline rerun.
 - Documentation changes: Updated `docs/backend.md`, `docs/frontend.md`, `frontend/ARCHITECTURE.md`, `feature_list.json`, `progress.md`, and this handoff to reflect the streamlined live FCF DCF path and the new user-assumption contract.
 - Implementation commit: `807a100 Simplify DCF valuation workspace`
