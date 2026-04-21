@@ -729,3 +729,15 @@
 - Files or artifacts updated: `frontend/src/app/_components/dcf-calculator-panel.tsx`, `frontend/src/app/globals.css`, `progress.md`, `session-handoff.md`
 - Known risk or unresolved issue: This is still a presentation-only polish pass; the DCF calculation flow and data contract are unchanged underneath.
 - Next best step: Resume the roadmap at `val-002` unless the user wants more valuation-page UI cleanup.
+
+### Session 061
+
+- Date: 2026-04-20
+- Goal: Correct the remaining valuation UI bugs after the previous polish pass.
+- Completed: Re-ran `./init.sh`, removed the extra per-field top margin that was offsetting the assumption grid, and tightened the upside/downside color selectors so a positive upside now renders green while downside stays red.
+- Verification run: `./init.sh`; `cd frontend && npm.cmd run lint`; `cd frontend && npm.cmd run typecheck`
+- Evidence captured: `./init.sh` passed again before the fix; frontend `npm.cmd run lint` passed; frontend `npm.cmd run typecheck` passed.
+- Commits: none yet
+- Files or artifacts updated: `frontend/src/app/globals.css`, `progress.md`, `session-handoff.md`
+- Known risk or unresolved issue: This is still a presentational correction only; the DCF calculation flow and data contract are unchanged underneath.
+- Next best step: Resume the roadmap at `val-002` unless the user wants more valuation-page UI cleanup.

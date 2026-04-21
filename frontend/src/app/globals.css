@@ -1259,10 +1259,6 @@ a {
   gap: 0.45rem;
 }
 
-.valuation-field + .valuation-field {
-  margin-top: 0.9rem;
-}
-
 .valuation-field input,
 .valuation-field select {
   width: 100%;
@@ -1313,11 +1309,11 @@ a {
   grid-template-columns: 1fr;
 }
 
-.valuation-trend-up {
+.valuation-result-card strong.valuation-trend-up {
   color: var(--dashboard-green);
 }
 
-.valuation-trend-down {
+.valuation-result-card strong.valuation-trend-down {
   color: var(--dashboard-red);
 }
 
