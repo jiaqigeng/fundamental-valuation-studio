@@ -34,6 +34,7 @@
 - Latest refinement: Renamed the output label to `Intrinsic value` and replaced the old `Project Years` dropdown with a segmented two-button selector.
 - Latest refinement commit: `9a0a679 Refine intrinsic value label and years control`
 - Newest refinement: Switched the valuation company title to IBM Plex Sans so it feels more professional and distinctive without breaking the dashboard tone.
+- Newest refinement commit: `8d07b9a Refine valuation title typography`
 - Infrastructure or harness changes: Refreshed `artifacts/verification/val-001a-pytest.log` and `artifacts/verification/val-001b-playwright.log`, re-ran the targeted backend/frontend verification gates after the redesign and contract simplification, and finished with a clean passing `./init.sh` baseline rerun.
 - Documentation changes: Updated `docs/backend.md`, `docs/frontend.md`, `frontend/ARCHITECTURE.md`, `feature_list.json`, `progress.md`, and this handoff to reflect the streamlined live FCF DCF path and the new user-assumption contract.
 - Implementation commit: `807a100 Simplify DCF valuation workspace`
