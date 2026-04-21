@@ -6,7 +6,7 @@
 - Standard startup path: `./init.sh`
 - Standard verification path: `./init.sh` for baseline health plus `feature_list.json -> features[*].verification.command` for feature passing
 - Current highest-priority unfinished feature: `val-001b`
-- Current blocker: none recorded. `val-001a` now passes through a backend `POST /valuations/dcf` endpoint plus `backend/tests/test_val_001a.py`, and the user explicitly de-prioritized `dash-006` on 2026-04-20 because the current dashboard scope is sufficient for now. The next roadmap step is the auto-fetched DCF baseline in `val-001b`.
+- Current blocker: none recorded. `val-001a` now passes through a backend `POST /valuations/dcf` endpoint plus `backend/tests/test_val_001a.py`, and the user explicitly de-prioritized `dash-006` on 2026-04-20 because the current dashboard scope is sufficient for now. The next roadmap step is the auto-fetched DCF baseline in `val-001b`. As a narrow frontend refinement, the landing page now also includes a direct button to a new `/valuation` entry route.
 
 ## Session Log
 
@@ -597,3 +597,15 @@
 - Files or artifacts updated: `backend/app/main.py`, `backend/app/routers/valuations.py`, `backend/app/schemas/valuation.py`, `backend/app/services/valuation.py`, `backend/tests/test_val_001a.py`, `backend/ARCHITECTURE.md`, `docs/backend.md`, `artifacts/verification/val-001a-pytest.log`, `feature_list.json`, `progress.md`, `session-handoff.md`
 - Known risk or unresolved issue: The DCF slice is intentionally manual-input math only. It does not yet auto-fill assumptions from company data, expose a frontend calculator surface, or model richer drivers such as staged growth, margin fade, or explicit ROIC-based reinvestment.
 - Next best step: Start `val-001b` and wire company-data baselines into the DCF flow so the user can open a calculator with prefilled assumptions and still override them.
+
+### Session 050
+
+- Date: 2026-04-20
+- Goal: Add a first-page button that takes the user into the valuation area.
+- Completed: Read the repo harness files, ran `./init.sh`, added a new landing-page CTA that routes to `/valuation`, created `frontend/src/app/valuation/page.tsx` as a lightweight valuation entry page, and updated frontend documentation to include the new route.
+- Verification run: `./init.sh`; `cd frontend && npm run lint`; `cd frontend && npm run typecheck`
+- Evidence captured: `./init.sh` completed successfully before the refinement; frontend `npm run lint` passed when rerun through `npm.cmd` because PowerShell blocked `npm.ps1`; frontend `npm run typecheck` also passed through `npm.cmd`.
+- Commits: none yet
+- Files or artifacts updated: `frontend/src/app/page.tsx`, `frontend/src/app/valuation/page.tsx`, `frontend/src/app/globals.css`, `frontend/ARCHITECTURE.md`, `docs/frontend.md`, `progress.md`, `session-handoff.md`
+- Known risk or unresolved issue: This is a navigation and route-shell refinement only. The full valuation calculator UI for `val-001b` still needs to be implemented and verified with its future Playwright gate.
+- Next best step: Continue `val-001b` by turning `/valuation` into the actual DCF calculator entry flow with backend-backed baseline assumptions.

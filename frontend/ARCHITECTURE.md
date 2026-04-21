@@ -14,7 +14,7 @@ It should avoid repeating routine commands, test-running instructions, and edit-
 
 ## What the frontend does
 
-The frontend is the user's entry point into Fundamental Valuation Studio. A user lands on a ticker-search page, submits a ticker, and is routed to a per-company dashboard workspace. The dashboard route now depends on backend-backed workspace data, while the landing-page search form validates tickers through a small local route handler before navigation so invalid input can be handled inline.
+The frontend is the user's entry point into Fundamental Valuation Studio. A user lands on a ticker-search page, can either submit a ticker into the dashboard flow or jump directly to the valuation route, and is routed into dedicated workspace pages. The dashboard route now depends on backend-backed workspace data, while the landing-page search form validates tickers through a small local route handler before navigation so invalid input can be handled inline.
 
 ## Top-level shape
 
@@ -23,6 +23,8 @@ frontend/
 |- src/app/                         App Router tree
 |  |- layout.tsx                   Root HTML shell, fonts, global CSS
 |  |- page.tsx                     Landing page (server component)
+|  |- valuation/
+|  |  `- page.tsx                  Valuation entry route (server component)
 |  |- api/companies/[ticker]/validate/
 |  |  `- route.ts                  Server route: validate ticker before navigation
 |  |- globals.css                  Hand-written + Tailwind v4 styles
@@ -52,10 +54,13 @@ The underscore prefix on `_components/` and `_lib/` keeps them out of the Next.j
 
 ```text
 User -> / (page.tsx)
+     -> <Link href="/valuation"> from landing CTA
      -> <TickerSearchForm> client component
         -> /api/companies/[ticker]/validate route handler
         -> inline error when ticker is invalid
         -> router.push(`/dashboard/${TICKER}`) when valid
+     -> /valuation (page.tsx)
+        -> renders valuation entry shell
      -> /dashboard/[ticker] (page.tsx)
         -> getCompanyWorkspaceData(ticker)  // from _lib
         -> backend workspace route

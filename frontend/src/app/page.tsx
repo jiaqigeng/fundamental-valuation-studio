@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { TickerSearchForm } from "@/app/_components/ticker-search-form";
 
 export default function Home() {
@@ -11,6 +13,11 @@ export default function Home() {
           intrinsic value models, and AI-assisted analysis from one workspace.
         </p>
         <TickerSearchForm />
+        <div className="landing-hero-actions">
+          <Link className="back-link landing-valuation-link" href="/valuation">
+            Open valuation workspace
+          </Link>
+        </div>
       </section>
 
       <section className="supported-companies project-overview" aria-label="Project overview">
