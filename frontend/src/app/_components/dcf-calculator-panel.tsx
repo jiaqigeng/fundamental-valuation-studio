@@ -296,19 +296,13 @@ export function DcfCalculatorPanel({
             <article className="valuation-result-card valuation-result-card-primary">
               <p>Estimated intrinsic value</p>
               <strong data-testid="intrinsic-value-per-share">
-                {result
-                  ? formatCurrency(result.intrinsicValuePerShare)
-                  : "Awaiting assumptions"}
+                {result ? formatCurrency(result.intrinsicValuePerShare) : "-"}
               </strong>
-            </article>
-            <article className="valuation-result-card">
-              <p>Current stock price</p>
-              <strong>{baseline.currentPriceDisplay}</strong>
             </article>
             <article className="valuation-result-card">
               <p>Upside / downside</p>
               <strong className={getValuationGapClassName(valuationGap, result)}>
-                {result ? formatSignedPercent(valuationGap) : "Awaiting assumptions"}
+                {result ? formatSignedPercent(valuationGap) : "-"}
               </strong>
             </article>
           </div>

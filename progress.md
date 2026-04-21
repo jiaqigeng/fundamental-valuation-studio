@@ -705,3 +705,15 @@
 - Files or artifacts updated: `frontend/src/app/_components/dcf-calculator-panel.tsx`, `frontend/src/app/globals.css`, `progress.md`, `session-handoff.md`
 - Known risk or unresolved issue: This is still a presentation-only cleanup; the calculation flow and DCF data contract are unchanged underneath.
 - Next best step: Resume the roadmap at `val-002` unless the user wants more valuation-page output cleanup.
+
+### Session 059
+
+- Date: 2026-04-20
+- Goal: Trim the DCF output section one step further and simplify the pre-calculation placeholders.
+- Completed: Re-ran `./init.sh`, removed current stock price from the output section, kept only estimated intrinsic value plus upside/downside, and replaced the remaining pre-calculation `Awaiting assumptions` strings in that output block with `-`.
+- Verification run: `./init.sh`; `cd frontend && npm.cmd run lint`; `cd frontend && npm.cmd run typecheck`
+- Evidence captured: `./init.sh` passed again before the refinement; frontend `npm.cmd run lint` passed; frontend `npm.cmd run typecheck` passed.
+- Commits: none yet
+- Files or artifacts updated: `frontend/src/app/_components/dcf-calculator-panel.tsx`, `progress.md`, `session-handoff.md`
+- Known risk or unresolved issue: This is still a presentation-only cleanup; the DCF calculation flow and data contract are unchanged underneath.
+- Next best step: Resume the roadmap at `val-002` unless the user wants more valuation-page output simplification.
